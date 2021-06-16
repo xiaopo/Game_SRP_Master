@@ -8,6 +8,8 @@ using UnityEngine.Rendering;
 
 public partial class CameraRenderer
 {
+    
+    
     ScriptableRenderContext contenxt;
 
     Camera camera;
@@ -18,6 +20,8 @@ public partial class CameraRenderer
     {
         name = bufferName
     };
+
+    Lighting lighting = new Lighting();
 
     public void Render(ScriptableRenderContext contenxt,Camera camera)
     {
@@ -33,6 +37,7 @@ public partial class CameraRenderer
 
         SetUp();
 
+        lighting.Setup(contenxt);
         //绘制几何体
         DrawVisibleGeometry();
 
@@ -44,8 +49,10 @@ public partial class CameraRenderer
         Submit();
     }
 
-    static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
-
+    ShaderTagId[] _shaderTagIds = new ShaderTagId[2] { 
+                                                        new ShaderTagId("SRPDefaultUnlit"),
+                                                        new ShaderTagId("CustomLit") 
+                                                      };
     void DrawVisibleGeometry()
     {
 
@@ -56,11 +63,18 @@ public partial class CameraRenderer
         };
 
         //设置渲染的 Shader Pass 和排序模式
-        var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSetting)
+        var drawingSettings = new DrawingSettings()
         {
             enableDynamicBatching = CustomRenderPipeline.asset.useDynamicBatching,
             enableInstancing = CustomRenderPipeline.asset.useGPUInstancing,
         };
+
+        drawingSettings.sortingSettings = sortingSetting;
+        for(int i = 0;i< _shaderTagIds.Length;i++)
+        {
+            drawingSettings.SetShaderPassName(i, _shaderTagIds[i]);
+        }
+
 
         //设置哪些类型的渲染队列可以被绘制
         var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);

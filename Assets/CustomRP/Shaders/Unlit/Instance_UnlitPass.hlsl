@@ -1,7 +1,7 @@
 #ifndef CUSTOM_UNLIT_PASS_Instance_INCLUDED
 #define CUSTOM_UNLIT_PASS_Instance_INCLUDED
 
-#include "../ShaderLibrary/Common.hlsl"
+#include "../../ShaderLibrary/Common.hlsl"
 
 TEXTURE2D(_MainTex);//定义一张2D文理
 SAMPLER(sampler_MainTex);//指定一个采样器
