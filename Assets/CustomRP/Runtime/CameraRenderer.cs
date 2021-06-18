@@ -37,7 +37,7 @@ public partial class CameraRenderer
 
         SetUp();
 
-        lighting.Setup(contenxt);
+        lighting.Setup(contenxt,culingResouts);
         //绘制几何体
         DrawVisibleGeometry();
 
@@ -124,7 +124,6 @@ public partial class CameraRenderer
     #region Culling
     //储存剔除后的结果数据
     CullingResults culingResouts;
-
     bool Cull()
     {
         ScriptableCullingParameters p;

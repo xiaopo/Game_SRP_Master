@@ -5,7 +5,6 @@ Shader "CustomRP/Lit"
     {
         _MainColor("Color",Color)=(1.0,1.0,1.0,1.0)
         _MainMap("Texture",2D) = "white"{}
-
     }
 
     SubShader
@@ -13,7 +12,6 @@ Shader "CustomRP/Lit"
         Tags
         { 
             "RenderType" = "Opaque"
-
             "LightMode" = "CustomLit"
         }
 
@@ -23,8 +21,8 @@ Shader "CustomRP/Lit"
         {
             Name "Lit"
             HLSLPROGRAM
-
-  
+            
+            #pragma target 3.5//该级别越高，允许使用的现代GPU功能越多，如果不设置Unity默认为 2.5
             #pragma vertex  LitPassVertex
             #pragma fragment LitPassFragment
             #pragma multi_compile_instancing

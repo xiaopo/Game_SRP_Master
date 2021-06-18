@@ -9,6 +9,8 @@ public class CustomRenderPipeline :RenderPipeline
     public CustomRenderPipeline(CustomRendePineAsset ast )
     {
         GraphicsSettings.useScriptableRenderPipelineBatching = ast.useSRPBatcher;
+        //灯光使用线性强度
+        GraphicsSettings.lightsUseLinearIntensity = true;
 
         asset = ast;
     }
