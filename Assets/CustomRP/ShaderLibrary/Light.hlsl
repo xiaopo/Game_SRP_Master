@@ -4,7 +4,7 @@
 CBUFFER_START(_CustomLight)
     //float3 _DirectionLightColor;
     //float3 _DirectionLightDrection;
-    int _DirectionLightCount;
+    int _DirectionLightCount;//有效平行光个数
     float4 _DirectionLightColors[MAX_DIRECTIONAL_LIGHT_COUNT];
     float4 _DirectionLightDrections[MAX_DIRECTIONAL_LIGHT_COUNT];
 CBUFFER_END
@@ -14,6 +14,7 @@ struct Light
     float3 color;
     float3 direction;
 };
+
 
 //获取方向光的数量
 int GetDirectionLightCount()

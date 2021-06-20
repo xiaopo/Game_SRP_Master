@@ -23,20 +23,21 @@ public class Lighting
     static int dirLightColorsId = Shader.PropertyToID("_DirectionLightColors");
     static int dirLightDirectionsId = Shader.PropertyToID("_DirectionLightDrections");
 
+
     //储存可见光的颜色和方向
     static Vector4[] dirLightColors = new Vector4[maxDirLightCount];
     static Vector4[] dirLightDirectioins = new Vector4[maxDirLightCount];
 
     //裁剪信息
     CullingResults cullingResults;
-    public void Setup(ScriptableRenderContext context,CullingResults cullingResults)
+    public void Setup(ScriptableRenderContext context,CullingResults cullingResults,Camera camera)
     {
         this.cullingResults = cullingResults;
 
         buffer.BeginSample(bufferName);
 
         //发送光源数据
-        SetupLights();
+        SetupLights(camera);
 
         //SetupDirectionLight();
         buffer.EndSample(bufferName);
@@ -45,9 +46,9 @@ public class Lighting
         buffer.Clear();
     }
 
-    void SetupLights()
+    void SetupLights(Camera camera)
     {
-        //Unity 会在剔除阶段好到哪些光源会影响相机的可见性
+        //Unity 会在剔除阶段计算哪些光源会影响相机的可见性
         //得到所有可见光
         NativeArray<VisibleLight> visibleLights = cullingResults.visibleLights;
         if (visibleLights == null) return;

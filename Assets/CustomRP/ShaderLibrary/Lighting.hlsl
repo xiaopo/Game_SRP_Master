@@ -7,23 +7,24 @@ float3 IncomingLight(Surface surface,Light light)
 {
     //兰伯特光照
     return saturate(dot(surface.normal, light.direction)) * light.color;
+
 }
 
-float3 GetLighting(Surface surface, Light light)
+float3 GetLighting(Surface surface,BRDF brdf,Light light)
 {
-    return IncomingLight(surface, light) * surface.color;
+    return IncomingLight(surface, light) * DirectBRDF(surface,brdf,light);
 }
 
 
 //根据物体的表面信息获取最终光照结果
-float3 GetLighting(Surface surface)
+float3 GetLighting(Surface surface,BRDF brdf)
 {
     //return GetLighting(surface, GetDirectionLight());
     //可见方向光的照明结果进行累加得到最终照明结果
     float3 color = 0.0;
     for (int i = 0; i < GetDirectionLightCount();i++)
     {
-        color += GetLighting(surface, GetDirectionLight(i));
+        color += GetLighting(surface,brdf,GetDirectionLight(i));
     }
     
     return color;

@@ -37,7 +37,7 @@ public partial class CameraRenderer
 
         SetUp();
 
-        lighting.Setup(contenxt,culingResouts);
+        lighting.Setup(contenxt,culingResouts,camera);
         //绘制几何体
         DrawVisibleGeometry();
 
@@ -49,10 +49,10 @@ public partial class CameraRenderer
         Submit();
     }
 
-    ShaderTagId[] _shaderTagIds = new ShaderTagId[2] { 
-                                                        new ShaderTagId("SRPDefaultUnlit"),
-                                                        new ShaderTagId("CustomLit") 
-                                                      };
+    ShaderTagId[] _shaderTagIds = {
+                                    new ShaderTagId("SRPDefaultUnlit"),
+                                    new ShaderTagId("CustomLit")
+                                  };
     void DrawVisibleGeometry()
     {
 

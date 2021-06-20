@@ -3,6 +3,10 @@ Shader "CustomRP/Lit"
    
     Properties
     {
+        //金属度和光滑度
+        _Metallic("Metallic",Range(0,1)) = 0
+        _Smoothness("Smoothness",Range(0,1)) = 0.5
+
         _MainColor("Color",Color)=(1.0,1.0,1.0,1.0)
         _MainMap("Texture",2D) = "white"{}
     }
@@ -27,7 +31,6 @@ Shader "CustomRP/Lit"
             #pragma fragment LitPassFragment
             #pragma multi_compile_instancing
             #include "LitPass.hlsl"
-
 
             ENDHLSL
         }
