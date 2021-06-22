@@ -14,8 +14,10 @@ SAMPLER(sampler_MainMap);//指定一个采样器
 //纹理和采样器是全局资源，不能放入缓冲区中
 
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
+
 UNITY_DEFINE_INSTANCED_PROP(float4,_MainColor)
 UNITY_DEFINE_INSTANCED_PROP(float4,_MainMap_ST)
+UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
 UNITY_DEFINE_INSTANCED_PROP(float,_Metallic)
 UNITY_DEFINE_INSTANCED_PROP(float,_Smoothness)
 
@@ -68,6 +70,9 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     float4 baseColor =  UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _MainColor);
     
     float4 albedo = baseMap * baseColor;
+    #if defined(_CLIPPING)
+        clip(albedo.a - UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff));
+    #endif
     
     Surface surface;
     surface.normal = normalize(input.worldNormal);
@@ -78,9 +83,13 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
     
     //通过表面属性计算最终光照结果
+#if defined(_PREMULTIPLY_ALPHA)
+    BRDF brdf = GetBRDF(surface,true);
+#else
     BRDF brdf = GetBRDF(surface);
-    float3 color = GetLighting(surface,brdf);
+#endif
     
+    float3 color = GetLighting(surface, brdf);
     return float4(color, surface.alpha);
 
 }
