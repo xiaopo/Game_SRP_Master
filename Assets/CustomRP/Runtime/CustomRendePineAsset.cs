@@ -2,19 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-
-[CreateAssetMenu(menuName ="Rendering/CreateCustomRenderPipeline")]
-public class CustomRendePineAsset : RenderPipelineAsset
+namespace CustomSR
 {
-    // Start is called before the first frame update
-
-    public bool useDynamicBatching = true;
-    public bool useGPUInstancing = true;
-    public bool useSRPBatcher = true;
-
-    
-    protected override RenderPipeline CreatePipeline()
+    [CreateAssetMenu(menuName = "Rendering/CreateCustomRenderPipeline")]
+    public class CustomRendePineAsset : RenderPipelineAsset
     {
-        return new CustomRenderPipeline(this);
+        // Start is called before the first frame update
+
+        public bool useDynamicBatching = true;
+        public bool useGPUInstancing = true;
+        public bool useSRPBatcher = true;
+
+        public ShadowSettings shadows = default;
+        protected override RenderPipeline CreatePipeline()
+        {
+            return new CustomRenderPipeline(this);
+        }
     }
 }
