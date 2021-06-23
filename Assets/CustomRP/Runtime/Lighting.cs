@@ -38,16 +38,13 @@ namespace CustomSR
             this.cullingResults = cullingResults;
 
             buffer.BeginSample(bufferName);
-
             //传递阴影数据
             shadows.Setup(context, cullingResults, shadowSettings);
             //发送光源数据
             SetupLights();
 
             shadows.Render();
-            //SetupDirectionLight();
             buffer.EndSample(bufferName);
-
             context.ExecuteCommandBuffer(buffer);
             buffer.Clear();
         }
@@ -67,7 +64,7 @@ namespace CustomSR
                 if (visibleLight.lightType == LightType.Directional)
                 {
                     //Visible 结构很大，我们改为传递引用不是传递值，这样不会生成副本
-                    SetupDirectionLight(dirLightCount++, ref visibleLight);
+                    SetupDirectionalLight(dirLightCount++, ref visibleLight);
 
                     if (dirLightCount > maxDirLightCount) break;
                 }
@@ -79,7 +76,7 @@ namespace CustomSR
             buffer.SetGlobalVectorArray(dirLightDirectionsId, dirLightDirectioins);
         }
 
-        void SetupDirectionLight(int index, ref VisibleLight visibleLight)
+        void SetupDirectionalLight(int index, ref VisibleLight visibleLight)
         {
             //Light light = RenderSettings.sun;
             //if (light == null) return;

@@ -26,9 +26,8 @@ struct Varyings
 Varyings UnlitPassVertex(Attributes input)
 {
     Varyings output;
+    //UNITY_TRANSFER_INSTANCE_ID(input, output);
     
-    //UNITY_INITIALIZE_OUTPUT(Varyings, output);
-
     float3 positionWS = TransformObjectToWorld(input.psotion);
     output.position = TransformWorldToHClip(positionWS);
     

@@ -30,6 +30,7 @@ namespace CustomSR
             this.contenxt = contenxt;
             this.camera = camera;
             this.asset = asset;
+
             //设置命令缓冲区名字
             PrepareBuffer();
             //因为此操作可能给Scene场景中添加一些几何体，所以我们在Render()方法中进行几何体剔除之前用这个方法
@@ -39,20 +40,17 @@ namespace CustomSR
 
             buffer.BeginSample(SampleName);
             ExcuteBuffer();
-            //光源和阴影数据发送到GPU计算光照
             lighting.Setup(contenxt, culingResouts, asset.shadows);
-
             buffer.EndSample(SampleName);
 
             SetUp();
-
             //绘制几何体
             DrawVisibleGeometry();
             //绘制SRP不支持的着色器类型
             DrawUnsupportedShaders();
             //绘制辅助线
             DrawGizmos();
-
+            //释放申请的RT内存空间
             lighting.Cleanup();
 
             Submit();

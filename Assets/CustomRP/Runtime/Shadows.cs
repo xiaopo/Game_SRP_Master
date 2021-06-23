@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -38,14 +34,25 @@ namespace CustomSR
 
             ShadowedirectionLightCount = 0;
         }
+        void ExecuteBuffer()
+        {
+            context.ExecuteCommandBuffer(buffer);
+            buffer.Clear();
+        }
 
         //阴影渲染
         public void Render()
         {
+ 
             if(ShadowedirectionLightCount > 0)
             {
                 RenderDirectionalShadows();
             }
+            else
+            {
+                buffer.GetTemporaryRT(dirShadowAtlasId, 1, 1,32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
+            }
+
         }
 
         static int dirShadowAtlasId = Shader.PropertyToID("_DirectionalShadowAtlas");
@@ -61,12 +68,41 @@ namespace CustomSR
             buffer.SetRenderTarget(dirShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
             //清除深度缓冲区
             buffer.ClearRenderTarget(true, false, Color.clear);
-            ExcuteBuffer();
+
+            buffer.BeginSample(bufferName);
+            ExecuteBuffer();
+
+            //遍历所有方向光渲染阴影
+            for(int i = 0;i<ShadowedirectionLightCount;i++)
+            {
+                RenderDirectionalShadows(i, atlasSize);
+            }
+            buffer.EndSample(bufferName);
+            
+            ExecuteBuffer();
+        }
+
+        //渲染定向光影
+        void RenderDirectionalShadows(int index,int tileSize)
+        {
+            ShadowedDirectionLight light = ShadowedDirectionalLights[index];
+            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
+
+            cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(light.visibleLightIndex, 0, 1, Vector3.zero, tileSize, 0f,
+                out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
+
+            shadowSettings.splitData = splitData;
+
+            buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+            ExecuteBuffer();
+
+            context.DrawShadows(ref shadowSettings);
 
         }
 
         public void ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
+            //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0
             if(ShadowedirectionLightCount < maxShadowdDirectionalLightCount 
                 && light.shadows != LightShadows.None 
                 && light.shadowStrength > 0f
@@ -77,16 +113,11 @@ namespace CustomSR
             }
         }
 
-        void ExcuteBuffer()
-        {
-            context.ExecuteCommandBuffer(buffer);
-            buffer.Clear();
-        }
-
+  
         public void Cleanup()
         {
             buffer.ReleaseTemporaryRT(dirShadowAtlasId);
-            ExcuteBuffer();
+            ExecuteBuffer();
         }
     }
 }

@@ -22,6 +22,7 @@ namespace CustomSR
         {
             public TextureSize atlasSize;
         }
+        //其他光源的阴影配置
 
         //默认尺寸为1024
         public Directional directional = new Directional

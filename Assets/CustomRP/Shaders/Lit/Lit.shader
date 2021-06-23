@@ -20,18 +20,16 @@ Shader "CustomRP/Lit"
 
     SubShader
     {
-        Tags
-        { 
-            "RenderType" = "Opaque"
-            "LightMode" = "CustomLit"
-            "Queue" = "Transparent"
-        }
-
-        LOD 100
+         
 
         Pass
         {
-            Name "Lit"
+           
+            Tags { "LightMode" = "CustomLit"}
+
+            LOD 100
+
+            //Name "Lit"
             Blend[_SrcBlend][_DstBlend]
             ZWrite[_ZWrite]
 
@@ -44,6 +42,28 @@ Shader "CustomRP/Lit"
             #pragma shader_feature _CLIPPING
             #pragma shader_feature _PREMULTIPLY_ALPHA
             #include "LitPass.hlsl"
+
+            ENDHLSL
+        }
+
+         Pass
+        {
+            Tags{  "LightMode" = "ShadowCaster" }
+
+            //Name "ShadowCaster"
+            ColorMask 0
+
+            HLSLPROGRAM
+
+            #pragma target 3.5//该级别越高，允许使用的现代GPU功能越多，如果不设置Unity默认为 2.5
+
+            #pragma shader_feature _CLIPPING
+            #pragma multi_compile_instancing
+
+            #pragma vertex  ShadowCasterPassVertex
+            #pragma fragment ShadowCasterPassFragment
+
+            #include "ShadowCasterPass.hlsl"
 
             ENDHLSL
         }
