@@ -42,7 +42,6 @@ namespace CustomSR
             shadows.Setup(context, cullingResults, shadowSettings);
             //发送光源数据
             SetupLights();
-
             shadows.Render();
             buffer.EndSample(bufferName);
             context.ExecuteCommandBuffer(buffer);
@@ -85,6 +84,7 @@ namespace CustomSR
 
             dirLightColors[index] = visibleLight.finalColor;
             dirLightDirectioins[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
+
             shadows.ReserveDirectionalShadows(visibleLight.light, index);
         }
 

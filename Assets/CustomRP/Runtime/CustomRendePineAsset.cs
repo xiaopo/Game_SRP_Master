@@ -12,8 +12,10 @@ namespace CustomSR
         public bool useDynamicBatching = true;
         public bool useGPUInstancing = true;
         public bool useSRPBatcher = true;
-
+        
+        [SerializeField]
         public ShadowSettings shadows = default;
+
         protected override RenderPipeline CreatePipeline()
         {
             return new CustomRenderPipeline(this);

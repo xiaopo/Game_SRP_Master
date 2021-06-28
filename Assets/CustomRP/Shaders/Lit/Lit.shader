@@ -6,8 +6,8 @@ Shader "CustomRP/Lit"
         _Metallic("Metallic",Range(0,1)) = 0//金属度
         _Smoothness("Smoothness",Range(0,1)) = 0.5//光滑度
 
-        _MainColor("Color",Color)=(1.0,1.0,1.0,1.0)
-        _MainMap("Texture",2D) = "white"{}
+        _BaseColor("Color",Color)=(1.0,1.0,1.0,1.0)
+        _BaseMap("Texture",2D) = "white"{}
         
         [Enum(Off,0,On,1)] _ZWrite("Z Write",Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend("Src Blend",Float) = 1
