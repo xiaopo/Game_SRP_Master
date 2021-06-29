@@ -3,6 +3,7 @@
 
 #include "../../ShaderLibrary/Common.hlsl"
 #include "../../ShaderLibrary/Surface.hlsl"
+#include "../../ShaderLibrary/Shadows.hlsl"
 #include "../../ShaderLibrary/Light.hlsl"
 #include "../../ShaderLibrary/BRDF.hlsl"
 #include "../../ShaderLibrary/Lighting.hlsl"
@@ -75,6 +76,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     #endif
     
     Surface surface;
+    surface.position = input.worldPos;
     surface.normal = normalize(input.worldNormal);
     surface.viewDirection = normalize(_WorldSpaceCameraPos - input.worldPos);
     surface.color = albedo.rgb;

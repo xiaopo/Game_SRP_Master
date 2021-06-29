@@ -6,6 +6,7 @@ namespace CustomSR
 {
     public class Shadows
     {
+        
         const int maxShadowdDirectionalLightCount = 4;
         struct ShadowedDirectionLight
         {
@@ -68,7 +69,7 @@ namespace CustomSR
         {
             //创建renderTexture，并指定该类型是阴影贴图
             int atlasSize = (int)settings.directional.atlasSize;
-
+            buffer.BeginSample(bufferName);
             buffer.GetTemporaryRT(dirShadowAtlasId, atlasSize, atlasSize, 32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
 
             //指定渲染数据储存到RT中
@@ -78,9 +79,9 @@ namespace CustomSR
 
             // all shadowed lights are rendered send the matrices to the GPU 
             buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
-            buffer.BeginSample(bufferName);
+            buffer.EndSample(bufferName);
             ExecuteBuffer();
-
+            buffer.BeginSample(bufferName);
             //分割图块
             int split = ShadowedirectionLightCount <= 1 ? 1 : 2;
             int tileSize = atlasSize / split;
@@ -94,7 +95,7 @@ namespace CustomSR
             
             ExecuteBuffer();
         }
-        Vector2 SetTileViewPoint(int index, int split,int tileSize)
+        Vector2 SetTileViewport(int index, int split,int tileSize)
         {
             //计算列 行
             Vector2 offset = new Vector2(index % split, index / split);
@@ -114,16 +115,16 @@ namespace CustomSR
                 out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
 
             shadowSettings.splitData = splitData;
-
+            
             //is a conversion matrix from world space to light space
-            dirShadowMatrices[index] = ConverToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewPoint(index, split, tileSize), split);
+            dirShadowMatrices[index] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(index, split, tileSize), split);
             buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
             ExecuteBuffer();
             context.DrawShadows(ref shadowSettings);
 
         }
-
-        public void ReserveDirectionalShadows(Light light,int visibleLightIndex)
+        
+        public Vector2 ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
             //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0
             if(ShadowedirectionLightCount < maxShadowdDirectionalLightCount 
@@ -133,11 +134,15 @@ namespace CustomSR
                 && cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
-                ShadowedDirectionalLights[ShadowedirectionLightCount++] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex };
+                ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex };
+
+                return new Vector2(light.shadowStrength, ShadowedirectionLightCount++);
             }
+
+            return Vector2.zero;
         }
 
-        Matrix4x4 ConverToAtlasMatrix(Matrix4x4 m,Vector2 offset,int split)
+        Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m,Vector2 offset,int split)
         {
             if(SystemInfo.usesReversedZBuffer)
             {
