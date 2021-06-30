@@ -51,7 +51,6 @@ namespace CustomSR
 
     #endif
 
-
         partial void DrawGizmos();
     #if UNITY_EDITOR
         //绘制DrawGizmos

@@ -31,7 +31,7 @@ namespace CustomSR
         static Vector4[] dirLightShadowData = new Vector4[maxDirLightCount];
 
        //裁剪信息
-       CullingResults cullingResults;
+        CullingResults cullingResults;
 
         Shadows shadows = new Shadows();
         public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
@@ -45,6 +45,7 @@ namespace CustomSR
             SetupLights();
             shadows.Render();
             buffer.EndSample(bufferName);
+
             context.ExecuteCommandBuffer(buffer);
             buffer.Clear();
         }
@@ -60,7 +61,7 @@ namespace CustomSR
             for (int i = 0; i < visibleLights.Length; i++)
             {
                 VisibleLight visibleLight = visibleLights[i];
-                //如果是方向光，我们才进行数据储存
+                //是方向光，我们才进行数据储存
                 if (visibleLight.lightType == LightType.Directional)
                 {
                     //Visible 结构很大，我们改为传递引用不是传递值，这样不会生成副本
@@ -79,15 +80,11 @@ namespace CustomSR
 
         void SetupDirectionalLight (int index, ref VisibleLight visibleLight)
         {
-            //Light light = RenderSettings.sun;
-            //if (light == null) return;
-            //buffer.SetGlobalVector(dirLightColorId,light.color.linear * light.intensity);
-            //buffer.SetGlobalVector(dirLightDirectionId, -light.transform.forward);
-
             dirLightColors[index] = visibleLight.finalColor;
+            //第三列取反得到light direction
             dirLightDirectioins[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
-            dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
 
+            dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
             shadows.ReserveDirectionalShadows(visibleLight.light, index);
         }
 

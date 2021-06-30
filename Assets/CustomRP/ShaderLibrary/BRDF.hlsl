@@ -49,15 +49,18 @@ BRDF GetBRDF(Surface surface,bool applyAlphaToDiffuse = false)
     
     //表面颜色减去慢反射颜色
     //brdf.specular = surface.color - brdf.diffuse;
+    
     //非金属不影响镜面反射颜色
-        brdf.specular = lerp(MIN_REFLECTIVITY, surface.color, surface.metallic);
+    //The specular color of dielectric surfaces should be white
+    //achieve by using the metallic property to interpolate between the minimus reflectivity and the surface color
+    brdf.specular = lerp(MIN_REFLECTIVITY, surface.color, surface.metallic);
     
     //粗糙度和光滑度相反，只需要使用1减去光滑度即可
     //使用CommonMaterial内置方法
-        float perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(surface.smoothness);
-        brdf.roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
+    float perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(surface.smoothness);
+    brdf.roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
     
-        return brdf;
+    return brdf;
     
-    }
+}
 #endif

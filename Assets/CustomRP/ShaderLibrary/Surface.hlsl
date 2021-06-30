@@ -3,7 +3,7 @@
 //表面信息
 struct Surface
 {
-    float3 position;
+    float3 position;//at world space
     float3 normal;//世界空间
     float3 color;//漫反射颜色
     float alpha;//漫反射alpha
