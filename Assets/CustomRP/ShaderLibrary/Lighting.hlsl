@@ -21,10 +21,12 @@ float3 GetLighting(Surface surface,BRDF brdf)
 {
     //return GetLighting(surface, GetDirectionLight());
     //可见方向光的照明结果进行累加得到最终照明结果
+    ShadowData shadowData = GetShadowData(surface);
     float3 color = 0.0;
     for (int i = 0; i < GetDirectionLightCount();i++)
     {
-        color += GetLighting(surface, brdf, GetDirectionLight(i, surface));
+        Light light = GetDirectionLight(i, surface, shadowData);
+        color += GetLighting(surface, brdf, light);
     }
     
     return color;

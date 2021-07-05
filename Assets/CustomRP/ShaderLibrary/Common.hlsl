@@ -21,4 +21,10 @@ float Square(float v)
     return v * v;
 }
 
+float DistanceSquared(float3 pA, float3 pB)
+{
+    float3 D = pA - pB;
+    return dot(D, D);
+}
+
 #endif

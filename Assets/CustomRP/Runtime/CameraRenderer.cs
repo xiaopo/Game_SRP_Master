@@ -33,6 +33,7 @@ namespace CustomSR
 
             //设置命令缓冲区名字
             PrepareBuffer();
+
             //因为此操作可能给Scene场景中添加一些几何体，所以我们在Render()方法中进行几何体剔除之前用这个方法
             PrepareForSceneWindow();
 
@@ -40,6 +41,7 @@ namespace CustomSR
 
             buffer.BeginSample(SampleName);
             ExcuteBuffer();
+            //渲染灯光
             lighting.Setup(contenxt, culingResouts, asset.shadows);
             buffer.EndSample(SampleName);
 

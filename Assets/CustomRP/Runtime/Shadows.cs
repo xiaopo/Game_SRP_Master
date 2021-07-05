@@ -27,9 +27,11 @@ namespace CustomSR
 
         static int dirShadowAtlasId = Shader.PropertyToID("_DirectionalShadowAtlas");
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
+        static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
+        static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingShperes");
 
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowdDirectionalLightCount * maxCascades];
-
+        static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
         ScriptableRenderContext context;
         CullingResults cullingResults;
         ShadowSettings settings;
@@ -78,14 +80,18 @@ namespace CustomSR
             //清除深度缓冲区
             buffer.ClearRenderTarget(true, false, Color.clear);
 
+            buffer.SetGlobalInt(cascadeCountId, settings.directional.cascadeCount);
+            buffer.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
             // all shadowed lights are rendered send the matrices to the GPU 
             buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
             buffer.EndSample(bufferName);
             ExecuteBuffer();
             buffer.BeginSample(bufferName);
-            //分割图块
+            //在shaowmap上渲染的小块数
             int tiles = ShadowedirectionLightCount * settings.directional.cascadeCount;
+            //每行分几份
             int split = tiles <= 1 ? 1 : tiles <= 4 ? 2 : 4;
+            //每块的宽高
             int tileSize = atlasSize / split;
 
             //遍历所有方向光渲染阴影
@@ -108,13 +114,14 @@ namespace CustomSR
         }
 
         //渲染定向光影
-        void RenderDirectionalShadows(int index, int split, int tileSize)
+        void RenderDirectionalShadows(int lightIndex, int split, int tileSize)
         {
-            ShadowedDirectionLight light = ShadowedDirectionalLights[index];
+            ShadowedDirectionLight light = ShadowedDirectionalLights[lightIndex];
             var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
 
             int cascadeCount = settings.directional.cascadeCount;
-            int tileOffset = index * cascadeCount;
+            //转换到对应的行
+            int tileOffset = lightIndex * cascadeCount;
             Vector3 ratios = settings.directional.CascadeRatios;
 
             for(int i = 0;i< cascadeCount;i++)
@@ -123,13 +130,19 @@ namespace CustomSR
                 out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
 
                 shadowSettings.splitData = splitData;
+                if(i == 0){
+                    Vector4 cullingSphere = splitData.cullingSphere;
+                    cullingSphere.w *= cullingSphere.w;
+                    cascadeCullingSpheres[i] = cullingSphere;
+                }
+
                 int tileIndex = tileOffset + i;
                 //is a conversion matrix from world space to light space
                 dirShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(tileIndex, split, tileSize), split);
                 buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
                 ExecuteBuffer();
-                context.DrawShadows(ref shadowSettings);
 
+                context.DrawShadows(ref shadowSettings);
             }
 
         }

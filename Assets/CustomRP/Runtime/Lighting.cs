@@ -43,6 +43,7 @@ namespace CustomSR
             shadows.Setup(context, cullingResults, shadowSettings);
             //发送光源数据
             SetupLights();
+            //渲染阴影
             shadows.Render();
             buffer.EndSample(bufferName);
 
