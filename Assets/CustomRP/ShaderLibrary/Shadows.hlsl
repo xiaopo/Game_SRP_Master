@@ -15,6 +15,8 @@ CBUFFER_START(_CustomShadows)
     int _CascadeCount;
     float4 _CascadeCullingShperes[MAX_CASCADE_COUNT];
     float4x4 _DirectionalShadowMatrices[MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT * MAX_CASCADE_COUNT];
+    //float _ShadowDistance;
+    float4 _ShadowDistanceFade;
 CBUFFER_END
 
 struct DirectionalShadowData
@@ -27,11 +29,22 @@ struct DirectionalShadowData
 struct ShadowData
 {
     int cascadeIndex;
+    float strength;
 };
+
+float FadedShadowStrength(float distance, float scale, float fade)
+{
+    return saturate((1.0 - distance * scale) * fade);
+}
+
 
 ShadowData GetShadowData(Surface surfaceWS)
 {
+    //Loop through all cascade culling spheres in GetShadowData until we find one that contains the surface position. 
+    //Break out of the loop once it's found and then use the current loop iterator as the cascade index.
+    //This means we end up with an invalid index if the fragment lies outside all spheres, but we'll ignore that for now.
     ShadowData data;
+    data.strength = FadedShadowStrength(surfaceWS.depth, _ShadowDistanceFade.x, _ShadowDistanceFade.y);
     int i;
     for (i = 0; i < _CascadeCount; i++)
     {
@@ -40,6 +53,9 @@ ShadowData GetShadowData(Surface surfaceWS)
         if (distanceSqr < sphere.w) break;
     }
     
+    if (i == _CascadeCount)
+        data.strength = 0.0;
+
     data.cascadeIndex = i;
     return data;
 }

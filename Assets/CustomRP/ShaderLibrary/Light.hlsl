@@ -27,7 +27,7 @@ int GetDirectionLightCount()
 DirectionalShadowData GetDirectionalShadowData(int lightIndex, ShadowData shadowData)
 {
     DirectionalShadowData data;
-    data.strength = _DirectionalLightShadowData[lightIndex].x;
+    data.strength = _DirectionalLightShadowData[lightIndex].x * shadowData.strength;
     data.tileIndex = _DirectionalLightShadowData[lightIndex].y + shadowData.cascadeIndex;
     return data;
 
@@ -36,14 +36,13 @@ DirectionalShadowData GetDirectionalShadowData(int lightIndex, ShadowData shadow
 //获取指定索引的方向的数据
 Light GetDirectionLight(int index, Surface surfaceWS, ShadowData shadowData)
 {
-    
     Light light;
     light.color = _DirectionLightColors[index].rgb;
     light.direction = _DirectionLightDrections[index].xyz;
     
     DirectionalShadowData dirshadowData = GetDirectionalShadowData(index, shadowData);
     light.attenuation = GetDirectionalShadowAttenuation(dirshadowData, surfaceWS);
-    light.attenuation = shadowData.cascadeIndex * 0.25;
+
     return light;
 
 }

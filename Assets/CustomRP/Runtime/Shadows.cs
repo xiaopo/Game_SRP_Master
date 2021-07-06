@@ -29,6 +29,8 @@ namespace CustomSR
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
         static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
         static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingShperes");
+        //static int shadowDistanceId = Shader.PropertyToID("_ShadowDistance");
+        static int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
 
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowdDirectionalLightCount * maxCascades];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
@@ -84,6 +86,8 @@ namespace CustomSR
             buffer.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
             // all shadowed lights are rendered send the matrices to the GPU 
             buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
+            //buffer.SetGlobalFloat(shadowDistanceId, settings.maxDistance);
+            buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1f / settings.maxDistance, 1f / settings.distanceFade));
             buffer.EndSample(bufferName);
             ExecuteBuffer();
             buffer.BeginSample(bufferName);

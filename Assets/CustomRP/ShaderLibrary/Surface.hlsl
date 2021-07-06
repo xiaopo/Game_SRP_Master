@@ -10,6 +10,7 @@ struct Surface
     float metallic;//金属度
     float smoothness;//光滑度
     float3 viewDirection;//视角
+    float depth;
 };
 
 #endif
