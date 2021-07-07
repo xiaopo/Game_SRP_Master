@@ -87,7 +87,8 @@ namespace CustomSR
             // all shadowed lights are rendered send the matrices to the GPU 
             buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
             //buffer.SetGlobalFloat(shadowDistanceId, settings.maxDistance);
-            buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1f / settings.maxDistance, 1f / settings.distanceFade));
+            float f = 1f - settings.directional.cascadeFade;
+            buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1.0f / settings.maxDistance, 1.0f / settings.distanceFade,1.0f/(1.0f - f * f)));
             buffer.EndSample(bufferName);
             ExecuteBuffer();
             buffer.BeginSample(bufferName);
@@ -130,12 +131,18 @@ namespace CustomSR
 
             for(int i = 0;i< cascadeCount;i++)
             {
-                cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(light.visibleLightIndex, i, cascadeCount, ratios, tileSize, 0f,
-                out Matrix4x4 viewMatrix, out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
+                cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
+                light.visibleLightIndex, i, cascadeCount, ratios, tileSize, 0f,
+                out Matrix4x4 viewMatrix, 
+                out Matrix4x4 projectionMatrix, 
+                out ShadowSplitData splitData);
 
                 shadowSettings.splitData = splitData;
+
                 if(i == 0){
+                    //as the cascades of all lights are equivalent
                     Vector4 cullingSphere = splitData.cullingSphere;
+                    //radius square
                     cullingSphere.w *= cullingSphere.w;
                     cascadeCullingSpheres[i] = cullingSphere;
                 }
@@ -191,10 +198,10 @@ namespace CustomSR
             m.m11 = (0.5f * (m.m11 + m.m31) + offset.y * m.m31) * scale;
             m.m12 = (0.5f * (m.m12 + m.m32) + offset.y * m.m32) * scale;
             m.m13 = (0.5f * (m.m13 + m.m33) + offset.y * m.m33) * scale;
-            m.m20 = 0.5f * (m.m20 + m.m30) ;
-            m.m21 = 0.5f * (m.m21 + m.m31) ;
-            m.m22 = 0.5f * (m.m22 + m.m32) ;
-            m.m23 = 0.5f * (m.m23 + m.m33) ;
+            m.m20 = 0.5f * (m.m20 + m.m30);
+            m.m21 = 0.5f * (m.m21 + m.m31);
+            m.m22 = 0.5f * (m.m22 + m.m32);
+            m.m23 = 0.5f * (m.m23 + m.m33);
 
             return m;
         }

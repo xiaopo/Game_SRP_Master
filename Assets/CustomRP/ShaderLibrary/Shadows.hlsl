@@ -32,9 +32,10 @@ struct ShadowData
     float strength;
 };
 
-float FadedShadowStrength(float distance, float scale, float fade)
+// (1 - d/m)/f
+float FadedShadowStrength(float d, float mx, float fx)
 {
-    return saturate((1.0 - distance * scale) * fade);
+    return saturate((1.0 - d * mx) * fx);
 }
 
 
@@ -50,12 +51,18 @@ ShadowData GetShadowData(Surface surfaceWS)
     {
         float4 sphere = _CascadeCullingShperes[i];
         float distanceSqr = DistanceSquared(surfaceWS.position, sphere.xyz);
-        if (distanceSqr < sphere.w) break;
+        if (distanceSqr < sphere.w)
+        {
+            if( i == _CascadeCount - 1)
+                data.strength *= 0.5;//FadedShadowStrength(distanceSqr, 1.0 / sphere.w, _ShadowDistanceFade.z);
+
+            break;
+        }
     }
     
     if (i == _CascadeCount)
         data.strength = 0.0;
-
+        
     data.cascadeIndex = i;
     return data;
 }
