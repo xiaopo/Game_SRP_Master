@@ -29,11 +29,13 @@ namespace CustomSR
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
         static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
         static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingShperes");
-        //static int shadowDistanceId = Shader.PropertyToID("_ShadowDistance");
+        static int cascadeDataId = Shader.PropertyToID("_CascadeData");
         static int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
 
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowdDirectionalLightCount * maxCascades];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
+        static Vector4[] cascadeData = new Vector4[maxCascades];
+
         ScriptableRenderContext context;
         CullingResults cullingResults;
         ShadowSettings settings;
@@ -84,6 +86,7 @@ namespace CustomSR
 
             buffer.SetGlobalInt(cascadeCountId, settings.directional.cascadeCount);
             buffer.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
+            buffer.SetGlobalVectorArray(cascadeDataId, cascadeData);
             // all shadowed lights are rendered send the matrices to the GPU 
             buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
             //buffer.SetGlobalFloat(shadowDistanceId, settings.maxDistance);
@@ -141,23 +144,31 @@ namespace CustomSR
 
                 if(i == 0){
                     //as the cascades of all lights are equivalent
-                    Vector4 cullingSphere = splitData.cullingSphere;
-                    //radius square
-                    cullingSphere.w *= cullingSphere.w;
-                    cascadeCullingSpheres[i] = cullingSphere;
+                    SetCascadeData(i, splitData.cullingSphere, tileSize);
                 }
 
                 int tileIndex = tileOffset + i;
                 //is a conversion matrix from world space to light space
                 dirShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(tileIndex, split, tileSize), split);
                 buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
-                ExecuteBuffer();
 
+                //buffer.SetGlobalDepthBias(0f, 3.0f);
+                ExecuteBuffer();
                 context.DrawShadows(ref shadowSettings);
+                //buffer.SetGlobalDepthBias(0f, 0f);
             }
 
         }
         
+        void SetCascadeData(int index,Vector4 cullingSphere,float titleSize)
+        {
+            cascadeData[index].x = 1.0f / cullingSphere.w;
+
+            //radius square
+            cullingSphere.w *= cullingSphere.w;
+            cascadeCullingSpheres[index] = cullingSphere;
+        }
+
         public Vector2 ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
             //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0

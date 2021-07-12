@@ -15,7 +15,7 @@ CBUFFER_START(_CustomShadows)
     int _CascadeCount;
     float4 _CascadeCullingShperes[MAX_CASCADE_COUNT];
     float4x4 _DirectionalShadowMatrices[MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT * MAX_CASCADE_COUNT];
-    //float _ShadowDistance;
+    float _CascadeData[MAX_CASCADE_COUNT];
     float4 _ShadowDistanceFade;
 CBUFFER_END
 
@@ -45,7 +45,7 @@ ShadowData GetShadowData(Surface surfaceWS)
     //Break out of the loop once it's found and then use the current loop iterator as the cascade index.
     //This means we end up with an invalid index if the fragment lies outside all spheres, but we'll ignore that for now.
     ShadowData data;
-    data.strength = FadedShadowStrength(surfaceWS.depth, _ShadowDistanceFade.x, _ShadowDistanceFade.y);
+    data.strength = FadedShadowStrength(surfaceWS.depth, _ShadowDistanceFade.x, _ShadowDistanceFade.z);
     int i;
     for (i = 0; i < _CascadeCount; i++)
     {
@@ -54,7 +54,7 @@ ShadowData GetShadowData(Surface surfaceWS)
         if (distanceSqr < sphere.w)
         {
             if( i == _CascadeCount - 1)
-                data.strength *= 0.5;//FadedShadowStrength(distanceSqr, 1.0 / sphere.w, _ShadowDistanceFade.z);
+                data.strength *= FadedShadowStrength(distanceSqr, _CascadeData[i].x, _ShadowDistanceFade.z);
 
             break;
         }
@@ -74,7 +74,7 @@ float SampleDirectionalShadowAtlas(float3 positionSTS)
 
 float GetDirectionalShadowAttenuation(DirectionalShadowData data,Surface surfaceWS)
 {
-    if (data.strength <= 0)
+    if (data.strength <= 0.0)
     {
         return 1.0;
     }
