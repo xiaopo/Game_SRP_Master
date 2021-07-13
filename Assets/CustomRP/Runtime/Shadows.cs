@@ -6,12 +6,12 @@ namespace CustomSR
 {
     public class Shadows
     {
-        
         const int maxShadowdDirectionalLightCount = 4;
         const int maxCascades = 4;
         struct ShadowedDirectionLight
         {
             public int visibleLightIndex;
+            public float slopeScaleBias;
         }
 
         ShadowedDirectionLight[] ShadowedDirectionalLights = new ShadowedDirectionLight[maxShadowdDirectionalLightCount * maxCascades];
@@ -23,7 +23,6 @@ namespace CustomSR
         {
             name = bufferName
         };
-
 
         static int dirShadowAtlasId = Shader.PropertyToID("_DirectionalShadowAtlas");
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
@@ -54,7 +53,6 @@ namespace CustomSR
             context.ExecuteCommandBuffer(buffer);
             buffer.Clear();
         }
-
         //阴影渲染
         public void Render()
         {
@@ -70,7 +68,6 @@ namespace CustomSR
 
         }
 
-        
         //渲染定向光影
         void RenderDirectionalShadows()
         {
@@ -111,6 +108,7 @@ namespace CustomSR
             
             ExecuteBuffer();
         }
+
         Vector2 SetTileViewport(int index, int split,int tileSize)
         {
             //计算列 行
@@ -120,7 +118,6 @@ namespace CustomSR
 
             return offset;
         }
-
         //渲染定向光影
         void RenderDirectionalShadows(int lightIndex, int split, int tileSize)
         {
@@ -152,24 +149,29 @@ namespace CustomSR
                 dirShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(tileIndex, split, tileSize), split);
                 buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
 
-                //buffer.SetGlobalDepthBias(0f, 3.0f);
+                buffer.SetGlobalDepthBias(0f, light.slopeScaleBias);
                 ExecuteBuffer();
                 context.DrawShadows(ref shadowSettings);
-                //buffer.SetGlobalDepthBias(0f, 0f);
+                buffer.SetGlobalDepthBias(0f, 0f);
             }
 
         }
         
         void SetCascadeData(int index,Vector4 cullingSphere,float titleSize)
         {
-            cascadeData[index].x = 1.0f / cullingSphere.w;
-
+           
             //radius square
             cullingSphere.w *= cullingSphere.w;
             cascadeCullingSpheres[index] = cullingSphere;
+
+            float texelSize = 2f * cullingSphere.w / titleSize;
+            cascadeData[index] = new Vector4(
+                                             1.0f / cullingSphere.w, 
+                                             titleSize * 1.4142136f
+                                             );
         }
 
-        public Vector2 ReserveDirectionalShadows(Light light,int visibleLightIndex)
+        public Vector3 ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
             //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0
             if(ShadowedirectionLightCount < maxShadowdDirectionalLightCount 
@@ -179,15 +181,21 @@ namespace CustomSR
                 && cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
-                ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex };
+                ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
+                                                                                                     slopeScaleBias = light.shadowBias
+                                                                                                    };
 
                 // x strength  y tileIndex
                 //each directional light will now claim multiple successive tiles
                 int tileIndex = settings.directional.cascadeCount * ShadowedirectionLightCount++;
-                return new Vector2(light.shadowStrength, tileIndex);
+                return new Vector3(
+                                    light.shadowStrength, 
+                                    tileIndex,
+                                    light.shadowNormalBias
+                                    );
             }
 
-            return Vector2.zero;
+            return Vector3.zero;
         }
 
         Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m,Vector2 offset,int split)
