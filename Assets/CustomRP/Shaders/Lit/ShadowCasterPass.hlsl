@@ -42,6 +42,12 @@ Varyings ShadowCasterPassVertex(Attributes input)
     float3 worldPos = TransformObjectToWorld(input.position);
     output.position = TransformWorldToHClip(worldPos);
     
+    #if UNITY_REVERSED_Z
+        output.position.z = min(output.position.z, output.position.w * UNITY_NEAR_CLIP_VALUE);
+    #else
+        output.position.z = max(output.position.z, output.position.w * UNITY_NEAR_CLIP_VALUE);
+    #endif
+    
     float4 baseST = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _BaseMap_ST);
     output.uv = input.uv * baseST.xy + baseST.zw;
     

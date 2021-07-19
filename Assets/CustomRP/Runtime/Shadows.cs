@@ -12,6 +12,7 @@ namespace CustomSR
         {
             public int visibleLightIndex;
             public float slopeScaleBias;
+            public float nearPlaneOffset;
         }
 
         ShadowedDirectionLight[] ShadowedDirectionalLights = new ShadowedDirectionLight[maxShadowdDirectionalLightCount * maxCascades];
@@ -27,9 +28,16 @@ namespace CustomSR
         static int dirShadowAtlasId = Shader.PropertyToID("_DirectionalShadowAtlas");
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
         static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
-        static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingShperes");
+        static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres");
         static int cascadeDataId = Shader.PropertyToID("_CascadeData");
+        static int shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
         static int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
+        static string[] directionalFilterKeywords =
+        {
+            "_DIRECTIONAL_PCF3",
+            "_DIRECTIONAL_PCF5",
+            "_DIRECTIONAL_PCF7",
+        };
 
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowdDirectionalLightCount * maxCascades];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
@@ -86,7 +94,7 @@ namespace CustomSR
             buffer.SetGlobalVectorArray(cascadeDataId, cascadeData);
             // all shadowed lights are rendered send the matrices to the GPU 
             buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
-            //buffer.SetGlobalFloat(shadowDistanceId, settings.maxDistance);
+           
             float f = 1f - settings.directional.cascadeFade;
             buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1.0f / settings.maxDistance, 1.0f / settings.distanceFade,1.0f/(1.0f - f * f)));
             buffer.EndSample(bufferName);
@@ -104,9 +112,26 @@ namespace CustomSR
             {
                 RenderDirectionalShadows(i, split, tileSize);
             }
+
+            SetKeywords();
+            buffer.SetGlobalVector(shadowAtlasSizeId, new Vector4(atlasSize, 1f / atlasSize));
             buffer.EndSample(bufferName);
             
             ExecuteBuffer();
+        }
+
+        void SetKeywords()
+        {
+            int enabledIndex = (int)settings.directional.filter - 1;
+            for(int i = 0;i<directionalFilterKeywords.Length;i++)
+            {
+                if(i == enabledIndex){
+                    buffer.EnableShaderKeyword(directionalFilterKeywords[i]);
+                }
+                else{
+                    buffer.DisableShaderKeyword(directionalFilterKeywords[i]);
+                }
+            }
         }
 
         Vector2 SetTileViewport(int index, int split,int tileSize)
@@ -132,14 +157,14 @@ namespace CustomSR
             for(int i = 0;i< cascadeCount;i++)
             {
                 cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
-                light.visibleLightIndex, i, cascadeCount, ratios, tileSize, 0f,
+                light.visibleLightIndex, i, cascadeCount, ratios, tileSize,light.nearPlaneOffset,
                 out Matrix4x4 viewMatrix, 
                 out Matrix4x4 projectionMatrix, 
                 out ShadowSplitData splitData);
 
                 shadowSettings.splitData = splitData;
 
-                if(i == 0){
+                if(lightIndex == 0){
                     //as the cascades of all lights are equivalent
                     SetCascadeData(i, splitData.cullingSphere, tileSize);
                 }
@@ -159,15 +184,17 @@ namespace CustomSR
         
         void SetCascadeData(int index,Vector4 cullingSphere,float titleSize)
         {
-           
+
             //radius square
+            //cullingSphere.w -= filterSize;
             cullingSphere.w *= cullingSphere.w;
             cascadeCullingSpheres[index] = cullingSphere;
 
             float texelSize = 2f * cullingSphere.w / titleSize;
+            float filterSize = texelSize * ((float)settings.directional.filter + 1f);
             cascadeData[index] = new Vector4(
-                                             1.0f / cullingSphere.w, 
-                                             titleSize * 1.4142136f
+                                             1.0f / cullingSphere.w,
+                                             filterSize * 1.4142136f
                                              );
         }
 
@@ -182,8 +209,9 @@ namespace CustomSR
              )
             {
                 ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
-                                                                                                     slopeScaleBias = light.shadowBias
-                                                                                                    };
+                                                                                                     slopeScaleBias = light.shadowBias,
+                                                                                                     nearPlaneOffset = light.shadowNearPlane
+                };
 
                 // x strength  y tileIndex
                 //each directional light will now claim multiple successive tiles
