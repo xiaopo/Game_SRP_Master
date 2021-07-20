@@ -34,11 +34,15 @@ namespace CustomSR
 
             [Range(0f, 1f)]
             public float cascadeRatio1, cascadeRatio2, cascadeRatio3;
+            public Vector3 CascadeRatios => new Vector3(cascadeRatio1, cascadeRatio2, cascadeRatio3);
 
             [Range(0.001f, 1f)]
             public float cascadeFade;
-            public Vector3 CascadeRatios => new Vector3(cascadeRatio1, cascadeRatio2, cascadeRatio3);
+
+            public enum CascadeBlendMode { Hard, Soft, Dither }
+            public CascadeBlendMode cascadeBlend;
         }
+
         //其他光源的阴影配置
 
         //默认尺寸为1024
@@ -50,7 +54,8 @@ namespace CustomSR
             cascadeRatio1 = 0.1f,
             cascadeRatio2 = 0.25f,
             cascadeRatio3 = 0.5f,
-            cascadeFade = 0.1f
+            cascadeFade = 0.1f,
+            cascadeBlend = Directional.CascadeBlendMode.Hard
         };
 
 

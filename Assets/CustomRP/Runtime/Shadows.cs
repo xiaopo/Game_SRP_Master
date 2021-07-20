@@ -39,6 +39,11 @@ namespace CustomSR
             "_DIRECTIONAL_PCF7",
         };
 
+        static string[] cascadeBlendKeywords = {
+            "_CASCADE_BLEND_SOFT",
+            "_CASCADE_BLEND_DITHER"
+        };
+
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowdDirectionalLightCount * maxCascades];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
         static Vector4[] cascadeData = new Vector4[maxCascades];
@@ -79,6 +84,7 @@ namespace CustomSR
         //渲染定向光影
         void RenderDirectionalShadows()
         {
+
             //创建renderTexture，并指定该类型是阴影贴图
             int atlasSize = (int)settings.directional.atlasSize;
             buffer.BeginSample(bufferName);
@@ -113,23 +119,24 @@ namespace CustomSR
                 RenderDirectionalShadows(i, split, tileSize);
             }
 
-            SetKeywords();
+            SetKeywords(directionalFilterKeywords,(int)settings.directional.filter - 1);
+            SetKeywords(cascadeBlendKeywords, (int)settings.directional.cascadeBlend - 1);
             buffer.SetGlobalVector(shadowAtlasSizeId, new Vector4(atlasSize, 1f / atlasSize));
             buffer.EndSample(bufferName);
             
             ExecuteBuffer();
         }
 
-        void SetKeywords()
+        void SetKeywords(string[] keywords,int enabledIndex)
         {
-            int enabledIndex = (int)settings.directional.filter - 1;
-            for(int i = 0;i<directionalFilterKeywords.Length;i++)
+            //int enabledIndex = (int)settings.directional.filter - 1;
+            for(int i = 0;i< keywords.Length;i++)
             {
                 if(i == enabledIndex){
-                    buffer.EnableShaderKeyword(directionalFilterKeywords[i]);
+                    buffer.EnableShaderKeyword(keywords[i]);
                 }
                 else{
-                    buffer.DisableShaderKeyword(directionalFilterKeywords[i]);
+                    buffer.DisableShaderKeyword(keywords[i]);
                 }
             }
         }
@@ -153,8 +160,8 @@ namespace CustomSR
             //转换到对应的行
             int tileOffset = lightIndex * cascadeCount;
             Vector3 ratios = settings.directional.CascadeRatios;
-
-            for(int i = 0;i< cascadeCount;i++)
+            float cullingFactor = Mathf.Max(0f, 0.8f - settings.directional.cascadeFade);
+            for (int i = 0;i< cascadeCount;i++)
             {
                 cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
                 light.visibleLightIndex, i, cascadeCount, ratios, tileSize,light.nearPlaneOffset,
@@ -162,6 +169,7 @@ namespace CustomSR
                 out Matrix4x4 projectionMatrix, 
                 out ShadowSplitData splitData);
 
+                splitData.shadowCascadeBlendCullingFactor = cullingFactor;
                 shadowSettings.splitData = splitData;
 
                 if(lightIndex == 0){

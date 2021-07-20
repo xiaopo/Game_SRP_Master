@@ -11,6 +11,7 @@ struct Surface
     float smoothness;//π‚ª¨∂»
     float3 viewDirection;// ”Ω«
     float depth;
+    float dither;
 };
 
 #endif

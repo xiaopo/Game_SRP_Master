@@ -84,6 +84,10 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
     surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
     surface.depth = -TransformWorldToView(input.worldPos).z;
+    //which generates a rotated tiled dither pattern given a screen-space XY position.
+    //In the fragment function that's equal to the clip-space XY position.
+    //It also requires a second argument which is used to animate it, which we don't need and can leave at zero.
+    surface.dither = InterleavedGradientNoise(input.position.xy, 0);
     
     //通过表面属性计算最终光照结果
 #if defined(_PREMULTIPLY_ALPHA)
