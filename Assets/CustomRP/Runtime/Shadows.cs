@@ -6,7 +6,6 @@ namespace CustomSR
 {
     public class Shadows
     {
-
         //定义最大支持的shadow的light数量
         const int maxShadowedDirectionalLightCount = 4;
         //定义最大阴影级联的数量
