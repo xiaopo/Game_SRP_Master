@@ -6,8 +6,12 @@ namespace CustomSR
 {
     public class Shadows
     {
-        const int maxShadowdDirectionalLightCount = 4;
+
+        //定义最大支持的shadow的light数量
+        const int maxShadowedDirectionalLightCount = 4;
+        //定义最大阴影级联的数量
         const int maxCascades = 4;
+        //light 中影响shadow的属性
         struct ShadowedDirectionLight
         {
             public int visibleLightIndex;
@@ -15,7 +19,9 @@ namespace CustomSR
             public float nearPlaneOffset;
         }
 
-        ShadowedDirectionLight[] ShadowedDirectionalLights = new ShadowedDirectionLight[maxShadowdDirectionalLightCount * maxCascades];
+        //根据级联和light数量定义数据长度
+        ShadowedDirectionLight[] ShadowedDirectionalLights = new ShadowedDirectionLight[maxShadowedDirectionalLightCount * maxCascades];
+
         int ShadowedirectionLightCount;
 
         const string bufferName = "Shadows";
@@ -25,6 +31,7 @@ namespace CustomSR
             name = bufferName
         };
 
+        
         static int dirShadowAtlasId = Shader.PropertyToID("_DirectionalShadowAtlas");
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
         static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
@@ -44,7 +51,7 @@ namespace CustomSR
             "_CASCADE_BLEND_DITHER"
         };
 
-        static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowdDirectionalLightCount * maxCascades];
+        static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowedDirectionalLightCount * maxCascades];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
         static Vector4[] cascadeData = new Vector4[maxCascades];
 
@@ -181,11 +188,10 @@ namespace CustomSR
                 //is a conversion matrix from world space to light space
                 dirShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(tileIndex, split, tileSize), split);
                 buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
-
-                buffer.SetGlobalDepthBias(0f, light.slopeScaleBias);
+ 
                 ExecuteBuffer();
                 context.DrawShadows(ref shadowSettings);
-                buffer.SetGlobalDepthBias(0f, 0f);
+   
             }
 
         }
@@ -200,26 +206,22 @@ namespace CustomSR
 
             float texelSize = 2f * cullingSphere.w / titleSize;
             float filterSize = texelSize * ((float)settings.directional.filter + 1f);
-            cascadeData[index] = new Vector4(
-                                             1.0f / cullingSphere.w,
-                                             filterSize * 1.4142136f
-                                             );
+            cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, filterSize * 1.4142136f);
         }
 
         public Vector3 ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
             //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0
-            if(ShadowedirectionLightCount < maxShadowdDirectionalLightCount 
+            if(ShadowedirectionLightCount < maxShadowedDirectionalLightCount 
                 && light.shadows != LightShadows.None 
                 && light.shadowStrength > 0f
-                //检查可见光是否有阴影或阴影是不是 beyond the maxshadowsdistance 
+                //检查可见光是否有阴影或阴影是不是 beyond the maxshadows distance 
                 && cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
                 ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
                                                                                                      slopeScaleBias = light.shadowBias,
-                                                                                                     nearPlaneOffset = light.shadowNearPlane
-                };
+                                                                                                     nearPlaneOffset = light.shadowNearPlane};
 
                 // x strength  y tileIndex
                 //each directional light will now claim multiple successive tiles

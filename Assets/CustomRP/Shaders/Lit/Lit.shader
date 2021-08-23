@@ -52,11 +52,11 @@ Shader "CustomRP/Lit"
             ENDHLSL
         }
 
-         Pass
+        Pass
         {
             Tags{  "LightMode" = "ShadowCaster" }
 
-            //Name "ShadowCaster"
+            Name "ShadowCaster"
             ColorMask 0
 
             HLSLPROGRAM

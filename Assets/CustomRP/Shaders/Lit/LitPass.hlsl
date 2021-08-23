@@ -75,14 +75,22 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
         clip(albedo.a - UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Cutoff));
     #endif
     
+    //Create a surface struct by those infomation
     Surface surface;
     surface.position = input.worldPos;
     surface.normal = normalize(input.worldNormal);
+   
     surface.viewDirection = normalize(_WorldSpaceCameraPos - input.worldPos);
     surface.color = albedo.rgb;
     surface.alpha = albedo.a;
+    
+    //with 1 indicating that it is fully metallic. The default is fully dielectric
     surface.metallic = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
+    //with 0 being perfectly rough and 1 being perfectly smooth.
     surface.smoothness = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
+    
+    //he depth can be found in LitPassFragment by converting from world space to view space via TransformWorldToView and taking the negated Z coordinate.
+    //As this conversion is only a rotation and offset relative to world space the depth is the same in both view space and world space
     surface.depth = -TransformWorldToView(input.worldPos).z;
     //which generates a rotated tiled dither pattern given a screen-space XY position.
     //In the fragment function that's equal to the clip-space XY position.

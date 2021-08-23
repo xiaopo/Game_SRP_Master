@@ -31,7 +31,6 @@ DirectionalShadowData GetDirectionalShadowData(int lightIndex, ShadowData shadow
     data.tileIndex = _DirectionalLightShadowData[lightIndex].y + shadowData.cascadeIndex;
     data.normalBias = _DirectionalLightShadowData[lightIndex].z;
     return data;
-
 }
 
 //获取指定索引的方向的数据

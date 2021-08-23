@@ -1,6 +1,7 @@
 #ifndef CUSTOM_BRDF_INCLUDED
 #define CUSTOM_BRDF_INCLUDED
 
+//Bidirectional Reflectance Distribution
 struct BRDF
 {
     float3 diffuse;//漫反射颜色
@@ -46,9 +47,6 @@ BRDF GetBRDF(Surface surface,bool applyAlphaToDiffuse = false)
     {
         brdf.diffuse *= surface.alpha;
     }
-    
-    //表面颜色减去慢反射颜色
-    //brdf.specular = surface.color - brdf.diffuse;
     
     //非金属不影响镜面反射颜色
     //The specular color of dielectric surfaces should be white

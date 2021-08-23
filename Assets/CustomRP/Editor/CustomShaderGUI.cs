@@ -47,7 +47,7 @@ public class CustomShaderGUI : ShaderGUI
             }
         }
     }
-
+    
     void SetShadowCasterPass()
     {
         MaterialProperty shadows = FindProperty("_Shadows", properties, false);

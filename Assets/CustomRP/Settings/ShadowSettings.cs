@@ -14,8 +14,9 @@ namespace CustomSR
         //“ı”∞Ã˘Õº¥Û–°
         public enum TextureSize
         {
-            _256 = 256, _512 = 512, _1024 = 1024,
-            _2048 = 2048, _4096 = 4096, _8192 = 8192
+            _256 = 256, _512 = 512, 
+            _1024 = 1024,_2048 = 2048,
+            _4096 = 4096, _8192 = 8192
         }
         //percentage closer filtering
         public enum FilterMode

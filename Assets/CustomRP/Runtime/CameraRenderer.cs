@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace CustomSR
 {
-
     public partial class CameraRenderer
     {
     
