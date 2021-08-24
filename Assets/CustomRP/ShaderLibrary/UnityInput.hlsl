@@ -2,10 +2,13 @@
 #define CUSTOM_UNITY_INPUT_INCLUDED
 
 CBUFFER_START(UnityPerDraw)
-float4x4 unity_ObjectToWorld;
-float4x4 unity_WorldToObject;
-float4 unity_LODFade;
-real4 unity_WorldTransformParams;
+    float4x4 unity_ObjectToWorld;
+    float4x4 unity_WorldToObject;
+    float4 unity_LODFade;
+    real4 unity_WorldTransformParams;
+
+    float4 unity_LightmapST;
+    float4 unity_DynamicLightmapST;
 CBUFFER_END
 
 float4x4 unity_MatrixVP;
