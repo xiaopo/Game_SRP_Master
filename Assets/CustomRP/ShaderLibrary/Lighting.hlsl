@@ -22,7 +22,7 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
 
     //可见方向光的照明结果进行累加得到最终照明结果
     ShadowData shadowData = GetShadowData(surface);
-    float3 color = gi.diffuse;
+    float3 color = gi.diffuse * brdf.diffuse;
     for (int i = 0; i < GetDirectionLightCount();i++)
     {
         //Get Color and direction by light index 

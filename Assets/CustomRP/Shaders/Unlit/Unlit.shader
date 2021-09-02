@@ -15,6 +15,12 @@ Shader "CustomRP/Unlit"
 
     SubShader
     {
+        HLSLINCLUDE
+        #include "../../ShaderLibrary/Common.hlsl"
+        #include "UnlitInput.hlsl"
+        ENDHLSL
+
+
         Tags{ "RenderType" = "Opaque" "Queue"="Transparent"}
         LOD 100
         Pass
