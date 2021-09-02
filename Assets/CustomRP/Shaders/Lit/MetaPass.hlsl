@@ -19,6 +19,7 @@ struct Varyings
     float2 uv : VAR_BASE_UV;
 };
 
+
 bool4 unity_MetaFragmentControl;
 float unity_OneOverOutputBoost;
 float unity_MaxOutputValue;
@@ -32,13 +33,11 @@ Varyings MetaPassVertex(Attributes input)
     output.position = TransformWorldToHClip(input.position);
     output.uv = TransformBaseUV(input.uv);
     return output;
-
 }
 
 
 float4 MetaPassFragment(Varyings input) : SV_TARGET
 {
-
     float4 albedo = GetBase(input.uv);
 
     Surface surface;
@@ -54,8 +53,9 @@ float4 MetaPassFragment(Varyings input) : SV_TARGET
     {
         meta = float4(brdf.diffuse, 1.0);
         meta.rgb += brdf.specular * brdf.roughness * 0.5;
-
+        meta.rgb = min(PositivePow(meta.rgb, unity_OneOverOutputBoost), unity_MaxOutputValue);
     }
+    
     return meta;
 }
 

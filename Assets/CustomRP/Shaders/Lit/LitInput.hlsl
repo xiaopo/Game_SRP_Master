@@ -1,7 +1,7 @@
 #ifndef CUSTOM_LIT_INPUT_INCLUDED
 #define CUSTOM_LIT_INPUT_INCLUDED
 
-TEXTURE2D(_BaseMap);//定义一张2D文理
+TEXTURE2D(_BaseMap);//2D文理
 SAMPLER(sampler_BaseMap);//指定一个采样器
 
 //纹理和采样器是全局资源，不能放入缓冲区中
