@@ -3,7 +3,7 @@ Shader "CustomRP/Unlit"
    
     Properties
     {
-        _MainColor("Color",Color)=(1.0,1.0,1.0,1.0)
+        [HDR]_MainColor("Color",Color)=(1.0,1.0,1.0,1.0)
         _MainTex("Main Tex",2D) = "white"{}
         [Enum(Off,0,On,1)] _ZWrite("Z Write",Float)= 1
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend("Src Blend",Float) = 1
