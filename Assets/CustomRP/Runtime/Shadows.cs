@@ -50,6 +50,10 @@ namespace CustomSR
             "_CASCADE_BLEND_DITHER"
         };
 
+        static string[] shadowMaskKeywords = {
+            "_SHADOW_MASK_DISTANCE"
+        };
+
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowedDirectionalLightCount * maxCascades];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
         static Vector4[] cascadeData = new Vector4[maxCascades];
@@ -57,7 +61,8 @@ namespace CustomSR
         ScriptableRenderContext context;
         CullingResults cullingResults;
         ShadowSettings settings;
-
+        
+        bool useShadowMask;
         public void Setup(ScriptableRenderContext context,CullingResults cullingResults,ShadowSettings settings)
         {
             this.context = context;
@@ -65,6 +70,7 @@ namespace CustomSR
             this.settings = settings;
 
             ShadowedirectionLightCount = 0;
+            useShadowMask = false;
         }
 
         void ExecuteBuffer()
@@ -85,6 +91,10 @@ namespace CustomSR
                 buffer.GetTemporaryRT(dirShadowAtlasId, 1, 1,32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
             }
 
+            buffer.BeginSample(bufferName);
+            SetKeywords(shadowMaskKeywords, useShadowMask ? 0 : -1);
+            buffer.EndSample(bufferName);
+            ExecuteBuffer();
         }
 
         //渲染定向光影
@@ -218,6 +228,9 @@ namespace CustomSR
                 && cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
+                LightBakingOutput lightBakeing = light.bakingOutput;
+                if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) { useShadowMask = true; }
+
                 ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
                                                                                                      slopeScaleBias = light.shadowBias,
                                                                                                      nearPlaneOffset = light.shadowNearPlane};

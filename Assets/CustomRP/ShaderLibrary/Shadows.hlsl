@@ -39,13 +39,21 @@ struct DirectionalShadowData
     float normalBias;
 };
 
+struct ShadowMask
+{
+    bool distance;
+    float4 shadows;
+};
+
 //The cascade index is determined per fragment,not per light.
 struct ShadowData
 {
     int cascadeIndex;
     float strength;
     float cascadeBlend;
+    ShadowMask shadowMask;
 };
+
 
 // (1 - d/m)/f
 float FadedShadowStrength(float d, float mx, float fx)
@@ -59,6 +67,9 @@ ShadowData GetShadowData(Surface surfaceWS)
     //Break out of the loop once it's found and then use the current loop iterator as the cascade index.
     //This means we end up with an invalid index if the fragment lies outside all spheres, but we'll ignore that for now.
     ShadowData data;
+    data.shadowMask.distance = false;
+    data.shadowMask.shadows = 1.0;
+
     data.cascadeBlend = 1.0;
     data.strength = FadedShadowStrength(surfaceWS.depth, _ShadowDistanceFade.x, _ShadowDistanceFade.y);
     int i;
