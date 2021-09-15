@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44923913, g: 0.49930936, b: 0.5757113, a: 1}
+  m_IndirectSpecularColor: {r: 0.44944334, g: 0.49639988, b: 0.5589212, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -392,13 +392,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 143408433}
-  m_LocalRotation: {x: 0.35403466, y: 0.08058057, z: -0.038984664, w: 0.9309384}
+  m_LocalRotation: {x: 0.17389818, y: 0.109739974, z: -0.00022077185, w: 0.97862995}
   m_LocalPosition: {x: 9, y: 8.98, z: -13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 41.717, y: 9.44, z: -1.192}
+  m_LocalEulerAnglesHint: {x: 19.902, y: 13.2, z: 2.3}
 --- !u!1 &337987072
 GameObject:
   m_ObjectHideFlags: 0
@@ -415,7 +415,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!108 &337987073
 Light:
   m_ObjectHideFlags: 0
@@ -1007,7 +1007,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 74
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1032,13 +1032,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 774337572}
-  m_LocalRotation: {x: -0.2012748, y: -0.7326513, z: 0.24520342, w: -0.602151}
+  m_LocalRotation: {x: 0.1338851, y: 0.7456194, z: -0.15794884, w: 0.6333867}
   m_LocalPosition: {x: -15.806209, y: 7.8243866, z: 0.22957219}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 23.9, y: 99.3, z: -0.027}
 --- !u!1 &854705408
 GameObject:
   m_ObjectHideFlags: 0
@@ -1550,6 +1550,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 3}
   material: {fileID: 2100000, guid: abf22dbf051a0d24f86f00f638c287bf, type: 2}
+  lightProbeVolume: {fileID: 0}
 --- !u!1 &1329799758
 GameObject:
   m_ObjectHideFlags: 0
