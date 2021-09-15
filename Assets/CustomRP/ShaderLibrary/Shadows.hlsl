@@ -115,7 +115,7 @@ float SampleDirectionalShadowAtlas(float3 positionSTS)
     return SAMPLE_TEXTURE2D_SHADOW(_DirectionalShadowAtlas, SHADOW_SAMPLER, positionSTS);
 }
 
-
+// percentage close-filtering
 float FilterDirectionalShadow(float3 positionSTS)
 {
 #if defined(DIRECTIONAL_FILTER_SETUP)
