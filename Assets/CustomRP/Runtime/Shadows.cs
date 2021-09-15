@@ -225,11 +225,16 @@ namespace CustomSR
                 && light.shadows != LightShadows.None 
                 && light.shadowStrength > 0f
                 //检查可见光是否有阴影或阴影是不是 beyond the maxshadows distance 
-                && cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
+                //&& cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
                 LightBakingOutput lightBakeing = light.bakingOutput;
                 if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) { useShadowMask = true; }
+
+                if (!cullingResults.GetShadowCasterBounds( visibleLightIndex, out Bounds b ))
+                {
+                    return new Vector3(-light.shadowStrength, 0f, 0f);
+                }
 
                 ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
                                                                                                      slopeScaleBias = light.shadowBias,

@@ -78,7 +78,9 @@ namespace CustomSR
                 perObjectData = PerObjectData.Lightmaps | 
                                 PerObjectData.LightProbe | 
                                 PerObjectData.LightProbeProxyVolume | 
-                                PerObjectData.ShadowMask
+                                PerObjectData.ShadowMask|
+                                PerObjectData.OcclusionProbe|
+                                PerObjectData.OcclusionProbeProxyVolume
             };
 
             drawingSettings.sortingSettings = sortingSetting;
