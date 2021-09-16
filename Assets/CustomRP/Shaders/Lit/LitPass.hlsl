@@ -73,16 +73,14 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.metallic = GetMetallic(input.uv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
     //with 0 being perfectly rough and 1 being perfectly smooth.
     surface.smoothness = GetSmoothness(input.uv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
-    
-    //he depth can be found in LitPassFragment by converting from world space to view space via TransformWorldToView and taking the negated Z coordinate.
-    //As this conversion is only a rotation and offset relative to world space the depth is the same in both view space and world space
+   
     surface.depth = -TransformWorldToView(input.worldPos).z;
     //which generates a rotated tiled dither pattern given a screen-space XY position.
     //In the fragment function that's equal to the clip-space XY position.
     //It also requires a second argument which is used to animate it, which we don't need and can leave at zero.
     surface.dither = InterleavedGradientNoise(input.position.xy, 0);
     
-    //通过表面属性计算最终光照结果
+
 #if defined(_PREMULTIPLY_ALPHA)
     BRDF brdf = GetBRDF(surface,true);
 #else
@@ -93,7 +91,6 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     float3 color = GetLighting(surface,brdf,gi);
     color += GetEmission(input.uv);
     return float4(color, surface.alpha);
-
 
 }
 

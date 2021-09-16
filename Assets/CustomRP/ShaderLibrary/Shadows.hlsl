@@ -172,14 +172,17 @@ float GetBakedShadow(ShadowMask mask, float strength)
     return 1.0;
 }
 
-// strength from fade vale between cascaeds
+
 float MixBakedAndRealtimeShadows(ShadowData global, float shadow, float strength)
 {
+    // strength from fade vale between cascaeds
+    //global.strength from light setting
     float baked = GetBakedShadow(global.shadowMask);
     if (global.shadowMask.distance)
     {
-        //global.strength from light setting
+        
         shadow = lerp(baked, shadow, global.strength);
+        
         return lerp(1.0, shadow, strength);
     }
     
@@ -195,10 +198,12 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
     float shadow;
     if (directional.strength * global.strength  <= 0.0)
     {
+        //when out of max shadow distance use pure bakeShadow to render shadows
         shadow = GetBakedShadow(global.shadowMask, abs(directional.strength));
     }
     else
     {
+        //when on the inside of max shadow distance.we mix both of them
         shadow = GetCascadedShadow(directional, global, surfaceWS);
         shadow = MixBakedAndRealtimeShadows(global, shadow, directional.strength);
     }

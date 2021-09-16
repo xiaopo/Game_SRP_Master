@@ -32,13 +32,16 @@ struct GI
     ShadowMask shadowMask;
 };
 
+/// sample then shadow mask  map
 float4 SampleBakedShadows(float2 lightMapUV, Surface surfaceWS)
 {
 #if defined(LIGHTMAP_ON)
     return SAMPLE_TEXTURE2D(unity_ShadowMask, samplerunity_ShadowMask, lightMapUV);
 #else
+    //dynamic gameobject shadow effected by light probe
     if (unity_ProbeVolumeParams.x)
     {
+        //sample spherical harmonic
         return SampleProbeOcclusion(
 				TEXTURE3D_ARGS(unity_ProbeVolumeSH, samplerunity_ProbeVolumeSH),
 				surfaceWS.position, unity_ProbeVolumeWorldToObject,
@@ -57,10 +60,12 @@ float4 SampleBakedShadows(float2 lightMapUV, Surface surfaceWS)
 float3 SampleLightProbe(Surface surfaceWS)
 {
     #if defined(LIGHTMAP_ON)
+        //static gameobjects
         return 0.0;
     #else
         if (unity_ProbeVolumeParams.x)
         {
+            //dynamic gameobjects
             return SampleProbeVolumeSH4(
 				    TEXTURE3D_ARGS(unity_ProbeVolumeSH, samplerunity_ProbeVolumeSH),
 				    surfaceWS.position, surfaceWS.normal,
@@ -110,6 +115,7 @@ GI GetGI(float2 lightMapUV, Surface surfaceWS)
     gi.diffuse = SampleLightMap(lightMapUV) + SampleLightProbe(surfaceWS);
     gi.shadowMask.distance = false;
     gi.shadowMask.shadows = 1.0;
+
 #if defined(_SHADOW_MASK_DISTANCE)
     gi.shadowMask.distance = true;
     gi.shadowMask.shadows = SampleBakedShadows(lightMapUV,surfaceWS);
