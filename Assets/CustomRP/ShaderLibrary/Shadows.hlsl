@@ -37,10 +37,12 @@ struct DirectionalShadowData
     float strength;
     int tileIndex;
     float normalBias;
+    int shadowMaskChannel;
 };
 
 struct ShadowMask
 {
+    bool always;
     bool distance;
     float4 shadows;
 };
@@ -67,6 +69,7 @@ ShadowData GetShadowData(Surface surfaceWS)
     //Break out of the loop once it's found and then use the current loop iterator as the cascade index.
     //This means we end up with an invalid index if the fragment lies outside all spheres, but we'll ignore that for now.
     ShadowData data;
+    data.shadowMask.always = false;
     data.shadowMask.distance = false;
     data.shadowMask.shadows = 1.0;
 
@@ -153,36 +156,46 @@ float GetCascadedShadow(DirectionalShadowData directional, ShadowData global, Su
     return shadow;
 }
 
-float GetBakedShadow(ShadowMask mask)
+float GetBakedShadow(ShadowMask mask,int channel)
 {
     float shadow = 1.0;
-    if (mask.distance)
+    if (mask.distance || mask.always)
     {
-        shadow = mask.shadows.r;
+        if (channel >= 0)
+        {
+            shadow = mask.shadows[channel];
+        }
+        
     }
     return shadow;
 }
 
-float GetBakedShadow(ShadowMask mask, float strength)
+float GetBakedShadow(ShadowMask mask,int channel, float strength)
 {
-    if (mask.distance)
+    if (mask.distance || mask.always)
     {
-        return lerp(1.0, GetBakedShadow(mask), strength);
+        return lerp(1.0, GetBakedShadow(mask, channel), strength);
     }
     return 1.0;
 }
 
 
-float MixBakedAndRealtimeShadows(ShadowData global, float shadow, float strength)
+float MixBakedAndRealtimeShadows(ShadowData global, float shadow, int shadowMaskChannel, float strength)
 {
     // strength from fade vale between cascaeds
     //global.strength from light setting
-    float baked = GetBakedShadow(global.shadowMask);
+    float baked = GetBakedShadow(global.shadowMask,shadowMaskChannel);
+
+    if (global.shadowMask.always)
+    {
+        shadow = lerp(1.0, shadow, global.strength);
+        shadow = min(baked, shadow);
+        return lerp(1.0, shadow, strength);
+    }
+    
     if (global.shadowMask.distance)
     {
-        
         shadow = lerp(baked, shadow, global.strength);
-        
         return lerp(1.0, shadow, strength);
     }
     
@@ -196,16 +209,16 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
 #endif
     
     float shadow;
-    if (directional.strength * global.strength  <= 0.0)
+    if (directional.strength * global .strength<= 0.0)
     {
         //when out of max shadow distance use pure bakeShadow to render shadows
-        shadow = GetBakedShadow(global.shadowMask, abs(directional.strength));
+        shadow = GetBakedShadow(global.shadowMask, directional.shadowMaskChannel, abs(directional.strength));
     }
     else
     {
         //when on the inside of max shadow distance.we mix both of them
         shadow = GetCascadedShadow(directional, global, surfaceWS);
-        shadow = MixBakedAndRealtimeShadows(global, shadow, directional.strength);
+        shadow = MixBakedAndRealtimeShadows(global, shadow, directional.shadowMaskChannel, directional.strength);
     }
 
     return shadow;

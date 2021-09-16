@@ -51,6 +51,7 @@ namespace CustomSR
         };
 
         static string[] shadowMaskKeywords = {
+            "_SHADOW_MASK_ALWAYS",
             "_SHADOW_MASK_DISTANCE"
         };
 
@@ -92,7 +93,7 @@ namespace CustomSR
             }
 
             buffer.BeginSample(bufferName);
-            SetKeywords(shadowMaskKeywords, useShadowMask ? 0 : -1);
+            SetKeywords(shadowMaskKeywords, useShadowMask ? QualitySettings.shadowmaskMode == ShadowmaskMode.Shadowmask ? 0:1 : -1);
             buffer.EndSample(bufferName);
             ExecuteBuffer();
         }
@@ -218,7 +219,7 @@ namespace CustomSR
             cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, filterSize * 1.4142136f);
         }
 
-        public Vector3 ReserveDirectionalShadows(Light light,int visibleLightIndex)
+        public Vector4 ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
             //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0
             if(ShadowedirectionLightCount < maxShadowedDirectionalLightCount 
@@ -228,12 +229,18 @@ namespace CustomSR
                 //&& cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
+                float maskChannel = -1;
                 LightBakingOutput lightBakeing = light.bakingOutput;
-                if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) { useShadowMask = true; }
+                if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed 
+                    && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) 
+                { 
+                    useShadowMask = true;
+                    maskChannel = lightBakeing.occlusionMaskChannel;
+                }
 
                 if (!cullingResults.GetShadowCasterBounds( visibleLightIndex, out Bounds b ))
                 {
-                    return new Vector3(-light.shadowStrength, 0f, 0f);
+                    return new Vector4(-light.shadowStrength, 0f, 0f,maskChannel);
                 }
 
                 ShadowedDirectionalLights[ShadowedirectionLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
@@ -243,14 +250,15 @@ namespace CustomSR
                 // x strength  y tileIndex
                 //each directional light will now claim multiple successive tiles
                 int tileIndex = settings.directional.cascadeCount * ShadowedirectionLightCount++;
-                return new Vector3(
+                return new Vector4(
                                     light.shadowStrength, 
                                     tileIndex,
-                                    light.shadowNormalBias
+                                    light.shadowNormalBias,
+                                    maskChannel
                                     );
             }
 
-            return Vector3.zero;
+            return new Vector4(0f,0f,0f,-1f);
         }
 
         Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m,Vector2 offset,int split)
