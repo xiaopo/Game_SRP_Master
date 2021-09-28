@@ -3,9 +3,11 @@
 
 #include "../../ShaderLibrary/Surface.hlsl"
 #include "../../ShaderLibrary/Shadows.hlsl"
-#include "../../ShaderLibrary/GI.hlsl"
+
 #include "../../ShaderLibrary/Light.hlsl"
 #include "../../ShaderLibrary/BRDF.hlsl"
+#include "../../ShaderLibrary/GI.hlsl"
+
 #include "../../ShaderLibrary/Lighting.hlsl"
 
 struct Attributes
@@ -75,11 +77,8 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.metallic = GetMetallic(input.uv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
     //with 0 being perfectly rough and 1 being perfectly smooth.
     surface.smoothness = GetSmoothness(input.uv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
-   
+    surface.fresnelStrength = GetFresnel(input.uv);
     surface.depth = -TransformWorldToView(input.worldPos).z;
-    //which generates a rotated tiled dither pattern given a screen-space XY position.
-    //In the fragment function that's equal to the clip-space XY position.
-    //It also requires a second argument which is used to animate it, which we don't need and can leave at zero.
     surface.dither = InterleavedGradientNoise(input.position.xy, 0);
     
 
@@ -89,7 +88,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     BRDF brdf = GetBRDF(surface);
 #endif
     
-    GI gi = GetGI(GI_FRAGMENT_DATA(input),surface); 
+    GI gi = GetGI(GI_FRAGMENT_DATA(input), surface, brdf);
     float3 color = GetLighting(surface,brdf,gi);
     color += GetEmission(input.uv);
     

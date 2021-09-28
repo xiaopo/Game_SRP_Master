@@ -15,6 +15,7 @@ UNITY_DEFINE_INSTANCED_PROP(float4,_EmissionColor)
 UNITY_DEFINE_INSTANCED_PROP(float, _Cutoff)
 UNITY_DEFINE_INSTANCED_PROP(float,_Metallic)
 UNITY_DEFINE_INSTANCED_PROP(float,_Smoothness)
+UNITY_DEFINE_INSTANCED_PROP(float, _Fresnel)
 
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
@@ -24,6 +25,11 @@ float3 GetEmission(float2 baseUV)
     float4 color = UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _EmissionColor);
    
     return map.rgb * color.rgb;
+}
+
+float GetFresnel(float2 baseUV)
+{
+    return UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Fresnel);
 }
 
 float2 TransformBaseUV(float2 baseUV)

@@ -23,7 +23,8 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
     ShadowData shadowData = GetShadowData(surface);
     shadowData.shadowMask = gi.shadowMask;
 
-    float3 color = gi.diffuse * brdf.diffuse;
+    //float3 color = gi.diffuse * brdf.diffuse;
+    float3 color = IndirectBRDF(surface, brdf, gi.diffuse, gi.specular);
     for (int i = 0; i < GetDirectionLightCount();i++)
     {
         //Get Color and direction by light index 

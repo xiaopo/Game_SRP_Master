@@ -5,6 +5,7 @@ Shader "CustomRP/Lit"
     {
         _Metallic("Metallic",Range(0,1)) = 0//金属度
         _Smoothness("Smoothness",Range(0,1)) = 0.5//光滑度
+        _Fresnel("Fresnel", Range(0, 1)) = 1
 
         _BaseColor("Color",Color)=(1.0,1.0,1.0,1.0)
         _BaseMap("Texture",2D) = "white"{}

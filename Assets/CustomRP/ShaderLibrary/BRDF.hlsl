@@ -7,6 +7,8 @@ struct BRDF
     float3 diffuse;//漫反射颜色
     float3 specular;//镜面反射颜色
     float roughness;//粗糙度
+    float perceptualRoughness;
+    float fresnel;
 };
 
 //电介质的反射率平均约0.04
@@ -37,6 +39,14 @@ float3 DirectBRDF(Surface surface,BRDF brdf,Light light)
     return SpecularStrength(surface, brdf, light) * brdf.specular + brdf.diffuse;
 }
 
+float3 IndirectBRDF(Surface surface, BRDF brdf, float3 diffuse_gi, float3 specular_gi)
+{
+
+    float fresnelStrength = surface.fresnelStrength * Pow4(1.0 - saturate(dot(surface.normal, surface.viewDirection)));
+    float3 reflection = specular_gi * lerp(brdf.specular, brdf.fresnel, fresnelStrength);
+    return diffuse_gi * brdf.diffuse + reflection;
+}
+
 //获取给定表面的BRDF数据
 BRDF GetBRDF(Surface surface,bool applyAlphaToDiffuse = false)
 {
@@ -55,9 +65,11 @@ BRDF GetBRDF(Surface surface,bool applyAlphaToDiffuse = false)
     
     //粗糙度和光滑度相反，只需要使用1减去光滑度即可
     //使用CommonMaterial内置方法
-    float perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(surface.smoothness);
-    brdf.roughness = PerceptualRoughnessToRoughness(perceptualRoughness);
+    brdf.perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(surface.smoothness);
+    brdf.roughness = PerceptualRoughnessToRoughness(brdf.perceptualRoughness);
     
+
+    brdf.fresnel = saturate(surface.smoothness + 1.0 - oneMinuseReflectivity);
     return brdf;
     
 }

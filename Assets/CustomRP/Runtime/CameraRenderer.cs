@@ -75,7 +75,8 @@ namespace CustomSR
             {
                 enableDynamicBatching = asset.useDynamicBatching,
                 enableInstancing = asset.useGPUInstancing,
-                perObjectData = PerObjectData.Lightmaps | 
+                perObjectData = PerObjectData.ReflectionProbes|
+                                PerObjectData.Lightmaps | 
                                 PerObjectData.LightProbe | 
                                 PerObjectData.LightProbeProxyVolume | 
                                 PerObjectData.ShadowMask|
