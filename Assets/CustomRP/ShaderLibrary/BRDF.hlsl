@@ -41,7 +41,7 @@ float3 DirectBRDF(Surface surface,BRDF brdf,Light light)
 
 float3 IndirectBRDF(Surface surface, BRDF brdf, float3 diffuse_gi, float3 specular_gi)
 {
-
+    // Fschlick(v,n) =  F0 + (1-F0)Pow5(1 - V*N)
     float fresnelStrength = surface.fresnelStrength * Pow4(1.0 - saturate(dot(surface.normal, surface.viewDirection)));
     float3 reflection = specular_gi * lerp(brdf.specular, brdf.fresnel, fresnelStrength);
     return diffuse_gi * brdf.diffuse + reflection;
