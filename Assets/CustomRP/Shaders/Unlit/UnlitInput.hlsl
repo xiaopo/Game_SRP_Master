@@ -19,6 +19,11 @@ float2 TransformBaseUV(float2 baseUV)
     return baseUV * baseST.xy + baseST.zw;
 }
 
+float4 GetMask(float2 baseUV)
+{
+    return float4(1, 1, 1, 1);
+}
+
 float4 GetBase(float2 baseUV)
 {
     float4 map = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, baseUV);
