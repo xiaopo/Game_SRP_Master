@@ -8,6 +8,7 @@ struct Surface
     float3 color;//漫反射颜色
     float alpha;//漫反射alpha
     float metallic;//金属度
+    float occlusion;
     float smoothness;//光滑度
     float fresnelStrength;
     float3 viewDirection;//视角

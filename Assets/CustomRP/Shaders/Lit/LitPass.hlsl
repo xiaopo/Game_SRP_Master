@@ -24,8 +24,9 @@ struct Attributes
 struct Varyings
 {
     float4 position : SV_Position;
-    float2 uv : VAR_BASE_UV;
-    float3 worldNormal : VAR_NORMAL;
+    float2 baseuv : VAR_BASE_UV;
+    float2 detailuv:VAR_DETAIL_UV;
+    float3 worldNormal:VAR_NORMAL;
     float3 worldPos : VAR_POSITION;
     
     GI_VARYINGS_DATA    
@@ -45,7 +46,8 @@ Varyings LitPassVertex(Attributes input)
     
     output.worldNormal = TransformObjectToWorldNormal(input.normal);
 
-    output.uv = TransformBaseUV(input.uv);
+    output.baseuv = TransformBaseUV(input.uv);
+    output.detailuv = TransformDetailUV(input.uv);
     
     return output;
 
@@ -58,10 +60,10 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     
     ClipLOD(input.position.xy, unity_LODFade.x);
     
-    float4 albedo = GetBase(input.uv);
+    float4 albedo = GetBase(input.baseuv,input.detailuv);
     
     #if defined(_CLIPPING)
-        clip(albedo.a - GetCutoff(input.uv));
+        clip(albedo.a - GetCutoff(input.baseuv));
     #endif
     
     //Create a surface struct by those infomation
@@ -74,10 +76,10 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.alpha = albedo.a;
     
     //with 1 indicating that it is fully metallic. The default is fully dielectric
-    surface.metallic = GetMetallic(input.uv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
-    //with 0 being perfectly rough and 1 being perfectly smooth.
-    surface.smoothness = GetSmoothness(input.uv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
-    surface.fresnelStrength = GetFresnel(input.uv);
+    surface.metallic = GetMetallic(input.baseuv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
+    surface.occlusion = GetOcclusion(input.baseuv);
+    surface.smoothness = GetSmoothness(input.baseuv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
+    surface.fresnelStrength = GetFresnel(input.baseuv);
     surface.depth = -TransformWorldToView(input.worldPos).z;
     surface.dither = InterleavedGradientNoise(input.position.xy, 0);
     
@@ -90,7 +92,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     
     GI gi = GetGI(GI_FRAGMENT_DATA(input), surface, brdf);
     float3 color = GetLighting(surface,brdf,gi);
-    color += GetEmission(input.uv);
+    color += GetEmission(input.baseuv);
     
     return float4(color, surface.alpha);
 
