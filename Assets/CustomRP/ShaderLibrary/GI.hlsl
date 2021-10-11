@@ -36,7 +36,7 @@ SAMPLER(samplerunity_SpecCube0);
 struct GI
 {
     float3 diffuse;
-    float specular;
+    float3 specular;
     ShadowMask shadowMask;
 };
 

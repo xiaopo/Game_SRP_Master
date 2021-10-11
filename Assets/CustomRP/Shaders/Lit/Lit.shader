@@ -19,6 +19,7 @@ Shader "CustomRP/Lit"
         [HDR] _EmissionColor("Emission Color", Color) = (0.0, 0.0, 0.0, 0.0)
         _DetailMap("Details", 2D) = "linearGrey" {}
         _DetailAlbedo("Detail Albedo", Range(0, 1)) = 1
+        _DetailSmoothness("Detail Smoothness", Range(0, 1)) = 1
 
         [Enum(Off,0,On,1)] _ZWrite("Z Write",Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlend("Src Blend",Float) = 1

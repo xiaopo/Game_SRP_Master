@@ -78,7 +78,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     //with 1 indicating that it is fully metallic. The default is fully dielectric
     surface.metallic = GetMetallic(input.baseuv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Metallic);
     surface.occlusion = GetOcclusion(input.baseuv);
-    surface.smoothness = GetSmoothness(input.baseuv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
+    surface.smoothness = GetSmoothness(input.baseuv, input.detailuv); //UNITY_ACCESS_INSTANCED_PROP(UnityPerMaterial, _Smoothness);
     surface.fresnelStrength = GetFresnel(input.baseuv);
     surface.depth = -TransformWorldToView(input.worldPos).z;
     surface.dither = InterleavedGradientNoise(input.position.xy, 0);

@@ -8,7 +8,7 @@ SAMPLER(sampler_BaseMap);//指定一个采样器
 //basemap 一样的采样器
 TEXTURE2D(_EmissionMap);
 
-//其他遮罩
+//MODS: metallic occlusion detail smoothness
 TEXTURE2D(_MaskMap);
 //细节纹理
 TEXTURE2D(_DetailMap);
@@ -29,6 +29,7 @@ UNITY_DEFINE_INSTANCED_PROP(float, _Occlusion)
 UNITY_DEFINE_INSTANCED_PROP(float,_Smoothness)
 UNITY_DEFINE_INSTANCED_PROP(float, _Fresnel)
 UNITY_DEFINE_INSTANCED_PROP(float, _DetailAlbedo)
+UNITY_DEFINE_INSTANCED_PROP(float, _DetailSmoothness)
 
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
@@ -47,6 +48,7 @@ float3 GetEmission(float2 baseUV)
     float4 color = INPUT_PROP(_EmissionColor);
    
     return map.rgb * color.rgb;
+
 }
 
 float4 GetDetail(float2 detailUV) {
@@ -60,10 +62,12 @@ float4 GetBase(float2 baseUV, float2 detailUV = 0.0)
     float4 map = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, baseUV);
     float4 color = INPUT_PROP(_BaseColor);
 
-    float4 detail = GetDetail(detailUV).r * INPUT_PROP(_DetailAlbedo);
+    float detail = GetDetail(detailUV).r * INPUT_PROP(_DetailAlbedo);
     float mask = GetMask(baseUV).b;
-    map.rgb = lerp(sqrt(map.rgb), detail < 0.0 ? 0.0 : 1.0, abs(detail)* mask);
-
+    //线性空间到gamma空间的近似转换
+    map.rgb = lerp(sqrt(map.rgb), detail < 0.0 ? 0.0 : 1.0, abs(detail) * mask);
+    map.rgb *= map.rgb;
+    
     return map * color;
 }
 
@@ -78,7 +82,7 @@ float2 TransformBaseUV(float2 baseUV)
     return baseUV * baseST.xy + baseST.zw;
 }
 
-float2 TransformDetailUV(float2 detailUV) 
+float2 TransformDetailUV(float2 detailUV)
 {
     float4 detailST = INPUT_PROP(_DetailMap_ST);
     return detailUV * detailST.xy + detailST.zw;
@@ -93,6 +97,7 @@ float GetCutoff(float2 baseUV)
 float GetMetallic(float2 baseUV)
 {
     float metallic = INPUT_PROP(_Metallic);
+
     metallic *= GetMask(baseUV).r;
     return metallic;
 }
@@ -106,10 +111,15 @@ float GetOcclusion(float2 baseUV)
     //return 0.0;
 }
 
-float GetSmoothness(float2 baseUV)
+float GetSmoothness(float2 baseUV, float2 detailUV = 0.0)
 {
     float smoothness = INPUT_PROP(_Smoothness);
     smoothness *= GetMask(baseUV).a;
+    
+    float detail = GetDetail(detailUV).b * INPUT_PROP(_DetailSmoothness);
+    float mask = GetMask(baseUV).b;
+    smoothness = lerp(smoothness, detail < 0.0 ? 0.0 : 1.0, abs(detail) * mask);
+    
     return smoothness;
 }
 
