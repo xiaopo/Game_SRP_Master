@@ -19,11 +19,31 @@
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
-
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
 
 float Square(float v)
 {
     return v * v;
+}
+
+float3 DecodeNormal(float4 sample, float scale)
+{
+#if defined(UNITY_NO_DXT5nm)
+	    return UnpackNormalRGB(sample, scale);
+#else
+    return UnpackNormalmapRGorAG(sample, scale);
+#endif
+}
+
+float3 NormalTangentToWorld(float3 normalTs, float3 normalWS, float4 tangentWS)
+{
+    float3x3 tangentToWorld = CreateTangentToWorld(normalWS, tangentWS.xyz, tangentWS.w);
+    
+    //real sgn = tangentWS * GetOddNegativeScale();
+    //real3 bitangent = cross(normalTS, tangentWS.xyz) * sgn;
+    //float3x3 tangentToWorld = real3x3(tangent, bitangent, normal);
+    
+    return mul(normalTs, tangentToWorld);
 }
 
 float DistanceSquared(float3 pA, float3 pB)
