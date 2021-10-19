@@ -81,12 +81,12 @@ namespace CustomSR
 
         void SetupDirectionalLight (int index, ref VisibleLight visibleLight)
         {
+            if (index >= maxDirLightCount) return;
             dirLightColors[index] = visibleLight.finalColor;
             //第三列取反得到light direction
             dirLightDirectioins[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
 
             dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
-
         }
 
         public void Cleanup()

@@ -79,9 +79,10 @@ float3 SampleLightProbe(Surface surfaceWS)
         //static gameobjects
         return 0.0;
     #else
+        //dynamic gameobjects
         if (unity_ProbeVolumeParams.x)
         {
-            //dynamic gameobjects
+           //LPPVs
             return SampleProbeVolumeSH4(
 				    TEXTURE3D_ARGS(unity_ProbeVolumeSH, samplerunity_ProbeVolumeSH),
 				    surfaceWS.position, surfaceWS.normal,
@@ -89,7 +90,7 @@ float3 SampleLightProbe(Surface surfaceWS)
 				    unity_ProbeVolumeParams.y, unity_ProbeVolumeParams.z,
 				    unity_ProbeVolumeMin.xyz, unity_ProbeVolumeSizeInv.xyz
 			    );
-    }
+        }
         else
         {
             float4 coefficients[7];

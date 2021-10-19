@@ -75,13 +75,13 @@ namespace CustomSR
             {
                 enableDynamicBatching = asset.useDynamicBatching,
                 enableInstancing = asset.useGPUInstancing,
-                perObjectData = PerObjectData.ReflectionProbes|
-                                PerObjectData.Lightmaps | 
-                                PerObjectData.LightProbe | 
-                                PerObjectData.LightProbeProxyVolume | 
+                perObjectData = PerObjectData.Lightmaps| 
+                                PerObjectData.LightProbe| 
+                                PerObjectData.LightProbeProxyVolume| 
                                 PerObjectData.ShadowMask|
                                 PerObjectData.OcclusionProbe|
-                                PerObjectData.OcclusionProbeProxyVolume
+                                PerObjectData.OcclusionProbeProxyVolume|
+                                PerObjectData.ReflectionProbes 
             };
 
             drawingSettings.sortingSettings = sortingSetting;
