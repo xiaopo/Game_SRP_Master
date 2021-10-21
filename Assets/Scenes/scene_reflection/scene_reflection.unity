@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 25813123}
   - component: {fileID: 25813122}
   m_Layer: 0
-  m_Name: Sphere (4)
+  m_Name: Sphere-reflection
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

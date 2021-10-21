@@ -65,9 +65,7 @@ float FadedShadowStrength(float d, float mx, float fx)
 
 ShadowData GetShadowData(Surface surfaceWS)
 {
-    //Loop through all cascade culling spheres in GetShadowData until we find one that contains the surface position. 
-    //Break out of the loop once it's found and then use the current loop iterator as the cascade index.
-    //This means we end up with an invalid index if the fragment lies outside all spheres, but we'll ignore that for now.
+
     ShadowData data;
     data.shadowMask.always = false;
     data.shadowMask.distance = false;

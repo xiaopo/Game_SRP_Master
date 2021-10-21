@@ -231,8 +231,7 @@ namespace CustomSR
             {
                 float maskChannel = -1;
                 LightBakingOutput lightBakeing = light.bakingOutput;
-                if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed 
-                    && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) 
+                if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) 
                 { 
                     useShadowMask = true;
                     maskChannel = lightBakeing.occlusionMaskChannel;

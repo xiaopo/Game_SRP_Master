@@ -35,8 +35,8 @@ SAMPLER(samplerunity_SpecCube0);
 
 struct GI
 {
-    float3 diffuse;
-    float3 specular;
+    float3 diffuse;// lightmapping and light probes
+    float3 specular;// reflection probes
     ShadowMask shadowMask;
 };
 
