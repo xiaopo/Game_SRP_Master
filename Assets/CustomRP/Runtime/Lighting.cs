@@ -69,13 +69,21 @@ namespace CustomSR
             for (int i = 0; i < visibleLights.Length; i++)
             {
                 VisibleLight visibleLight = visibleLights[i];
-                //是方向光，我们才进行数据储存
-                if (visibleLight.lightType == LightType.Directional)
-                {
-                    //Visible 结构很大，我们改为传递引用不是传递值，这样不会生成副本
-                    SetupDirectionalLight (dirLightCount++, ref visibleLight);
 
-                    if (dirLightCount > maxDirLightCount) break;
+                switch (visibleLight.lightType)
+                {
+                    case LightType.Directional:
+                        if (dirLightCount < maxDirLightCount)
+                        {
+                            SetupDirectionalLight(dirLightCount++, ref visibleLight);
+                        }
+                        break;
+                    case LightType.Point:
+                        if (otherLightCount < maxOtherLightCount)
+                        {
+                            SetupPointLight(otherLightCount++, ref visibleLight);
+                        }
+                        break;
                 }
             }
 
@@ -109,6 +117,16 @@ namespace CustomSR
             dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
         }
 
+        // point and spot light
+        void SetupPointLight(int index, ref VisibleLight visibleLight)
+        {
+            otherLightColors[index] = visibleLight.finalColor;
+
+            Vector4 position = visibleLight.localToWorldMatrix.GetColumn(3);
+            position.w = 1f / Mathf.Max(visibleLight.range * visibleLight.range, 0.00001f);
+            //最后一列平移量
+            otherLightPositions[index] = position;
+        }
         public void Cleanup()
         {
             shadows.Cleanup();

@@ -32,7 +32,16 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
         color += GetLighting(surface, brdf, light);
     }
     
-    return color;
+    //point light and spot light
+    for (int j = 0; j < GetOtherLightCount(); j++)
+    {
+        Light light = GetOtherLight(j, surface, shadowData);
+        color += GetLighting(surface, brdf, light);
+    }
+    
+     return color;
 }
+
+
 
 #endif
