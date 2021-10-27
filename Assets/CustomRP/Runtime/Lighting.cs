@@ -29,6 +29,8 @@ namespace CustomSR
         static int otherLightCountId = Shader.PropertyToID("_OtherLightCount");
         static int otherLightColorsId = Shader.PropertyToID("_OtherLightColors");
         static int otherLightPositionsId = Shader.PropertyToID("_OtherLightPositions");
+        static int otherLightDirectionsId = Shader.PropertyToID("_OtherLightDirections");
+        static int otherLightSpotAnglesId = Shader.PropertyToID("_OtherLightSpotAngles");
 
         //储存可见光的颜色和方向
         static Vector4[] dirLightColors = new Vector4[maxDirLightCount];
@@ -37,7 +39,9 @@ namespace CustomSR
 
         static Vector4[] otherLightColors = new Vector4[maxOtherLightCount];
         static Vector4[] otherLightPositions = new Vector4[maxOtherLightCount];
-        //裁剪信息
+        static Vector4[] otherLightDirections = new Vector4[maxOtherLightCount];
+        static Vector4[] otherLightSpotAngles = new Vector4[maxOtherLightCount];
+        //裁剪信息 
         CullingResults cullingResults;
 
         Shadows shadows = new Shadows();
@@ -73,15 +77,18 @@ namespace CustomSR
                 switch (visibleLight.lightType)
                 {
                     case LightType.Directional:
-                        if (dirLightCount < maxDirLightCount)
-                        {
+                        if (dirLightCount < maxDirLightCount){
                             SetupDirectionalLight(dirLightCount++, ref visibleLight);
                         }
                         break;
                     case LightType.Point:
-                        if (otherLightCount < maxOtherLightCount)
-                        {
+                        if (otherLightCount < maxOtherLightCount){
                             SetupPointLight(otherLightCount++, ref visibleLight);
+                        }
+                        break;
+                    case LightType.Spot:
+                        if (otherLightCount < maxOtherLightCount){
+                            SetupSpotLight(otherLightCount++, ref visibleLight);
                         }
                         break;
                 }
@@ -101,9 +108,13 @@ namespace CustomSR
             buffer.SetGlobalInt(otherLightCountId, otherLightCount);
             if(otherLightCount > 0)
             {
-                //点光和聚光
+                //点光
                 buffer.SetGlobalVectorArray(otherLightColorsId, otherLightColors);
                 buffer.SetGlobalVectorArray(otherLightPositionsId, otherLightPositions);
+                //聚光
+                buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirections);
+                buffer.SetGlobalVectorArray(otherLightSpotAnglesId, otherLightSpotAngles);
+
             }
         }
 
@@ -117,16 +128,40 @@ namespace CustomSR
             dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
         }
 
-        // point and spot light
-        void SetupPointLight(int index, ref VisibleLight visibleLight)
+
+        void SetupOtherLightPosition(int index, ref VisibleLight visibleLight)
         {
             otherLightColors[index] = visibleLight.finalColor;
 
+            //最后一列平移量
             Vector4 position = visibleLight.localToWorldMatrix.GetColumn(3);
             position.w = 1f / Mathf.Max(visibleLight.range * visibleLight.range, 0.00001f);
-            //最后一列平移量
+
             otherLightPositions[index] = position;
         }
+
+        // point light
+        void SetupPointLight(int index, ref VisibleLight visibleLight)
+        {
+            SetupOtherLightPosition(index, ref visibleLight);
+            otherLightSpotAngles[index] = new Vector4(0f, 1f);
+        }
+
+        //spot light
+        void SetupSpotLight(int index, ref VisibleLight visibleLight)
+        {
+            SetupOtherLightPosition(index, ref visibleLight);
+                
+            //第三列取反可得光照方向
+            otherLightDirections[index] =  -visibleLight.localToWorldMatrix.GetColumn(2);
+
+            float innerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.light.innerSpotAngle);
+            float outerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.spotAngle);
+            float angleRangeInv = 1f / Mathf.Max(innerCos - outerCos, 0.001f);
+            otherLightSpotAngles[index] = new Vector4(angleRangeInv, -outerCos * angleRangeInv);
+
+        }
+
         public void Cleanup()
         {
             shadows.Cleanup();
