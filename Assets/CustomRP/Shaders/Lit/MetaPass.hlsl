@@ -28,9 +28,17 @@ Varyings MetaPassVertex(Attributes input)
 {
     Varyings output;
   
+    //利用 xy 保存lightmap uv坐标
     input.position.xy = input.lightMapUV * unity_LightmapST.xy + unity_LightmapST.zw;
+    
+    //We still need the object-space vertex attribute as input because shaders expect it to exist.
+    //In fact, it seems that OpenGL doesn't work unless it explicitly uses the Z coordinate.
+    //We'll use the same dummy assignment that Unity's own meta pass uses, which is input.positionOS.z > 0.0 ? FLT_MIN : 0.0.
     input.position.z = input.position.z > 0.0 ? FLT_MIN : 0.0;
+    
+    //继续转一下
     output.position = TransformWorldToHClip(input.position);
+    
     output.uv = TransformBaseUV(input.uv);
     return output;
 }
@@ -52,12 +60,17 @@ float4 MetaPassFragment(Varyings input) : SV_TARGET
     float4 meta = 0.0;
     if (unity_MetaFragmentControl.x)
     {
+        // If the X flag is set then diffuse reflectivity is requested
         meta = float4(brdf.diffuse, 1.0);
         meta.rgb += brdf.specular * brdf.roughness * 0.5;
+        
+        //the result is modified by raising it to a power provided via unity_OneOverOutputBoost with the PositivePow method, 
+        //and then limited it to unity_MaxOutputValue.
         meta.rgb = min(PositivePow(meta.rgb, unity_OneOverOutputBoost), unity_MaxOutputValue);
     }
     else if (unity_MetaFragmentControl.y)
     {
+        //Emissive light is baked via a separate pass. When the Y flag of unity_MetaFragmentControl is set 
         meta = float4(GetEmission(config), 1.0);
     }
     

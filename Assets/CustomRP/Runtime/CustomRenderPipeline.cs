@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 namespace CustomSR
 {
-    public class CustomRenderPipeline : RenderPipeline
+    public partial class CustomRenderPipeline : RenderPipeline
     {
         CameraRenderer render = new CameraRenderer();
         public CustomRendePineAsset asset;
@@ -14,6 +14,8 @@ namespace CustomSR
             GraphicsSettings.lightsUseLinearIntensity = true;
 
             this.asset = asset;
+
+            InitializeForEditor();
         }
 
         protected override void Render(ScriptableRenderContext context, Camera[] cameras)
