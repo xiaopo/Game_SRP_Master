@@ -54,7 +54,10 @@ namespace CustomSR
                         lightData.InitNoBake(light.GetInstanceID());
                         break;
                 }
+
+                lightData.falloff = FalloffType.InverseSquared;
                 output[i] = lightData;
+                
             }
         };
 

@@ -31,6 +31,7 @@ namespace CustomSR
         static int otherLightPositionsId = Shader.PropertyToID("_OtherLightPositions");
         static int otherLightDirectionsId = Shader.PropertyToID("_OtherLightDirections");
         static int otherLightSpotAnglesId = Shader.PropertyToID("_OtherLightSpotAngles");
+        static int otherLightShadowDataId = Shader.PropertyToID("_OtherLightShadowData");
 
         //储存可见光的颜色和方向
         static Vector4[] dirLightColors = new Vector4[maxDirLightCount];
@@ -41,11 +42,15 @@ namespace CustomSR
         static Vector4[] otherLightPositions = new Vector4[maxOtherLightCount];
         static Vector4[] otherLightDirections = new Vector4[maxOtherLightCount];
         static Vector4[] otherLightSpotAngles = new Vector4[maxOtherLightCount];
+        static Vector4[] otherLightShadowData = new Vector4[maxOtherLightCount];
+
+        static string lightsPerObjectKeyword = "_LIGHTS_PER_OBJECT";
+
         //裁剪信息 
         CullingResults cullingResults;
 
         Shadows shadows = new Shadows();
-        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings)
+        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings, bool useLightsPerObject)
         {
             this.cullingResults = cullingResults;
 
@@ -53,7 +58,7 @@ namespace CustomSR
             //传递阴影数据
             shadows.Setup(context, cullingResults, shadowSettings);
             //发送光源数据
-            SetupLights();
+            SetupLights(useLightsPerObject);
             //渲染阴影
             shadows.Render();
             buffer.EndSample(bufferName);
@@ -62,18 +67,21 @@ namespace CustomSR
             buffer.Clear();
         }
 
-        void SetupLights()
+        void SetupLights(bool useLightsPerObject)
         {
             //Unity 会在剔除阶段计算哪些光源会影响相机的可见性
             //得到所有可见光
+            NativeArray<int> indexMap = useLightsPerObject  ? cullingResults.GetLightIndexMap(Allocator.Temp) :default;
+
             NativeArray<VisibleLight> visibleLights = cullingResults.visibleLights;
             if (visibleLights == null) return;
 
             int dirLightCount = 0, otherLightCount = 0;
-            for (int i = 0; i < visibleLights.Length; i++)
+            int i = 0;
+            for (i = 0; i < visibleLights.Length; i++)
             {
                 VisibleLight visibleLight = visibleLights[i];
-
+                int newIndex = -1;
                 switch (visibleLight.lightType)
                 {
                     case LightType.Directional:
@@ -83,19 +91,39 @@ namespace CustomSR
                         break;
                     case LightType.Point:
                         if (otherLightCount < maxOtherLightCount){
+                            newIndex = otherLightCount;
                             SetupPointLight(otherLightCount++, ref visibleLight);
                         }
                         break;
                     case LightType.Spot:
                         if (otherLightCount < maxOtherLightCount){
+                            newIndex = otherLightCount;
                             SetupSpotLight(otherLightCount++, ref visibleLight);
                         }
                         break;
                 }
+
+                if (useLightsPerObject) {
+                    indexMap[i] = newIndex;  
+                }
             }
 
-            
-            if(dirLightCount > 0)
+            if (useLightsPerObject)
+            {
+                for (; i < indexMap.Length; i++){
+                    indexMap[i] = -1;
+                }
+
+                cullingResults.SetLightIndexMap(indexMap);
+                indexMap.Dispose();
+                Shader.EnableKeyword(lightsPerObjectKeyword);
+            }
+            else{
+                Shader.DisableKeyword(lightsPerObjectKeyword);
+            }
+
+
+            if (dirLightCount > 0)
             {
                 //方向光
                 buffer.SetGlobalInt(dirLightCountId, dirLightCount);
@@ -114,6 +142,8 @@ namespace CustomSR
                 //聚光
                 buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirections);
                 buffer.SetGlobalVectorArray(otherLightSpotAnglesId, otherLightSpotAngles);
+
+                buffer.SetGlobalVectorArray(otherLightShadowDataId, otherLightShadowData);
 
             }
         }
@@ -145,21 +175,26 @@ namespace CustomSR
         {
             SetupOtherLightPosition(index, ref visibleLight);
             otherLightSpotAngles[index] = new Vector4(0f, 1f);
+
+            Light light = visibleLight.light;
+            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index);
         }
 
         //spot light
         void SetupSpotLight(int index, ref VisibleLight visibleLight)
         {
             SetupOtherLightPosition(index, ref visibleLight);
-                
+
+            Light light = visibleLight.light;
             //第三列取反可得光照方向
             otherLightDirections[index] =  -visibleLight.localToWorldMatrix.GetColumn(2);
 
-            float innerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.light.innerSpotAngle);
+            float innerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * light.innerSpotAngle);
             float outerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.spotAngle);
             float angleRangeInv = 1f / Mathf.Max(innerCos - outerCos, 0.001f);
             otherLightSpotAngles[index] = new Vector4(angleRangeInv, -outerCos * angleRangeInv);
 
+            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index);
         }
 
         public void Cleanup()

@@ -158,6 +158,23 @@ namespace CustomSR
             }
         }
 
+        public Vector4 ReserveOtherShadows(Light light, int visibleLightIndex)
+        {
+            if (light.shadows != LightShadows.None && light.shadowStrength > 0f)
+            {
+                LightBakingOutput lightBaking = light.bakingOutput;
+                if (
+                    lightBaking.lightmapBakeType == LightmapBakeType.Mixed &&
+                    lightBaking.mixedLightingMode == MixedLightingMode.Shadowmask
+                    )
+                {
+                    useShadowMask = true;
+                    return new Vector4( light.shadowStrength, 0f, 0f,lightBaking.occlusionMaskChannel);
+                }
+            }
+            return new Vector4(0f, 0f, 0f, -1f);
+        }
+
         Vector2 SetTileViewport(int index, int split,int tileSize)
         {
             //计算列 行

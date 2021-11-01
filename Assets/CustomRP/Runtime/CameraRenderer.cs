@@ -41,7 +41,7 @@ namespace CustomSR
             buffer.BeginSample(SampleName);
             ExcuteBuffer();
             //渲染灯光
-            lighting.Setup(contenxt, culingResouts, asset.shadows);
+            lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
             buffer.EndSample(SampleName);
 
             SetUp();
@@ -64,6 +64,7 @@ namespace CustomSR
         void DrawVisibleGeometry()
         {
 
+            PerObjectData lightsPerObjectFlags = asset.useLightsPerObject ? PerObjectData.LightData | PerObjectData.LightIndices : PerObjectData.None;
             //设置绘制序列和制定渲染相机
             var sortingSetting = new SortingSettings(camera)
             {
@@ -81,7 +82,8 @@ namespace CustomSR
                                 PerObjectData.ShadowMask|
                                 PerObjectData.OcclusionProbe|
                                 PerObjectData.OcclusionProbeProxyVolume|
-                                PerObjectData.ReflectionProbes 
+                                PerObjectData.ReflectionProbes|
+                                lightsPerObjectFlags
             };
 
             drawingSettings.sortingSettings = sortingSetting;

@@ -56,6 +56,12 @@ struct ShadowData
     ShadowMask shadowMask;
 };
 
+struct OtherShadowData
+{
+    float strength;
+    int shadowMaskChannel;
+};
+
 
 // (1 - d/m)/f
 float FadedShadowStrength(float d, float mx, float fx)
@@ -222,6 +228,24 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
     return shadow;
 }
 
+
+float GetOtherShadowAttenuation(OtherShadowData other, ShadowData global, Surface surfaceWS)
+{
+#if !defined(_RECEIVE_SHADOWS)
+    return 1.0;
+#endif
+	
+    float shadow;
+    if (other.strength > 0.0)
+    {
+        shadow = GetBakedShadow(global.shadowMask, other.shadowMaskChannel, other.strength);
+    }
+    else
+    {
+        shadow = 1.0;
+    }
+    return shadow;
+}
 
 
 #endif
