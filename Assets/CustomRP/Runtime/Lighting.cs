@@ -86,19 +86,19 @@ namespace CustomSR
                 {
                     case LightType.Directional:
                         if (dirLightCount < maxDirLightCount){
-                            SetupDirectionalLight(dirLightCount++, ref visibleLight);
+                            SetupDirectionalLight(dirLightCount++, i,ref visibleLight);
                         }
                         break;
                     case LightType.Point:
                         if (otherLightCount < maxOtherLightCount){
                             newIndex = otherLightCount;
-                            SetupPointLight(otherLightCount++, ref visibleLight);
+                            SetupPointLight(otherLightCount++,i, ref visibleLight);
                         }
                         break;
                     case LightType.Spot:
                         if (otherLightCount < maxOtherLightCount){
                             newIndex = otherLightCount;
-                            SetupSpotLight(otherLightCount++, ref visibleLight);
+                            SetupSpotLight(otherLightCount++, i,ref visibleLight);
                         }
                         break;
                 }
@@ -138,8 +138,7 @@ namespace CustomSR
             {
                 //点光
                 buffer.SetGlobalVectorArray(otherLightColorsId, otherLightColors);
-                buffer.SetGlobalVectorArray(otherLightPositionsId, otherLightPositions);
-                //聚光
+                buffer.SetGlobalVectorArray(otherLightPositionsId, otherLightPositions); 
                 buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirections);
                 buffer.SetGlobalVectorArray(otherLightSpotAnglesId, otherLightSpotAngles);
 
@@ -148,14 +147,14 @@ namespace CustomSR
             }
         }
 
-        void SetupDirectionalLight (int index, ref VisibleLight visibleLight)
+        void SetupDirectionalLight (int index, int visibleIndex, ref VisibleLight visibleLight)
         {
             if (index >= maxDirLightCount) return;
             dirLightColors[index] = visibleLight.finalColor;
             //第三列取反得到light direction
             dirLightDirectioins[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
 
-            dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index);
+            dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index, visibleIndex);
         }
 
 
@@ -171,17 +170,17 @@ namespace CustomSR
         }
 
         // point light
-        void SetupPointLight(int index, ref VisibleLight visibleLight)
+        void SetupPointLight(int index, int visibleIndex, ref VisibleLight visibleLight)
         {
             SetupOtherLightPosition(index, ref visibleLight);
             otherLightSpotAngles[index] = new Vector4(0f, 1f);
 
             Light light = visibleLight.light;
-            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index);
+            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
         }
 
         //spot light
-        void SetupSpotLight(int index, ref VisibleLight visibleLight)
+        void SetupSpotLight(int index, int visibleIndex, ref VisibleLight visibleLight)
         {
             SetupOtherLightPosition(index, ref visibleLight);
 
@@ -194,7 +193,7 @@ namespace CustomSR
             float angleRangeInv = 1f / Mathf.Max(innerCos - outerCos, 0.001f);
             otherLightSpotAngles[index] = new Vector4(angleRangeInv, -outerCos * angleRangeInv);
 
-            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index);
+            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
         }
 
         public void Cleanup()

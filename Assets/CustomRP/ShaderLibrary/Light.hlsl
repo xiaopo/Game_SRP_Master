@@ -75,14 +75,14 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     
     Light light;
     light.color = _OtherLightColors[index].rgb;
+    
+    //衰减是R平方的反比
     float3 ray = _OtherLightPositions[index].xyz - surfaceWS.position;
     light.direction = normalize(ray);
     float distanceSqr = max(dot(ray, ray), 0.00001);
     float rangeAttenuation = Square(saturate(1.0 - Square(distanceSqr * _OtherLightPositions[index].w)));
     
-    
     //Spot light
-    //float spotAttenuation = saturate(dot(_OtherLightDirections[index].xyz, light.direction));
     float4 spotAngles = _OtherLightSpotAngles[index];
     float spotAttenuation = Square(saturate(dot(_OtherLightDirections[index].xyz, light.direction) * spotAngles.x + spotAngles.y));
     
@@ -93,13 +93,7 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     
     light.attenuation = otherShadowVal * spotAttenuation * rangeAttenuation / distanceSqr;
     
-    return light;
-    
-    
-    
+    return light;  
 }
-
-
-
 
 #endif

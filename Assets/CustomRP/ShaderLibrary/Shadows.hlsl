@@ -71,7 +71,6 @@ float FadedShadowStrength(float d, float mx, float fx)
 
 ShadowData GetShadowData(Surface surfaceWS)
 {
-
     ShadowData data;
     data.shadowMask.always = false;
     data.shadowMask.distance = false;
@@ -99,7 +98,7 @@ ShadowData GetShadowData(Surface surfaceWS)
         }
     }
     
-    if (i == _CascadeCount)
+    if (i == _CascadeCount && _CascadeCount > 0 )
     {
         data.strength = 0.0;
     }
@@ -228,6 +227,10 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
     return shadow;
 }
 
+float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS)
+{
+    return 1.0;
+}
 
 float GetOtherShadowAttenuation(OtherShadowData other, ShadowData global, Surface surfaceWS)
 {
@@ -236,13 +239,14 @@ float GetOtherShadowAttenuation(OtherShadowData other, ShadowData global, Surfac
 #endif
 	
     float shadow;
-    if (other.strength > 0.0)
+    if (other.strength * global.strength <= 0.0)
     {
-        shadow = GetBakedShadow(global.shadowMask, other.shadowMaskChannel, other.strength);
+        shadow = GetBakedShadow(global.shadowMask, other.shadowMaskChannel, abs(other.strength));
     }
     else
     {
-        shadow = 1.0;
+        shadow = GetOtherShadow(other, global, surfaceWS);
+        shadow = MixBakedAndRealtimeShadows(global, shadow, other.shadowMaskChannel, other.strength);
     }
     return shadow;
 }
