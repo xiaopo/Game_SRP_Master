@@ -184,10 +184,10 @@ namespace CustomSR
         {
             SetupOtherLightPosition(index, ref visibleLight);
 
-            Light light = visibleLight.light;
             //第三列取反可得光照方向
             otherLightDirections[index] =  -visibleLight.localToWorldMatrix.GetColumn(2);
 
+            Light light = visibleLight.light;
             float innerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * light.innerSpotAngle);
             float outerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.spotAngle);
             float angleRangeInv = 1f / Mathf.Max(innerCos - outerCos, 0.001f);
