@@ -80,17 +80,20 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     float3 ray = _OtherLightPositions[index].xyz - surfaceWS.position;
     light.direction = normalize(ray);
     float distanceSqr = max(dot(ray, ray), 0.00001);
+
+    //max(0,1 - (d^2 / r^2)^2)^2;
+    // w is the range inverse-squared
     float rangeAttenuation = Square(saturate(1.0 - Square(distanceSqr * _OtherLightPositions[index].w)));
     
     //Spot light
     float4 spotAngles = _OtherLightSpotAngles[index];
+    // spotAttenuation =  saturate(d * a + b)^2 
     float spotAttenuation = Square(saturate(dot(_OtherLightDirections[index].xyz, light.direction) * spotAngles.x + spotAngles.y));
     
     //other light with shadowmask
     OtherShadowData otherShadowData = GetOtherShadowData(index);
     float otherShadowVal = GetOtherShadowAttenuation(otherShadowData, shadowData, surfaceWS);
-    
-    
+
     light.attenuation = otherShadowVal * spotAttenuation * rangeAttenuation / distanceSqr;
     
     return light;  

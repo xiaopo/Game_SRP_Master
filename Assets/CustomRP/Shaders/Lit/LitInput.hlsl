@@ -57,6 +57,7 @@ InputConfig GetInputConfig(float2 baseUV, float2 detailUV = 0.0)
     return c;
 }
 
+//R:Metallic, G:Occlusion, B:Detail, A:Smoothness
 float4 GetMask(InputConfig c)
 {
     if(c.useMask)

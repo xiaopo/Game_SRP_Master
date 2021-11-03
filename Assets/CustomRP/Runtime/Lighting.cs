@@ -188,11 +188,31 @@ namespace CustomSR
             otherLightDirections[index] =  -visibleLight.localToWorldMatrix.GetColumn(2);
 
             Light light = visibleLight.light;
-            float innerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * light.innerSpotAngle);
-            float outerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.spotAngle);
-            float angleRangeInv = 1f / Mathf.Max(innerCos - outerCos, 0.001f);
-            otherLightSpotAngles[index] = new Vector4(angleRangeInv, -outerCos * angleRangeInv);
 
+            /**
+             * formula
+             * R1:inner angle ,R0 outer angle
+             * attenuation =  saturate(d * a + b)^2 
+             * 
+             * d]: is the dot product
+             * a]: 1 / cos(R1 * 0.5) - cos(R0 * 0.5)
+             * b]: -cos(R0 * 0.5) * a
+             * **/
+
+            //内角，光线开始渐变的地方
+            float innerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * light.innerSpotAngle);
+            //外角，光线强度值变为0
+            float outerCos = Mathf.Cos(Mathf.Deg2Rad * 0.5f * visibleLight.spotAngle);
+
+            //parameter "a"
+            float angleRangeInv = 1f / Mathf.Max(innerCos - outerCos, 0.001f);
+            //parameter "b"
+            float paramB = -outerCos * angleRangeInv;
+
+            //reserve to x,y component
+            otherLightSpotAngles[index] = new Vector4(angleRangeInv, paramB);
+
+            //shadow data
             otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
         }
 
