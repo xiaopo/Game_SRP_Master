@@ -160,7 +160,7 @@ namespace CustomSR
 
         void SetupOtherLightPosition(int index, ref VisibleLight visibleLight)
         {
-            otherLightColors[index] = visibleLight.finalColor;
+            otherLightColors[index] = visibleLight.finalColor * visibleLight.light.intensity;
 
             //最后一列平移量
             Vector4 position = visibleLight.localToWorldMatrix.GetColumn(3);
