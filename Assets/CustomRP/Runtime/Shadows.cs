@@ -59,9 +59,9 @@ namespace CustomSR
         };
 
         static string[] otherFilterKeywords = {
-        "_OTHER_PCF3",
-        "_OTHER_PCF5",
-        "_OTHER_PCF7",
+            "_OTHER_PCF3",
+            "_OTHER_PCF5",
+            "_OTHER_PCF7",
         };
 
         static Matrix4x4[] dirShadowMatrices = new Matrix4x4[maxShadowedDirLightCount  * maxCascades];
@@ -247,13 +247,13 @@ namespace CustomSR
 
             float maskChannel = -1f;
             LightBakingOutput lightBaking = light.bakingOutput;
-            if (lightBaking.lightmapBakeType == LightmapBakeType.Mixed &&
-                lightBaking.mixedLightingMode == MixedLightingMode.Shadowmask)
+            if (lightBaking.lightmapBakeType == LightmapBakeType.Mixed && lightBaking.mixedLightingMode == MixedLightingMode.Shadowmask)
             {
                 useShadowMask = true;
                 maskChannel = lightBaking.occlusionMaskChannel;
             }
 
+            //out of range and amount of limit
             if ( shadowedOtherLightCount >= maxShadowedOtherLightCount || !cullingResults.GetShadowCasterBounds(visibleLightIndex, out Bounds b))
             {
                 return new Vector4(-light.shadowStrength, 0f, 0f, maskChannel);

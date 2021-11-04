@@ -62,7 +62,6 @@ struct OtherShadowData
     int shadowMaskChannel;
 };
 
-
 // (1 - d/m)/f
 float FadedShadowStrength(float d, float mx, float fx)
 {
