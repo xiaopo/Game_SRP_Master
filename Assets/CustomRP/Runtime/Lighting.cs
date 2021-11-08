@@ -77,7 +77,7 @@ namespace CustomSR
             if (visibleLights == null) return;
 
             int dirLightCount = 0, otherLightCount = 0;
-            int i = 0;
+            int i;
             for (i = 0; i < visibleLights.Length; i++)
             {
                 VisibleLight visibleLight = visibleLights[i];
@@ -86,19 +86,19 @@ namespace CustomSR
                 {
                     case LightType.Directional:
                         if (dirLightCount < maxDirLightCount){
-                            SetupDirectionalLight(dirLightCount++, i,ref visibleLight);
+                            SetupDirectionalLight(dirLightCount++,i,ref visibleLight);
                         }
                         break;
                     case LightType.Point:
                         if (otherLightCount < maxOtherLightCount){
                             newIndex = otherLightCount;
-                            SetupPointLight(otherLightCount++,i, ref visibleLight);
+                            SetupPointLight(otherLightCount++,i,ref visibleLight);
                         }
                         break;
                     case LightType.Spot:
                         if (otherLightCount < maxOtherLightCount){
                             newIndex = otherLightCount;
-                            SetupSpotLight(otherLightCount++, i,ref visibleLight);
+                            SetupSpotLight(otherLightCount++,i,ref visibleLight);
                         }
                         break;
                 }

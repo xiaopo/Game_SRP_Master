@@ -41,6 +41,7 @@ namespace CustomSR
         static int cascadeDataId = Shader.PropertyToID("_CascadeData");
         static int shadowAtlasSizeId = Shader.PropertyToID("_ShadowAtlasSize");
         static int shadowDistanceFadeId = Shader.PropertyToID("_ShadowDistanceFade");
+        static int shadowPancakingId = Shader.PropertyToID("_ShadowPancaking");
         static string[] directionalFilterKeywords =
         {
             "_DIRECTIONAL_PCF3",
@@ -104,21 +105,17 @@ namespace CustomSR
         public void Render()
         {
  
-            if(shadowedDirLightCount > 0)
-            {
+            if(shadowedDirLightCount > 0){
                 RenderDirectionalShadows();
             }
-            else
-            {
+            else{
                 buffer.GetTemporaryRT(dirShadowAtlasId, 1, 1,32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
             }
 
-            if (shadowedOtherLightCount > 0)
-            {
+            if (shadowedOtherLightCount > 0){
                 RenderOtherShadows();
             }
-            else
-            {
+            else{
                 buffer.SetGlobalTexture(otherShadowAtlasId, dirShadowAtlasId);
             }
 
@@ -129,6 +126,7 @@ namespace CustomSR
             buffer.SetGlobalInt(cascadeCountId, shadowedDirLightCount > 0 ? settings.directional.cascadeCount : 0);
             float f = 1f - settings.directional.cascadeFade;
             buffer.SetGlobalVector( shadowDistanceFadeId, new Vector4(1f / settings.maxDistance, 1f / settings.distanceFade, 1f / (1f - f * f)));
+
             buffer.SetGlobalVector(shadowAtlasSizeId, atlasSizes);
 
             buffer.EndSample(bufferName);
@@ -138,7 +136,6 @@ namespace CustomSR
         //渲染定向光影
         void RenderDirectionalShadows()
         {
-
             //创建renderTexture，并指定该类型是阴影贴图
             int atlasSize = (int)settings.directional.atlasSize;
             buffer.BeginSample(bufferName);
@@ -148,7 +145,7 @@ namespace CustomSR
             buffer.SetRenderTarget(dirShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
             //清除深度缓冲区
             buffer.ClearRenderTarget(true, false, Color.clear);
-
+            buffer.SetGlobalFloat(shadowPancakingId, 1f);
             //buffer.SetGlobalInt(cascadeCountId, settings.directional.cascadeCount);
             buffer.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
             buffer.SetGlobalVectorArray(cascadeDataId, cascadeData);
@@ -187,9 +184,11 @@ namespace CustomSR
             int atlasSize = (int)settings.other.atlasSize;
             atlasSizes.z = atlasSize;
             atlasSizes.w = 1f / atlasSize;
+
             buffer.GetTemporaryRT(otherShadowAtlasId, atlasSize, atlasSize,32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap );
             buffer.SetRenderTarget(otherShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store );
             buffer.ClearRenderTarget(true, false, Color.clear);
+            buffer.SetGlobalFloat(shadowPancakingId, 0f);
             buffer.BeginSample(bufferName);
             ExecuteBuffer();
 
@@ -214,13 +213,19 @@ namespace CustomSR
             ShadowedOtherLight light = shadowedOtherLights[index];
             var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
 
-            cullingResults.ComputeSpotShadowMatricesAndCullingPrimitives(light.visibleLightIndex, out Matrix4x4 viewMatrix,out Matrix4x4 projectionMatrix, out ShadowSplitData splitData);
+            cullingResults.ComputeSpotShadowMatricesAndCullingPrimitives(light.visibleLightIndex,
+                                                                        out Matrix4x4 viewMatrix,
+                                                                        out Matrix4x4 projectionMatrix,
+                                                                        out ShadowSplitData splitData);
             shadowSettings.splitData = splitData;
             otherShadowMatrices[index] = ConvertToAtlasMatrix( projectionMatrix * viewMatrix, SetTileViewport(index, split, tileSize), split);
             buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+
             buffer.SetGlobalDepthBias(0f, light.slopeScaleBias);
+
             ExecuteBuffer();
             context.DrawShadows(ref shadowSettings);
+
             buffer.SetGlobalDepthBias(0f, 0f);
         }
 
@@ -259,8 +264,7 @@ namespace CustomSR
                 return new Vector4(-light.shadowStrength, 0f, 0f, maskChannel);
             }
 
-            shadowedOtherLights[shadowedOtherLightCount] = new ShadowedOtherLight
-            {
+            shadowedOtherLights[shadowedOtherLightCount] = new ShadowedOtherLight{
                 visibleLightIndex = visibleLightIndex,
                 slopeScaleBias = light.shadowBias,
                 normalBias = light.shadowNormalBias
@@ -382,18 +386,32 @@ namespace CustomSR
             }
 
             float scale = 1f / split;
-            m.m00 = (0.5f * (m.m00 + m.m30) + offset.x * m.m30) * scale;
-            m.m01 = (0.5f * (m.m01 + m.m31) + offset.x * m.m31) * scale;
-            m.m02 = (0.5f * (m.m02 + m.m32) + offset.x * m.m32) * scale;
+            m.m00 = (0.5f * m.m00) * scale;
+            m.m01 = (0.5f * m.m01) * scale;
+            m.m02 = (0.5f * m.m02) * scale;
             m.m03 = (0.5f * (m.m03 + m.m33) + offset.x * m.m33) * scale;
-            m.m10 = (0.5f * (m.m10 + m.m30) + offset.y * m.m30) * scale;
-            m.m11 = (0.5f * (m.m11 + m.m31) + offset.y * m.m31) * scale;
-            m.m12 = (0.5f * (m.m12 + m.m32) + offset.y * m.m32) * scale;
+            m.m10 = (0.5f * m.m10) * scale;
+            m.m11 = (0.5f * m.m11) * scale;
+            m.m12 = (0.5f * m.m12) * scale;
             m.m13 = (0.5f * (m.m13 + m.m33) + offset.y * m.m33) * scale;
-            m.m20 = 0.5f * (m.m20 + m.m30);
-            m.m21 = 0.5f * (m.m21 + m.m31);
-            m.m22 = 0.5f * (m.m22 + m.m32);
+            m.m20 = 0.5f * m.m20;
+            m.m21 = 0.5f * m.m21;
+            m.m22 = 0.5f * m.m22;
             m.m23 = 0.5f * (m.m23 + m.m33);
+
+            //float scale = 1f / split;
+            //m.m00 = (0.5f * (m.m00 + m.m30) + offset.x * m.m30) * scale;
+            //m.m01 = (0.5f * (m.m01 + m.m31) + offset.x * m.m31) * scale;
+            //m.m02 = (0.5f * (m.m02 + m.m32) + offset.x * m.m32) * scale;
+            //m.m03 = (0.5f * (m.m03 + m.m33) + offset.x * m.m33) * scale;
+            //m.m10 = (0.5f * (m.m10 + m.m30) + offset.y * m.m30) * scale;
+            //m.m11 = (0.5f * (m.m11 + m.m31) + offset.y * m.m31) * scale;
+            //m.m12 = (0.5f * (m.m12 + m.m32) + offset.y * m.m32) * scale;
+            //m.m13 = (0.5f * (m.m13 + m.m33) + offset.y * m.m33) * scale;
+            //m.m20 = 0.5f * (m.m20 + m.m30);
+            //m.m21 = 0.5f * (m.m21 + m.m31);
+            //m.m22 = 0.5f * (m.m22 + m.m32);
+            //m.m23 = 0.5f * (m.m23 + m.m33);
 
             return m;
         }
