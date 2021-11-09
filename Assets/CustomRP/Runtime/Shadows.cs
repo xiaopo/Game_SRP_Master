@@ -145,12 +145,7 @@ namespace CustomSR
             buffer.SetRenderTarget(dirShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
             //清除深度缓冲区
             buffer.ClearRenderTarget(true, false, Color.clear);
-            buffer.SetGlobalFloat(shadowPancakingId, 1f);
-            //buffer.SetGlobalInt(cascadeCountId, settings.directional.cascadeCount);
-            buffer.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
-            buffer.SetGlobalVectorArray(cascadeDataId, cascadeData);
-            // all shadowed lights are rendered send the matrices to the GPU 
-            buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
+          
            
             //float f = 1f - settings.directional.cascadeFade;
             //buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1.0f / settings.maxDistance, 1.0f / settings.distanceFade,1.0f/(1.0f - f * f)));
@@ -170,6 +165,13 @@ namespace CustomSR
                 RenderDirectionalShadows(i, split, tileSize);
             }
 
+            buffer.SetGlobalFloat(shadowPancakingId, 1f);
+            //buffer.SetGlobalInt(cascadeCountId, settings.directional.cascadeCount);
+            buffer.SetGlobalVectorArray(cascadeCullingSpheresId, cascadeCullingSpheres);
+            buffer.SetGlobalVectorArray(cascadeDataId, cascadeData);
+            // all shadowed lights are rendered send the matrices to the GPU 
+            buffer.SetGlobalMatrixArray(dirShadowMatricesId, dirShadowMatrices);
+
             SetKeywords(directionalFilterKeywords,(int)settings.directional.filter - 1);
             SetKeywords(cascadeBlendKeywords, (int)settings.directional.cascadeBlend - 1);
             atlasSizes.x = atlasSize;
@@ -188,7 +190,7 @@ namespace CustomSR
             buffer.GetTemporaryRT(otherShadowAtlasId, atlasSize, atlasSize,32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap );
             buffer.SetRenderTarget(otherShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store );
             buffer.ClearRenderTarget(true, false, Color.clear);
-            buffer.SetGlobalFloat(shadowPancakingId, 0f);
+          
             buffer.BeginSample(bufferName);
             ExecuteBuffer();
 
@@ -202,6 +204,7 @@ namespace CustomSR
             }
 
             buffer.SetGlobalMatrixArray(otherShadowMatricesId, otherShadowMatrices);
+            buffer.SetGlobalFloat(shadowPancakingId, 0f);
             SetKeywords(otherFilterKeywords, (int)settings.other.filter - 1);
 
             buffer.EndSample(bufferName);
@@ -316,7 +319,6 @@ namespace CustomSR
  
                 ExecuteBuffer();
                 context.DrawShadows(ref shadowSettings);
-   
             }
 
         }
@@ -325,7 +327,6 @@ namespace CustomSR
         {
 
             //radius square
-            //cullingSphere.w -= filterSize;
             cullingSphere.w *= cullingSphere.w;
             cascadeCullingSpheres[index] = cullingSphere;
 
@@ -340,8 +341,6 @@ namespace CustomSR
             if(shadowedDirLightCount < maxShadowedDirLightCount  
                 && light.shadows != LightShadows.None 
                 && light.shadowStrength > 0f
-                //检查可见光是否有阴影或阴影是不是 beyond the maxshadows distance 
-                //&& cullingResults.GetShadowCasterBounds(visibleLightIndex,out Bounds b)
              )
             {
                 float maskChannel = -1;

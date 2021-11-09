@@ -2,9 +2,8 @@
 #define CUSTOM_LIGHT_INCLUDED
 #define MAX_DIRECTIONAL_LIGHT_COUNT 4
 #define MAX_OTHER_LIGHT_COUNT 64
+
 CBUFFER_START(_CustomLight)
-    //float3 _DirectionLightColor;
-    //float3 _DirectionLightDrection;
     int _DirectionLightCount;//有效平行光个数
     float4 _DirectionLightColors[MAX_DIRECTIONAL_LIGHT_COUNT];
     float4 _DirectionLightDrections[MAX_DIRECTIONAL_LIGHT_COUNT];
@@ -73,7 +72,6 @@ Light GetDirectionLight(int index, Surface surfaceWS, ShadowData shadowData)
 //point light and spot light
 Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
 {
-    
     Light light;
     light.color = _OtherLightColors[index].rgb;
     
@@ -96,7 +94,7 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     float otherShadowVal = GetOtherShadowAttenuation(otherShadowData, shadowData, surfaceWS);
 
     light.attenuation = otherShadowVal * spotAttenuation * rangeAttenuation / distanceSqr;
-    
+
     return light;  
 }
 

@@ -136,7 +136,7 @@ namespace CustomSR
             buffer.SetGlobalInt(otherLightCountId, otherLightCount);
             if(otherLightCount > 0)
             {
-                //点光
+                //point and spot light
                 buffer.SetGlobalVectorArray(otherLightColorsId, otherLightColors);
                 buffer.SetGlobalVectorArray(otherLightPositionsId, otherLightPositions); 
                 buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirections);
