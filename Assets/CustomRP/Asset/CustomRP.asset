@@ -29,5 +29,5 @@ MonoBehaviour:
       cascadeFade: 0.905
       cascadeBlend: 1
     other:
-      atlasSize: 1024
+      atlasSize: 512
       filter: 0

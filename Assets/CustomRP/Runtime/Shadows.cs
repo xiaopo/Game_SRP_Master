@@ -35,6 +35,7 @@ namespace CustomSR
         static int dirShadowMatricesId = Shader.PropertyToID("_DirectionalShadowMatrices");
         static int otherShadowAtlasId = Shader.PropertyToID("_OtherShadowAtlas");
         static int otherShadowMatricesId = Shader.PropertyToID("_OtherShadowMatrices");
+        static int otherShadowTilesId = Shader.PropertyToID("_OtherShadowTiles");
 
         static int cascadeCountId = Shader.PropertyToID("_CascadeCount");
         static int cascadeCullingSpheresId = Shader.PropertyToID("_CascadeCullingSpheres");
@@ -69,7 +70,7 @@ namespace CustomSR
         static Matrix4x4[] otherShadowMatrices = new Matrix4x4[maxShadowedOtherLightCount];
         static Vector4[] cascadeCullingSpheres = new Vector4[maxCascades];
         static Vector4[] cascadeData = new Vector4[maxCascades];
-
+        static Vector4[] otherShadowTiles = new Vector4[maxShadowedOtherLightCount];
         struct ShadowedOtherLight
         {
             public int visibleLightIndex;
@@ -204,11 +205,23 @@ namespace CustomSR
             }
 
             buffer.SetGlobalMatrixArray(otherShadowMatricesId, otherShadowMatrices);
+            buffer.SetGlobalVectorArray(otherShadowTilesId, otherShadowTiles);
             buffer.SetGlobalFloat(shadowPancakingId, 0f);
             SetKeywords(otherFilterKeywords, (int)settings.other.filter - 1);
 
             buffer.EndSample(bufferName);
             ExecuteBuffer();
+        }
+
+        void SetOtherTileData(int index, Vector2 offset, float scale, float bias)
+        {
+            float border = atlasSizes.w * 0.5f;
+            Vector4 data;
+            data.x = offset.x * scale + border;
+            data.y = offset.y * scale + border;
+            data.z = scale - border - border;
+            data.w = bias;
+            otherShadowTiles[index] = data;
         }
 
         void RenderSpotShadows(int index, int split, int tileSize)
@@ -221,9 +234,17 @@ namespace CustomSR
                                                                         out Matrix4x4 projectionMatrix,
                                                                         out ShadowSplitData splitData);
             shadowSettings.splitData = splitData;
-            otherShadowMatrices[index] = ConvertToAtlasMatrix( projectionMatrix * viewMatrix, SetTileViewport(index, split, tileSize), split);
-            buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
 
+            float texelSize = 2f / (tileSize * projectionMatrix.m00);
+            float filterSize = texelSize * ((float)settings.other.filter + 1f);
+            float bias = light.normalBias * filterSize * 1.4142136f;
+            Vector2 offset = SetTileViewport(index, split, tileSize);
+            float tileScale = 1f / split;
+            SetOtherTileData(index, offset, tileScale, bias);
+
+            otherShadowMatrices[index] = ConvertToAtlasMatrix( projectionMatrix * viewMatrix, SetTileViewport(index, split, tileSize), tileScale);
+
+            buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
             buffer.SetGlobalDepthBias(0f, light.slopeScaleBias);
 
             ExecuteBuffer();
@@ -296,6 +317,7 @@ namespace CustomSR
             int tileOffset = lightIndex * cascadeCount;
             Vector3 ratios = settings.directional.CascadeRatios;
             float cullingFactor = Mathf.Max(0f, 0.8f - settings.directional.cascadeFade);
+            float tileScale = 1f / split;
             for (int i = 0;i< cascadeCount;i++)
             {
                 cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
@@ -314,7 +336,7 @@ namespace CustomSR
 
                 int tileIndex = tileOffset + i;
                 //is a conversion matrix from world space to light space
-                dirShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(tileIndex, split, tileSize), split);
+                dirShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, SetTileViewport(tileIndex, split, tileSize), tileScale);
                 buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
  
                 ExecuteBuffer();
@@ -332,7 +354,8 @@ namespace CustomSR
 
             float texelSize = 2f * cullingSphere.w / titleSize;
             float filterSize = texelSize * ((float)settings.directional.filter + 1f);
-            cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, filterSize * 1.4142136f);
+            float bias = filterSize * 1.4142136f;
+            cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, bias);
         }
 
         public Vector4 ReserveDirectionalShadows(Light light,int visibleLightIndex, int visibleIndex)
@@ -374,7 +397,7 @@ namespace CustomSR
             return new Vector4(0f,0f,0f,-1f);
         }
 
-        Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m,Vector2 offset,int split)
+        Matrix4x4 ConvertToAtlasMatrix(Matrix4x4 m,Vector2 offset, float scale)
         {
             if(SystemInfo.usesReversedZBuffer)
             {
@@ -384,7 +407,6 @@ namespace CustomSR
                 m.m23 = -m.m23;
             }
 
-            float scale = 1f / split;
             m.m00 = (0.5f * (m.m00 + m.m30) + offset.x * m.m30) * scale;
             m.m01 = (0.5f * (m.m01 + m.m31) + offset.x * m.m31) * scale;
             m.m02 = (0.5f * (m.m02 + m.m32) + offset.x * m.m32) * scale;
