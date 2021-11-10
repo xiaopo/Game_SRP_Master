@@ -26,6 +26,7 @@ Varyings ShadowCasterPassVertex(Attributes input)
     
     if (_ShadowPancaking)
     {
+        //Shadow Pancaking
         #if UNITY_REVERSED_Z
             output.position.z = min(output.position.z, output.position.w * UNITY_NEAR_CLIP_VALUE);
         #else

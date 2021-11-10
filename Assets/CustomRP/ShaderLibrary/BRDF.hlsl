@@ -24,9 +24,9 @@ float OneMinuseReflectivity(float metallic)
 float SpecularStrength(Surface surface,BRDF brdf,Light light)
 {
     float3 h = SafeNormalize(light.direction + surface.viewDirection);//∞ÎΩ«œÚ¡ø
-    float nh2 = Square(saturate(dot(surface.normal,h)));
-    float lh2 = Square(saturate(dot(light.direction, h)));
-    float r2 = Square(brdf.roughness);
+    float nh2 = Square(saturate(dot(surface.normal,h)));// dot(N,H)^2
+    float lh2 = Square(saturate(dot(light.direction, h)));//dot(L,H)^2
+    float r2 = Square(brdf.roughness);// R ^2
     float d2 = Square(nh2 * (r2 - 1.0) + 1.00001);
     float normalization = brdf.roughness * 4.0 + 2.0;
     

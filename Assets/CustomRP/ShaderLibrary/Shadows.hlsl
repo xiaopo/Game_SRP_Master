@@ -125,7 +125,6 @@ ShadowData GetShadowData(Surface surfaceWS)
 #if !defined(_CASCADE_BLEND_SOFT)
         data.cascadeBlend = 1.0;
 #endif
-    
         data.cascadeIndex = i;
         return data;
 }
@@ -265,6 +264,7 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
 
 float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS)
 {
+    //other light use persepective matrix for atlas
     float3 normalBias = surfaceWS.interpolatedNormal * 0.0;
     float4 positionSTS = mul(_OtherShadowMatrices[other.tileIndex],float4(surfaceWS.position + normalBias, 1.0));
     return FilterOtherShadow(positionSTS.xyz / positionSTS.w);
