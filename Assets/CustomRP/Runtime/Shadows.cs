@@ -76,6 +76,7 @@ namespace CustomSR
             public int visibleLightIndex;
             public float slopeScaleBias;
             public float normalBias;
+            public bool isPoint;
         }
 
         ShadowedOtherLight[] shadowedOtherLights = new ShadowedOtherLight[maxShadowedOtherLightCount];
@@ -199,9 +200,18 @@ namespace CustomSR
             int split = tiles <= 1 ? 1 : tiles <= 4 ? 2 : 4;
             int tileSize = atlasSize / split;
 
-            for (int i = 0; i < shadowedOtherLightCount; i++)
-            {
-                RenderSpotShadows(i, split, tileSize);
+            for (int i = 0; i < shadowedOtherLightCount;)
+            { 
+                if (shadowedOtherLights[i].isPoint)
+                {
+                    RenderPointShadows(i, split, tileSize);
+                    i += 6;
+                }
+                else
+                {
+                    RenderSpotShadows(i, split, tileSize);
+                    i += 1;
+                }
             }
 
             buffer.SetGlobalMatrixArray(otherShadowMatricesId, otherShadowMatrices);
@@ -253,6 +263,47 @@ namespace CustomSR
             buffer.SetGlobalDepthBias(0f, 0f);
         }
 
+        void RenderPointShadows(int index, int split, int tileSize)
+        {
+            ShadowedOtherLight light = shadowedOtherLights[index];
+            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
+
+
+            float texelSize = 2f / tileSize;
+            float filterSize = texelSize * ((float)settings.other.filter + 1f);
+            float bias = light.normalBias * filterSize * 1.4142136f;
+            float tileScale = 1f / split;
+            float fovBias = Mathf.Atan(1f + bias + filterSize) * Mathf.Rad2Deg * 2f - 90f;
+            for (int i = 0; i < 6; i++)
+            {
+                cullingResults.ComputePointShadowMatricesAndCullingPrimitives(light.visibleLightIndex,(CubemapFace)i, fovBias,
+                out Matrix4x4 viewMatrix,
+                out Matrix4x4 projectionMatrix,
+                out ShadowSplitData splitData
+                );
+
+                viewMatrix.m11 = -viewMatrix.m11;
+                viewMatrix.m12 = -viewMatrix.m12;
+                viewMatrix.m13 = -viewMatrix.m13;
+                shadowSettings.splitData = splitData;
+
+                int tileIndex = index + i;
+
+                Vector2 offset = SetTileViewport(tileIndex, split, tileSize);
+ 
+                SetOtherTileData(tileIndex, offset, tileScale, bias);
+
+                otherShadowMatrices[tileIndex] = ConvertToAtlasMatrix(projectionMatrix * viewMatrix, offset, tileScale);
+
+                buffer.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+
+                buffer.SetGlobalDepthBias(0f, light.slopeScaleBias);
+                ExecuteBuffer();
+                context.DrawShadows(ref shadowSettings);
+                buffer.SetGlobalDepthBias(0f, 0f);
+            }
+        }
+
         void SetKeywords(string[] keywords,int enabledIndex)
         {
             //int enabledIndex = (int)settings.directional.filter - 1;
@@ -282,8 +333,11 @@ namespace CustomSR
                 maskChannel = lightBaking.occlusionMaskChannel;
             }
 
+            bool isPoint = light.type == LightType.Point;
+            int newLightCount = shadowedOtherLightCount + (isPoint ? 6 : 1);
+
             //out of range and amount of limit
-            if ( shadowedOtherLightCount >= maxShadowedOtherLightCount || !cullingResults.GetShadowCasterBounds(visibleLightIndex, out Bounds b))
+            if (newLightCount >= maxShadowedOtherLightCount || !cullingResults.GetShadowCasterBounds(visibleLightIndex, out Bounds b))
             {
                 return new Vector4(-light.shadowStrength, 0f, 0f, maskChannel);
             }
@@ -291,10 +345,15 @@ namespace CustomSR
             shadowedOtherLights[shadowedOtherLightCount] = new ShadowedOtherLight{
                 visibleLightIndex = visibleLightIndex,
                 slopeScaleBias = light.shadowBias,
-                normalBias = light.shadowNormalBias
+                normalBias = light.shadowNormalBias,
+                isPoint = isPoint
             };
 
-            return new Vector4(light.shadowStrength, shadowedOtherLightCount++, 0f, maskChannel);
+            Vector4 data =  new Vector4(light.shadowStrength, shadowedOtherLightCount, isPoint ? 1f : 0f, maskChannel);
+
+            shadowedOtherLightCount = newLightCount;
+
+            return data;
         }
 
         Vector2 SetTileViewport(int index, int split,int tileSize)
