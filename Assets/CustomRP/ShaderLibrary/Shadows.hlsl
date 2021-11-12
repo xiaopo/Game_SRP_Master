@@ -179,9 +179,20 @@ float GetCascadedShadow(DirectionalShadowData directional, ShadowData global, Su
 
 float SampleOtherShadowAtlas(float3 positionSTS, float3 bounds)
 {
+    //Note:
+    //this position is in Normalization Device Coodinates
+    //so the bounds also should need to clamping in -1 and 1
+    //Note 2:
+    // 需要把采样顶点限制在 tile 的范围内
+    //clamp(value,min,max);
+    //min: offset * scale 就是最小值
+    //max: min + size
+
     positionSTS.xy = clamp(positionSTS.xy, bounds.xy, bounds.xy + bounds.z);
+
     return SAMPLE_TEXTURE2D_SHADOW(_OtherShadowAtlas, SHADOW_SAMPLER, positionSTS);
 }
+
 float FilterOtherShadow(float3 positionSTS, float3 bounds)
 {
 #if defined(OTHER_FILTER_SETUP)
@@ -294,6 +305,7 @@ float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS
     float3 normalBias = surfaceWS.interpolatedNormal * (distanceToLightPlane * tileData.w);
     float4 positionSTS = mul(_OtherShadowMatrices[tileIndex],float4(surfaceWS.position + normalBias, 1.0));
     
+    //it's a perspective projection,so have to divide the XYZ by its W (其次除法)
     return FilterOtherShadow(positionSTS.xyz / positionSTS.w, tileData.xyz);
 }
 
