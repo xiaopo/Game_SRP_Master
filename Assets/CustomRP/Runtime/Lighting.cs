@@ -157,7 +157,6 @@ namespace CustomSR
             dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index, visibleIndex);
         }
 
-
         void SetupOtherLightPosition(int index, ref VisibleLight visibleLight)
         {
             otherLightColors[index] = visibleLight.finalColor * visibleLight.light.intensity;

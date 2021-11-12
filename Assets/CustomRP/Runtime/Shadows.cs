@@ -257,6 +257,7 @@ namespace CustomSR
 
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
 
+            //最坏得情况是需要偏移对角线
             float bias = light.normalBias * filterSize * 1.4142136f;
             Vector2 offset = SetTileViewport(index, split, tileSize);
             float tileScale = 1f / split;
@@ -278,11 +279,11 @@ namespace CustomSR
             ShadowedOtherLight light = shadowedOtherLights[index];
             var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
 
-
             float texelSize = 2f / tileSize;
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
             float bias = light.normalBias * filterSize * 1.4142136f;
             float tileScale = 1f / split;
+            //Note:filed of view bias
             float fovBias = Mathf.Atan(1f + bias + filterSize) * Mathf.Rad2Deg * 2f - 90f;
             for (int i = 0; i < 6; i++)
             {
