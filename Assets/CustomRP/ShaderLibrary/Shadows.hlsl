@@ -1,4 +1,4 @@
-#ifndef CUSTOM_SHADOWS_INCLUDED
+ï»¿#ifndef CUSTOM_SHADOWS_INCLUDED
 #define CUSTOM_SHADOWS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
@@ -159,18 +159,18 @@ float FilterDirectionalShadow(float3 positionSTS)
 
 float GetCascadedShadow(DirectionalShadowData directional, ShadowData global, Surface surfaceWS)
 {
-     //µÚÒ»¸ö²ÉÑù
+     //ç¬¬ä¸€ä¸ªé‡‡æ ·
     float3 normalBias = surfaceWS.interpolatedNormal * (directional.normalBias * _CascadeData[global.cascadeIndex].y);
     float3 positionSTS = mul(_DirectionalShadowMatrices[directional.tileIndex], float4(surfaceWS.position + normalBias, 1.0)).xyz;
     float shadow = FilterDirectionalShadow(positionSTS);
     
     if (global.cascadeBlend < 1.0)
     {
-        //ÔÚµÚ¶þ¸ö¼¶Áª²ÉÑù
+        //åœ¨ç¬¬äºŒä¸ªçº§è”é‡‡æ ·
         normalBias = surfaceWS.interpolatedNormal * (directional.normalBias * _CascadeData[global.cascadeIndex + 1].y);
         positionSTS = mul(_DirectionalShadowMatrices[directional.tileIndex + 1], float4(surfaceWS.position + normalBias, 1.0)).xyz;
         
-        //»ìºÏ
+        //æ··åˆ
         shadow = lerp(FilterDirectionalShadow(positionSTS), shadow, global.cascadeBlend);
     }
     
@@ -266,7 +266,7 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
 
     return shadow;
 }
-
+//+X, âˆ’X, +Y, âˆ’Y, +Z, âˆ’Z
 static const float3 pointShadowPlanes[6] =
 {
     float3(-1.0, 0.0, 0.0),

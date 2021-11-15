@@ -268,7 +268,7 @@ namespace CustomSR
             ShadowedOtherLight light = shadowedOtherLights[index];
             var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
 
-
+            //The field of view for cubemap faces is always 90°, thus the world-space tile size at distance 1 is always 2
             float texelSize = 2f / tileSize;
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
             float bias = light.normalBias * filterSize * 1.4142136f;
