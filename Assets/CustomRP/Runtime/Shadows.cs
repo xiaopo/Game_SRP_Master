@@ -225,12 +225,19 @@ namespace CustomSR
 
         void SetOtherTileData(int index, Vector2 offset, float scale, float bias)
         {
+            //Note:
+            //A border value by the half (1/atlasSize),that actually as the 1 texel half
             float border = atlasSizes.w * 0.5f;
             Vector4 data;
+            //Note:
+            //The tile's minimum texture coordinates are the scaled offset
             data.x = offset.x * scale + border;
             data.y = offset.y * scale + border;
+            //as a size of square but deducted borders
             data.z = scale - border - border;
+            //light normal bias
             data.w = bias;
+
             otherShadowTiles[index] = data;
         }
 
@@ -245,8 +252,12 @@ namespace CustomSR
                                                                         out ShadowSplitData splitData);
             shadowSettings.splitData = splitData;
 
+            //世界空间文素对应的Size
             float texelSize = 2f / (tileSize * projectionMatrix.m00);
+
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
+
+            //最坏得情况是需要偏移对角线
             float bias = light.normalBias * filterSize * 1.4142136f;
             Vector2 offset = SetTileViewport(index, split, tileSize);
             float tileScale = 1f / split;
@@ -268,11 +279,13 @@ namespace CustomSR
             ShadowedOtherLight light = shadowedOtherLights[index];
             var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
 
+
             //The field of view for cubemap faces is always 90°, thus the world-space tile size at distance 1 is always 2
             float texelSize = 2f / tileSize;
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
             float bias = light.normalBias * filterSize * 1.4142136f;
             float tileScale = 1f / split;
+            //Note:filed of view bias
             float fovBias = Mathf.Atan(1f + bias + filterSize) * Mathf.Rad2Deg * 2f - 90f;
             for (int i = 0; i < 6; i++)
             {
