@@ -17,6 +17,9 @@ namespace CustomSR
         [SerializeField]
         public ShadowSettings shadows = default;
 
+        [SerializeField]
+        public PostFXSettings postFXSettings = default;
+
         protected override RenderPipeline CreatePipeline()
         {
             return new CustomRenderPipeline(this);

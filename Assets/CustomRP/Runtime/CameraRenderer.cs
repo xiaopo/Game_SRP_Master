@@ -23,6 +23,7 @@ namespace CustomSR
         };
 
         Lighting lighting = new Lighting();//灯光
+        PostFXStack postFXStack = new PostFXStack();
 
         public void Render(ScriptableRenderContext contenxt,Camera camera, CustomRendePineAsset asset)
         {
@@ -42,6 +43,8 @@ namespace CustomSR
             ExcuteBuffer();
             //渲染灯光
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
+            //后处理
+            postFXStack.Setup(contenxt, camera, asset.postFXSettings);
             buffer.EndSample(SampleName);
 
             SetUp();
@@ -50,9 +53,14 @@ namespace CustomSR
             //绘制SRP不支持的着色器类型
             DrawUnsupportedShaders();
             //绘制辅助线
-            DrawGizmos();
+            DrawGizmosBeforeFX();
+            //后处理
+            if (postFXStack.IsActive){
+                postFXStack.Render(frameBufferId);
+            }
+            DrawGizmosAfterFX();
             //释放申请的RT内存空间
-            lighting.Cleanup();
+            Cleanup();
 
             Submit();
         }
@@ -108,6 +116,7 @@ namespace CustomSR
 
             contenxt.DrawRenderers(culingResouts, ref drawingSettings, ref filteringSettings);
         }
+        static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
         void SetUp()
         {
             //设置相机的属性和矩阵
@@ -116,6 +125,16 @@ namespace CustomSR
 
             //得到相机的清除状态
             CameraClearFlags flags = camera.clearFlags;
+
+            //后处理部分
+            if (postFXStack.IsActive)
+            {
+                if (flags > CameraClearFlags.Color) flags = CameraClearFlags.Color;
+
+                //intermediate frame buffer for the camera
+                buffer.GetTemporaryRT(frameBufferId, camera.pixelWidth, camera.pixelHeight,32, FilterMode.Bilinear, RenderTextureFormat.Default);
+                buffer.SetRenderTarget(frameBufferId,RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+            }
 
             buffer.ClearRenderTarget(
                 flags <= CameraClearFlags.Depth, 
@@ -161,6 +180,15 @@ namespace CustomSR
         }
 
         #endregion
+
+        void Cleanup()
+        {
+            lighting.Cleanup();
+            if (postFXStack.IsActive)
+            {
+                buffer.ReleaseTemporaryRT(frameBufferId);
+            }
+        }
 
     }
 }

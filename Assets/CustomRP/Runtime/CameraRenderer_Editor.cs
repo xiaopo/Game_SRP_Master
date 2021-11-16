@@ -51,23 +51,30 @@ namespace CustomSR
 
     #endif
 
-        partial void DrawGizmos();
-    #if UNITY_EDITOR
+        partial void DrawGizmosBeforeFX();
+        partial void DrawGizmosAfterFX();
+#if UNITY_EDITOR
         //绘制DrawGizmos
-        partial void DrawGizmos()
+        partial void DrawGizmosBeforeFX()
         {
-            if (camera.cameraType == CameraType.SceneView)
+            if (Handles.ShouldRenderGizmos())
             {
-                if (Handles.ShouldRenderGizmos())
-                {
-                    contenxt.DrawGizmos(camera, GizmoSubset.PreImageEffects);
-                    contenxt.DrawGizmos(camera, GizmoSubset.PostImageEffects);
-                }
+                contenxt.DrawGizmos(camera, GizmoSubset.PreImageEffects);
+                //context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
             }
-           
         }
 
-    #endif
+        partial void DrawGizmosAfterFX()
+        {
+            if (Handles.ShouldRenderGizmos())
+            {
+                contenxt.DrawGizmos(camera, GizmoSubset.PostImageEffects);
+            }
+        }
+#endif
+
+
+
 
         partial void PrepareForSceneWindow();
     #if UNITY_EDITOR
