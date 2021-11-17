@@ -14,7 +14,7 @@ CBUFFER_START(UnityPerDraw)
 
     float4 unity_LightmapST;
     float4 unity_DynamicLightmapST;
-
+    
     float4 unity_SHAr;
     float4 unity_SHAg;
     float4 unity_SHAb;
@@ -37,6 +37,6 @@ float4x4 unity_MatrixV;
 float4x4 glstate_matrix_projection;
 //œ‡ª˙Œª÷√
 float3 _WorldSpaceCameraPos;
-
+float4 _ProjectionParams;
 
 #endif

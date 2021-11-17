@@ -24,7 +24,7 @@ namespace CustomSR
 
         Lighting lighting = new Lighting();//灯光
         PostFXStack postFXStack = new PostFXStack();
-
+        static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
         public void Render(ScriptableRenderContext contenxt,Camera camera, CustomRendePineAsset asset)
         {
             this.contenxt = contenxt;
@@ -116,7 +116,7 @@ namespace CustomSR
 
             contenxt.DrawRenderers(culingResouts, ref drawingSettings, ref filteringSettings);
         }
-        static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+       
         void SetUp()
         {
             //设置相机的属性和矩阵

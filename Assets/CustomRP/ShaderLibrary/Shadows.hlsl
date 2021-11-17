@@ -183,9 +183,9 @@ float SampleOtherShadowAtlas(float3 positionSTS, float3 bounds)
     //this position is in Normalization Device Coodinates
     //so the bounds also should need to clamping in -1 and 1
     //Note 2:
-    // ÐèÒª°Ñ²ÉÑù¶¥µãÏÞÖÆÔÚ tile µÄ·¶Î§ÄÚ
+    // ï¿½ï¿½Òªï¿½Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tile ï¿½Ä·ï¿½Î§ï¿½ï¿½
     //clamp(value,min,max);
-    //min: offset * scale ¾ÍÊÇ×îÐ¡Öµ
+    //min: offset * scale ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡Öµ
     //max: min + size
 
     positionSTS.xy = clamp(positionSTS.xy, bounds.xy, bounds.xy + bounds.z);
@@ -305,7 +305,7 @@ float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS
     float3 normalBias = surfaceWS.interpolatedNormal * (distanceToLightPlane * tileData.w);
     float4 positionSTS = mul(_OtherShadowMatrices[tileIndex],float4(surfaceWS.position + normalBias, 1.0));
     
-    //it's a perspective projection,so have to divide the XYZ by its W (Æä´Î³ý·¨)
+    //it's a perspective projection,so have to divide the XYZ by its W (ï¿½ï¿½Î³ï¿½ï¿½ï¿½)
     return FilterOtherShadow(positionSTS.xyz / positionSTS.w, tileData.xyz);
 }
 
