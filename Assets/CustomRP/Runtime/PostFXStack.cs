@@ -14,7 +14,9 @@ namespace CustomSR
 
         enum Pass
         {
-            Copy
+            BloomHorizontal,
+            Copy,
+            BloomVertical
         }
 
         ScriptableRenderContext context;
@@ -22,12 +24,13 @@ namespace CustomSR
         PostFXSettings settings;
         public bool IsActive => settings != null;
         int fxSourceId = Shader.PropertyToID("_PostFXSource");
+        int fxSource2Id = Shader.PropertyToID("_PostFXSource2");
 
         int bloomPyramidId;
         public PostFXStack()
         {
             bloomPyramidId = Shader.PropertyToID("_BloomPyramid0");
-            for (int i = 1; i < maxBloomPyramidLevels; i++)
+            for (int i = 1; i < maxBloomPyramidLevels * 2; i++)
             {
                 Shader.PropertyToID("_BloomPyramid" + i);
             }
@@ -62,7 +65,7 @@ namespace CustomSR
             //设置渲染目标，准备渲染
             buffer.SetRenderTarget(to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
-            //draw triangles on screen
+            //draw triangles on screen with a material to render
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
         }
 
@@ -73,7 +76,7 @@ namespace CustomSR
             int height = camera.pixelHeight / 2;
             RenderTextureFormat format = RenderTextureFormat.Default;
             int fromId = sourceId;
-            int toId = bloomPyramidId;
+            int toId = bloomPyramidId + 1;
             PostFXSettings.BloomSettings bloom = settings.Bloom;
             int i;
             for (i = 0; i < bloom.maxIterations; i++)
@@ -82,10 +85,15 @@ namespace CustomSR
                 {
                     break;
                 }
+
+                int midId = toId - 1;
+                buffer.GetTemporaryRT( midId, width, height, 0, FilterMode.Bilinear, format);
                 buffer.GetTemporaryRT( toId, width, height, 0, FilterMode.Bilinear, format);
-                Draw(fromId, toId, Pass.Copy);
+                Draw(fromId, midId, Pass.BloomHorizontal);
+                Draw(midId, toId, Pass.BloomVertical);
+
                 fromId = toId;
-                toId += 1;
+                toId += 2;
                 width = width >> 1;
                 height = height >> 1;
             }
@@ -94,7 +102,10 @@ namespace CustomSR
 
             for (i -= 1; i >= 0; i--)
             {
-                buffer.ReleaseTemporaryRT(bloomPyramidId + i);
+                //buffer.ReleaseTemporaryRT(bloomPyramidId + i);
+                buffer.ReleaseTemporaryRT(fromId);
+                buffer.ReleaseTemporaryRT(fromId - 1);
+                fromId -= 2;
             }
 
             buffer.EndSample("Bloom");

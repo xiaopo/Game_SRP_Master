@@ -144,8 +144,6 @@ namespace CustomSR
             buffer.BeginSample(SampleName);
 
             ExcuteBuffer();
-
-
         }
         void Submit()
         {
