@@ -150,6 +150,7 @@ namespace CustomSR
         void SetupDirectionalLight (int index, int visibleIndex, ref VisibleLight visibleLight)
         {
             if (index >= maxDirLightCount) return;
+
             dirLightColors[index] = visibleLight.finalColor;
             //第三列取反得到light direction
             dirLightDirectioins[index] = -visibleLight.localToWorldMatrix.GetColumn(2);

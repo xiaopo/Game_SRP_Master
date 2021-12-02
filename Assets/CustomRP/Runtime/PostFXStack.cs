@@ -16,7 +16,8 @@ namespace CustomSR
         {
             BloomHorizontal,
             Copy,
-            BloomVertical
+            BloomVertical,
+            BloomCombine
         }
 
         ScriptableRenderContext context;
@@ -72,8 +73,8 @@ namespace CustomSR
         void DoBloom(int sourceId)
         {
             buffer.BeginSample("Bloom");
-            int width = camera.pixelWidth / 2;
-            int height = camera.pixelHeight / 2;
+            int width = camera.pixelWidth >>1;
+            int height = camera.pixelHeight >>1;
             RenderTextureFormat format = RenderTextureFormat.Default;
             int fromId = sourceId;
             int toId = bloomPyramidId + 1;
@@ -98,16 +99,29 @@ namespace CustomSR
                 height = height >> 1;
             }
 
-            Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
-
-            for (i -= 1; i >= 0; i--)
+            //Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+            buffer.ReleaseTemporaryRT(fromId - 1);
+            if( i > 1)
             {
-                //buffer.ReleaseTemporaryRT(bloomPyramidId + i);
-                buffer.ReleaseTemporaryRT(fromId);
-                buffer.ReleaseTemporaryRT(fromId - 1);
-                fromId -= 2;
-            }
+                toId -= 5;
+                for (i -= 1; i > 0; i--)
+                {
+                    buffer.SetGlobalTexture(fxSource2Id, toId + 1);
+                    Draw(fromId, toId, Pass.BloomCombine);
 
+                    buffer.ReleaseTemporaryRT(fromId);
+                    buffer.ReleaseTemporaryRT(fromId + 1);
+                    fromId = toId;
+                    toId -= 2;
+                }
+            }
+            else
+                buffer.ReleaseTemporaryRT(bloomPyramidId);
+           
+
+            buffer.SetGlobalTexture(fxSource2Id, sourceId);
+            Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+            buffer.ReleaseTemporaryRT(fromId);
             buffer.EndSample("Bloom");
         }
     }

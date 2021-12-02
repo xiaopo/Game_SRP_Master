@@ -183,9 +183,9 @@ float SampleOtherShadowAtlas(float3 positionSTS, float3 bounds)
     //this position is in Normalization Device Coodinates
     //so the bounds also should need to clamping in -1 and 1
     //Note 2:
-    // ��Ҫ�Ѳ������������� tile �ķ�Χ��
+
     //clamp(value,min,max);
-    //min: offset * scale ������Сֵ
+    //min: offset * scale ֵ
     //max: min + size
 
     positionSTS.xy = clamp(positionSTS.xy, bounds.xy, bounds.xy + bounds.z);

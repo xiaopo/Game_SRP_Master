@@ -1,14 +1,24 @@
 #ifndef CUSTOM_POST_FX_PASSES_INCLUDED
 #define CUSTOM_POST_FX_PASSES_INCLUDED
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 
 TEXTURE2D(_PostFXSource);
+TEXTURE2D(_PostFXSource2);
 SAMPLER(sampler_linear_clamp);
+
+//Vector4(1 / width, 1 / height, width, height)
+float4 _PostFXSource_TexelSize;
 
 struct Varyings
 {
     float4 positionCS : SV_POSITION;
     float2 screenUV : VAR_SCREEN_UV;
 };
+
+float4 GetSourceBicubic(float2 screenUV)
+{
+    return SampleTexture2DBicubic(TEXTURE2D_ARGS(_PostFXSource, sampler_linear_clamp), screenUV,_PostFXSource_TexelSize.zwxy, 1.0, 0.0);
+}
 
 Varyings DefaultPassVertex(uint vertexID : SV_VertexID)
 {
@@ -36,13 +46,15 @@ float4 GetSource(float2 screenUV)
     return SAMPLE_TEXTURE2D_LOD(_PostFXSource, sampler_linear_clamp, screenUV,0);
 }
 
+float4 GetSource2(float2 screenUV)
+{
+    return SAMPLE_TEXTURE2D_LOD(_PostFXSource2, sampler_linear_clamp, screenUV, 0);
+}
+
 float4 CopyPassFragment(Varyings input) : SV_TARGET
 {
     return GetSource(input.screenUV);
 }
-
-//Vector4(1 / width, 1 / height, width, height)
-float4 _PostFXSource_TexelSize;
 
 float4 GetSourceTexelSize()
 {
@@ -77,6 +89,15 @@ float4 BloomVerticalPassFragment(Varyings input) : SV_TARGET
         color += GetSource(input.screenUV + float2(0.0, offset)).rgb * weights[i];
     }
     return float4(color, 1.0);
+}
+
+
+
+float4 BloomCombinePassFragment(Varyings input) : SV_TARGET
+{
+    float3 lowRes = GetSource(input.screenUV).rgb;
+    float3 highRes = GetSource2(input.screenUV).rgb;
+    return float4(lowRes + highRes, 1.0);
 }
 
 #endif
