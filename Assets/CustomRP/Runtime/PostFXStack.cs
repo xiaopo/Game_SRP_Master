@@ -17,7 +17,8 @@ namespace CustomSR
             BloomHorizontal,
             Copy,
             BloomVertical,
-            BloomCombine
+            BloomCombine,
+            BloomPrefilter
         }
 
         ScriptableRenderContext context;
@@ -26,7 +27,10 @@ namespace CustomSR
         public bool IsActive => settings != null;
         int fxSourceId = Shader.PropertyToID("_PostFXSource");
         int fxSource2Id = Shader.PropertyToID("_PostFXSource2");
-
+        int bloomBucibicUpsamplingId = Shader.PropertyToID("_BloomBicubicUpsampling");
+        int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
+        int bloomThresholdId = Shader.PropertyToID("_BloomThreshold");
+        int bloomIntensityId = Shader.PropertyToID("_BloomIntensity");
         int bloomPyramidId;
         public PostFXStack()
         {
@@ -73,12 +77,38 @@ namespace CustomSR
         void DoBloom(int sourceId)
         {
             buffer.BeginSample("Bloom");
+
+            PostFXSettings.BloomSettings bloom = settings.Bloom;
+            buffer.SetGlobalFloat(bloomBucibicUpsamplingId, bloom.bicubicUpsampling ? 1f : 0f);
+
             int width = camera.pixelWidth >>1;
             int height = camera.pixelHeight >>1;
+
+            if ( bloom.maxIterations == 0 || bloom.intensity <= 0f || height < bloom.downscaleLimit*2 || width < bloom.downscaleLimit*2)
+            {
+                Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+                buffer.EndSample("Bloom");
+                return;
+            }
+
+            Vector4 threshold;
+            threshold.x = Mathf.GammaToLinearSpace(bloom.threshold);
+            threshold.y = threshold.x * bloom.thresholdKnee;
+            threshold.z = 2f * threshold.y;
+            threshold.w = 0.25f / (threshold.y + 0.00001f);
+            threshold.y -= threshold.x;
+            buffer.SetGlobalVector(bloomThresholdId, threshold);
+
             RenderTextureFormat format = RenderTextureFormat.Default;
-            int fromId = sourceId;
+            buffer.GetTemporaryRT(bloomPrefilterId, width, height, 0, FilterMode.Bilinear, format);
+            Draw(sourceId, bloomPrefilterId, Pass.BloomPrefilter);
+            width = width >> 1;
+            height = height >> 1;
+
+            int fromId = bloomPrefilterId;
             int toId = bloomPyramidId + 1;
-            PostFXSettings.BloomSettings bloom = settings.Bloom;
+
+           
             int i;
             for (i = 0; i < bloom.maxIterations; i++)
             {
@@ -99,9 +129,12 @@ namespace CustomSR
                 height = height >> 1;
             }
 
+            buffer.ReleaseTemporaryRT(bloomPrefilterId);
+
             //Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
             buffer.ReleaseTemporaryRT(fromId - 1);
-            if( i > 1)
+            buffer.SetGlobalFloat(bloomIntensityId, 1f);
+            if ( i > 1)
             {
                 toId -= 5;
                 for (i -= 1; i > 0; i--)
@@ -117,8 +150,9 @@ namespace CustomSR
             }
             else
                 buffer.ReleaseTemporaryRT(bloomPyramidId);
-           
 
+
+            buffer.SetGlobalFloat(bloomIntensityId, bloom.intensity);
             buffer.SetGlobalTexture(fxSource2Id, sourceId);
             Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
             buffer.ReleaseTemporaryRT(fromId);
