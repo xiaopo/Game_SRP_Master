@@ -92,7 +92,7 @@ float4 BloomVerticalPassFragment(Varyings input) : SV_TARGET
 }
 
 
-bool _BloomBicubicUpsampling;
+int _BloomBicubicUpsampling;
 float _BloomIntensity;
 float4 BloomCombinePassFragment(Varyings input) : SV_TARGET
 {
@@ -110,17 +110,20 @@ float4 BloomCombinePassFragment(Varyings input) : SV_TARGET
 
 float4 _BloomThreshold;
 
-float3 ApplyBloomThreshold(float3 color) {
+float3 ApplyBloomThreshold(float3 color) 
+{
     float brightness = Max3(color.r, color.g, color.b);
     float soft = brightness + _BloomThreshold.y;
     soft = clamp(soft, 0.0, _BloomThreshold.z);
     soft = soft * soft * _BloomThreshold.w;
     float contribution = max(soft, brightness - _BloomThreshold.x);
     contribution /= max(brightness, 0.00001);
+    
     return color * contribution;
 }
 
-float4 BloomPrefilterPassFragment(Varyings input) : SV_TARGET{
+float4 BloomPrefilterPassFragment(Varyings input) : SV_TARGET
+{
     float3 color = ApplyBloomThreshold(GetSource(input.screenUV).rgb);
     return float4(color, 1.0);
 }
