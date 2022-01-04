@@ -8,12 +8,13 @@ namespace CustomSR
     public class CustomRendePineAsset : RenderPipelineAsset
     {
         // Start is called before the first frame update
-
+        public bool allowHDR = true;
         public bool useDynamicBatching = true;
         public bool useGPUInstancing = true;
         public bool useSRPBatcher = true;
         public bool useLightsPerObject = false;
         
+
         [SerializeField]
         public ShadowSettings shadows = default;
 

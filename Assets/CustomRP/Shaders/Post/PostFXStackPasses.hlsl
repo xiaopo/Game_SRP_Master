@@ -109,7 +109,6 @@ float4 BloomCombinePassFragment(Varyings input) : SV_TARGET
 }
 
 float4 _BloomThreshold;
-
 float3 ApplyBloomThreshold(float3 color) 
 {
     float brightness = Max3(color.r, color.g, color.b);

@@ -32,6 +32,7 @@ namespace CustomSR
         int bloomThresholdId = Shader.PropertyToID("_BloomThreshold");
         int bloomIntensityId = Shader.PropertyToID("_BloomIntensity");
         int bloomPyramidId;
+        bool useHDR;
         public PostFXStack()
         {
             bloomPyramidId = Shader.PropertyToID("_BloomPyramid0");
@@ -41,11 +42,12 @@ namespace CustomSR
             }
         }
 
-        public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings)
+        public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings,bool useHDR)
         {
             this.context = context;
             this.camera = camera;
             this.settings = settings;
+            this.useHDR = useHDR;
 
             this.settings = camera.cameraType <= CameraType.SceneView ? settings : null;
 
@@ -84,7 +86,7 @@ namespace CustomSR
             int width = camera.pixelWidth >> 1;
             int height = camera.pixelHeight >> 1;
 
-            if ( bloom.maxIterations == 0 || bloom.intensity <= 0 || height < bloom.downscaleLimit * 2 || width < bloom.downscaleLimit * 2)
+            if (bloom.maxIterations == 0 || bloom.intensity <= 0 || height < bloom.downscaleLimit * 2 || width < bloom.downscaleLimit * 2)
             {
                 Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
                 buffer.EndSample("Bloom");
@@ -99,7 +101,7 @@ namespace CustomSR
             threshold.y -= threshold.x;
             buffer.SetGlobalVector(bloomThresholdId, threshold);
 
-            RenderTextureFormat format = RenderTextureFormat.Default;
+            RenderTextureFormat format = useHDR ? RenderTextureFormat.DefaultHDR:RenderTextureFormat.Default;
 
             buffer.GetTemporaryRT(bloomPrefilterId, width, height, 0, FilterMode.Bilinear, format);
             Draw(sourceId, bloomPrefilterId, Pass.BloomPrefilter);

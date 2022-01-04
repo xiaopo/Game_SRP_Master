@@ -25,6 +25,7 @@ namespace CustomSR
         Lighting lighting = new Lighting();//灯光
         PostFXStack postFXStack = new PostFXStack();
         static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+        bool useHDR;
         public void Render(ScriptableRenderContext contenxt,Camera camera, CustomRendePineAsset asset)
         {
             this.contenxt = contenxt;
@@ -39,12 +40,14 @@ namespace CustomSR
 
             if (!Cull(asset.shadows.maxDistance)) return;///被剔除
 
+            useHDR = asset.allowHDR && camera.allowHDR;
+
             buffer.BeginSample(SampleName);
             ExcuteBuffer();
             //渲染灯光
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
             //后处理
-            postFXStack.Setup(contenxt, camera, asset.postFXSettings);
+            postFXStack.Setup(contenxt, camera, asset.postFXSettings,useHDR);
             buffer.EndSample(SampleName);
 
             SetUp();
@@ -132,7 +135,8 @@ namespace CustomSR
                 if (flags > CameraClearFlags.Color) flags = CameraClearFlags.Color;
 
                 //intermediate frame buffer for the camera
-                buffer.GetTemporaryRT(frameBufferId, camera.pixelWidth, camera.pixelHeight,32, FilterMode.Bilinear, RenderTextureFormat.Default);
+                buffer.GetTemporaryRT(frameBufferId, camera.pixelWidth, camera.pixelHeight,32, FilterMode.Bilinear, useHDR ? 
+                    RenderTextureFormat.DefaultHDR :RenderTextureFormat.Default);
                 buffer.SetRenderTarget(frameBufferId,RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
             }
 
