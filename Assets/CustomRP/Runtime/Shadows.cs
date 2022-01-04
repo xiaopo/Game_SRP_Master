@@ -378,7 +378,7 @@ namespace CustomSR
 
             return offset;
         }
-        //渲染定向光影
+        
         void RenderDirectionalShadows(int lightIndex, int split, int tileSize)
         {
             ShadowedDirectionLight light = ShadowedDirectionalLights[lightIndex];
@@ -398,6 +398,8 @@ namespace CustomSR
                 out Matrix4x4 projectionMatrix, 
                 out ShadowSplitData splitData);
 
+                //cull some shadow casters from larger cascades
+                //guaranteed that their results will always be covered by a smaller cascade
                 splitData.shadowCascadeBlendCullingFactor = cullingFactor;
                 shadowSettings.splitData = splitData;
 
@@ -419,13 +421,14 @@ namespace CustomSR
         
         void SetCascadeData(int index,Vector4 cullingSphere,float titleSize)
         {
-
             //radius square
             cullingSphere.w *= cullingSphere.w;
             cascadeCullingSpheres[index] = cullingSphere;
 
+            //dividing the diameter of the culling sphere by the tile size
             float texelSize = 2f * cullingSphere.w / titleSize;
             float filterSize = texelSize * ((float)settings.directional.filter + 1f);
+            //In the worst case we end up having to offset along the square's diagonal, so let's scale it by √2.
             float bias = filterSize * 1.4142136f;
             cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, bias);
         }

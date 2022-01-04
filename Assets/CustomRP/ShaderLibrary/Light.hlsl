@@ -71,7 +71,6 @@ Light GetDirectionLight(int index, Surface surfaceWS, ShadowData shadowData)
     light.attenuation = GetDirectionalShadowAttenuation(dirshadowData, shadowData,surfaceWS);
 
     return light;
-
 }
 
 //point light and spot light

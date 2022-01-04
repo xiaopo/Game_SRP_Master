@@ -38,8 +38,8 @@ SAMPLER_CMP(SHADOW_SAMPLER);
 
 CBUFFER_START(_CustomShadows)
     int _CascadeCount;
-    float4 _CascadeData[MAX_CASCADE_COUNT];
-    float4 _CascadeCullingSpheres[MAX_CASCADE_COUNT];
+    float4 _CascadeData[MAX_CASCADE_COUNT];//(x : 1/sphere.radius)   (y: normal bais)
+    float4 _CascadeCullingSpheres[MAX_CASCADE_COUNT]; // (x,y,z : sphere position)   (w : sphere radius)
     float4x4 _DirectionalShadowMatrices[MAX_SHADOWED_DIRECTIONAL_LIGHT_COUNT * MAX_CASCADE_COUNT];
     float4x4 _OtherShadowMatrices[MAX_SHADOWED_OTHER_LIGHT_COUNT];
     float4 _OtherShadowTiles[MAX_SHADOWED_OTHER_LIGHT_COUNT];
@@ -85,6 +85,8 @@ struct OtherShadowData
 // (1 - d/m)/f
 float FadedShadowStrength(float d, float mx, float fx)
 {
+    //Suddenly cutting off shadows at the max distance can by very obvious, so let's make the transition smoother by linearly fading them. 
+    //The fading starts some distance before the max, until we reach a strength of zero at the max
     return saturate((1.0 - d * mx) * fx);
 }
 
@@ -256,6 +258,7 @@ float MixBakedAndRealtimeShadows(ShadowData global, float shadow, int shadowMask
     return lerp(1.0, shadow, strength * global.strength);
 }
 
+//directional(strength, tileIndex, normalBias, shadowMaskChannel)
 float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowData global,Surface surfaceWS)
 {
 #if !defined(_RECEIVE_SHADOWS)
@@ -263,7 +266,7 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
 #endif
     
     float shadow;
-    if (directional.strength * global .strength<= 0.0)
+    if (directional.strength * global .strength <= 0.0)
     {
         //when out of max shadow distance use pure bakeShadow to render shadows
         shadow = GetBakedShadow(global.shadowMask, directional.shadowMaskChannel, abs(directional.strength));
