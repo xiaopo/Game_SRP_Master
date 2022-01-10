@@ -18,7 +18,10 @@ namespace CustomSR
             Copy,
             BloomVertical,
             BloomCombine,
-            BloomPrefilter
+            BloomPrefilter,
+            BloomPrefilterFireflies,
+            BloomScatter,
+            BloomScatterFinal
         }
 
         ScriptableRenderContext context;
@@ -104,7 +107,7 @@ namespace CustomSR
             RenderTextureFormat format = useHDR ? RenderTextureFormat.DefaultHDR:RenderTextureFormat.Default;
 
             buffer.GetTemporaryRT(bloomPrefilterId, width, height, 0, FilterMode.Bilinear, format);
-            Draw(sourceId, bloomPrefilterId, Pass.BloomPrefilter);
+            Draw(sourceId, bloomPrefilterId, this.settings.Bloom.fadeFireflies ?Pass.BloomPrefilterFireflies:Pass.BloomPrefilter);
             width = width >> 1;
             height = height >> 1;
 
@@ -135,14 +138,29 @@ namespace CustomSR
 
             //Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
             buffer.ReleaseTemporaryRT(fromId - 1);
-            buffer.SetGlobalFloat(bloomIntensityId, 1f);
+            float finalIntensity;
+            Pass combinePass,finalPass;
+            if (bloom.mode == PostFXSettings.BloomSettings.Mode.Additive)
+            {
+                combinePass = finalPass = Pass.BloomCombine;
+                buffer.SetGlobalFloat(bloomIntensityId, 1f);
+                finalIntensity = bloom.intensity;
+            }
+            else
+            {
+                combinePass = Pass.BloomScatter;
+                finalPass = Pass.BloomScatterFinal;
+                buffer.SetGlobalFloat(bloomIntensityId, bloom.scatter);
+                finalIntensity = Mathf.Min(bloom.intensity, 0.95f);
+            }
+
             if ( i > 1)
             {
                 toId -= 5;
                 for (i -= 1; i > 0; i--)
                 {
                     buffer.SetGlobalTexture(fxSource2Id, toId + 1);
-                    Draw(fromId, toId, Pass.BloomCombine);
+                    Draw(fromId, toId, combinePass);
 
                     buffer.ReleaseTemporaryRT(fromId);
                     buffer.ReleaseTemporaryRT(fromId + 1);
@@ -154,9 +172,10 @@ namespace CustomSR
                 buffer.ReleaseTemporaryRT(bloomPyramidId);
 
 
-            buffer.SetGlobalFloat(bloomIntensityId, bloom.intensity);
+            buffer.SetGlobalFloat(bloomIntensityId, finalIntensity);
+
             buffer.SetGlobalTexture(fxSource2Id, sourceId);
-            Draw(fromId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+            Draw(fromId, BuiltinRenderTextureType.CameraTarget, finalPass);
             buffer.ReleaseTemporaryRT(fromId);
             buffer.EndSample("Bloom");
         }
