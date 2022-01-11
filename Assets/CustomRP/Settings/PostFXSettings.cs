@@ -48,6 +48,18 @@ namespace CustomSR
         };
         public BloomSettings Bloom => bloom;
 
+        [System.Serializable]
+        public struct ToneMappingSettings
+        {
+            public enum Mode { None = -1, ACES, Neutral, Reinhard }
+            public Mode mode;
+        }
+
+        [SerializeField]
+        ToneMappingSettings toneMapping = default;
+
+        public ToneMappingSettings ToneMapping => toneMapping;
+
         public Material Material
         {
             get

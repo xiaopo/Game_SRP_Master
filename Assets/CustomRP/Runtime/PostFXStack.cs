@@ -21,7 +21,11 @@ namespace CustomSR
             BloomPrefilter,
             BloomPrefilterFireflies,
             BloomScatter,
-            BloomScatterFinal
+            BloomScatterFinal,
+            ToneMappingACES,
+            ToneMappingNeutral,
+            ToneMappingReinhard,
+            
         }
 
         ScriptableRenderContext context;
@@ -34,6 +38,7 @@ namespace CustomSR
         int bloomPrefilterId = Shader.PropertyToID("_BloomPrefilter");
         int bloomThresholdId = Shader.PropertyToID("_BloomThreshold");
         int bloomIntensityId = Shader.PropertyToID("_BloomIntensity");
+        int bloomResultId = Shader.PropertyToID("_BloomResult");
         int bloomPyramidId;
         bool useHDR;
         public PostFXStack()
@@ -60,8 +65,14 @@ namespace CustomSR
         public void Render(int sourceId)
         {
             //buffer.Blit(sourceId, BuiltinRenderTextureType.CameraTarget);
-    
-            DoBloom(sourceId);
+            if (DoBloom(sourceId))
+            {
+                DoToneMapping(bloomResultId);
+                buffer.ReleaseTemporaryRT(bloomResultId);
+            }
+            else{
+                DoToneMapping(sourceId);
+            }
 
             context.ExecuteCommandBuffer(buffer);
             buffer.Clear();
@@ -79,9 +90,9 @@ namespace CustomSR
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
         }
 
-        void DoBloom(int sourceId)
+        bool DoBloom(int sourceId)
         {
-            buffer.BeginSample("Bloom");
+            //buffer.BeginSample("Bloom");
 
             PostFXSettings.BloomSettings bloom = settings.Bloom;
             buffer.SetGlobalFloat(bloomBucibicUpsamplingId, bloom.bicubicUpsampling ? 1f : 0f);
@@ -91,10 +102,12 @@ namespace CustomSR
 
             if (bloom.maxIterations == 0 || bloom.intensity <= 0 || height < bloom.downscaleLimit * 2 || width < bloom.downscaleLimit * 2)
             {
-                Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
-                buffer.EndSample("Bloom");
-                return;
+                //Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
+               // buffer.EndSample("Bloom");
+                return false;
             }
+
+            buffer.BeginSample("Bloom");
 
             Vector4 threshold;
             threshold.x = Mathf.GammaToLinearSpace(bloom.threshold);
@@ -173,11 +186,23 @@ namespace CustomSR
 
 
             buffer.SetGlobalFloat(bloomIntensityId, finalIntensity);
-
             buffer.SetGlobalTexture(fxSource2Id, sourceId);
-            Draw(fromId, BuiltinRenderTextureType.CameraTarget, finalPass);
+            buffer.GetTemporaryRT(bloomResultId, camera.pixelWidth, camera.pixelHeight, 0, FilterMode.Bilinear, format);
+
+            Draw(fromId, bloomResultId, finalPass);
             buffer.ReleaseTemporaryRT(fromId);
             buffer.EndSample("Bloom");
+
+            return true;
+        }
+
+        void DoToneMapping(int sourceId)
+        {
+            PostFXSettings.ToneMappingSettings.Mode mode = settings.ToneMapping.mode;
+
+            Pass pass = mode < 0 ? Pass.Copy : Pass.ToneMappingACES + (int)mode;
+
+            Draw(sourceId, BuiltinRenderTextureType.CameraTarget, pass);
         }
     }
 }

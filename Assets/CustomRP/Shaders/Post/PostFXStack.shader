@@ -92,5 +92,36 @@ Shader"Hidden/Custom RP/Post FX Stack"
 				#pragma fragment BloomScatterFinalPassFragment 
 			ENDHLSL
 		}
+	
+		Pass {
+			Name "Bloom MappingACES"
+
+			HLSLPROGRAM
+				#pragma target 3.5
+				#pragma vertex DefaultPassVertex
+				#pragma fragment ToneMappingACESPassFragment 
+			ENDHLSL
+		}
+
+		Pass {
+			Name "Bloom MappingNeutral"
+
+			HLSLPROGRAM
+				#pragma target 3.5
+				#pragma vertex DefaultPassVertex
+				#pragma fragment ToneMappingNeutralPassFragment 
+			ENDHLSL
+		}
+
+		Pass {
+			Name "Bloom MappingReinhard"
+
+			HLSLPROGRAM
+				#pragma target 3.5
+				#pragma vertex DefaultPassVertex
+				#pragma fragment ToneMappingReinhardPassFragment 
+			ENDHLSL
+		}
+		
 	}
 }
