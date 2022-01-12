@@ -94,6 +94,16 @@ Shader"Hidden/Custom RP/Post FX Stack"
 		}
 	
 		Pass {
+			Name "Bloom MappingNone"
+
+			HLSLPROGRAM
+				#pragma target 3.5
+				#pragma vertex DefaultPassVertex
+				#pragma fragment ToneMappingNonePassFragment 
+			ENDHLSL
+		}
+
+		Pass {
 			Name "Bloom MappingACES"
 
 			HLSLPROGRAM
