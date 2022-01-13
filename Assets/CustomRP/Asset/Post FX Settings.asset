@@ -25,3 +25,9 @@ MonoBehaviour:
     scatter: 0.329
   toneMapping:
     mode: 1
+  colorAdjustments:
+    postExposure: 0
+    contrast: -4
+    colorFilter: {r: 0, g: 0, b: 0, a: 0}
+    hueShift: -24
+    saturation: -15

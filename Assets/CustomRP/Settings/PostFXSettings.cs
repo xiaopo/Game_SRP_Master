@@ -65,19 +65,19 @@ namespace CustomSR
         public struct ColorAdjustmentsSettings
         {
 
-            public float postExposure;
+            public float postExposure;//曝光度
 
             [Range(-100f, 100f)]
-            public float contrast;
+            public float contrast;//对比度
 
             [ColorUsage(false, true)]
-            public Color colorFilter;
+            public Color colorFilter;//颜色滤镜
 
             [Range(-180f, 180f)]
-            public float hueShift;
+            public float hueShift;//色调偏移
 
             [Range(-100f, 100f)]
-            public float saturation;
+            public float saturation;//饱和度
         }
 
         [SerializeField]

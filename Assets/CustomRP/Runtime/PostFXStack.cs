@@ -205,11 +205,12 @@ namespace CustomSR
         void ConfigureColorAdjustments()
         {
             ColorAdjustmentsSettings colorAdjustments = settings.ColorAdjustments;
+
             buffer.SetGlobalVector(colorAdjustmentsId, new Vector4(
                                                                     Mathf.Pow(2f, colorAdjustments.postExposure),
-                                                                    colorAdjustments.contrast * 0.01f + 1f,
+                                                                    colorAdjustments.contrast * 0.01f + 1f,// 1 - 2
                                                                     colorAdjustments.hueShift * (1f / 360f),
-                                                                    colorAdjustments.saturation * 0.01f + 1f
+                                                                    colorAdjustments.saturation * 0.01f + 1f// 1 - 2
                                                                      ));
 
             buffer.SetGlobalColor(colorFilterId, colorAdjustments.colorFilter.linear);
