@@ -14,20 +14,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: 42f444f1d9454114fa8e04c06d039666, type: 3}
   bloom:
-    maxIterations: 4
+    maxIterations: 1
     downscaleLimit: 15
     bicubicUpsampling: 1
     threshold: 0.67
     thresholdKnee: 0
     intensity: 2.33
     fadeFireflies: 1
-    mode: 0
+    mode: 1
     scatter: 0.329
   toneMapping:
     mode: 1
   colorAdjustments:
-    postExposure: 0
-    contrast: -4
-    colorFilter: {r: 0, g: 0, b: 0, a: 0}
-    hueShift: -24
-    saturation: -15
+    postExposure: 0.35
+    contrast: -19
+    colorFilter: {r: 1, g: 0.995283, b: 0.995283, a: 0}
+    hueShift: -35
+    saturation: -7
+  whiteBalance:
+    temperature: 0
+    tint: 0
+  splitToning:
+    shadows: {r: 0.6415094, g: 0.499288, b: 0.499288, a: 1}
+    highlights: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    balance: 0
+  channelMixer:
+    red: {x: 1, y: 0, z: 0}
+    green: {x: 0, y: 1, z: 0}
+    blue: {x: 0, y: 0, z: 1}

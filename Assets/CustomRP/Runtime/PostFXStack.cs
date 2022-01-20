@@ -50,6 +50,10 @@ namespace CustomSR
         int channelMixerRedId = Shader.PropertyToID("_ChannelMixerRed");
         int channelMixerGreenId = Shader.PropertyToID("_ChannelMixerGreen");
         int channelMixerBlueId = Shader.PropertyToID("_ChannelMixerBlue");
+        int smhShadowsId = Shader.PropertyToID("_SMHShadows");
+        int smhMidtonesId = Shader.PropertyToID("_SMHMidtones");
+        int smhHighlightsId = Shader.PropertyToID("_SMHHighlights");
+        int smhRangeId = Shader.PropertyToID("_SMHRange");
 
         bool useHDR;
         public PostFXStack()
@@ -223,6 +227,18 @@ namespace CustomSR
             buffer.SetGlobalColor(colorFilterId, colorAdjustments.colorFilter.linear);
         }
 
+        void ConfigureShadowsMidtonesHighlights()
+        {
+            ShadowsMidtonesHighlightsSettings smh = settings.ShadowsMidtonesHighlights;
+            buffer.SetGlobalColor(smhShadowsId, smh.shadows.linear);
+            buffer.SetGlobalColor(smhMidtonesId, smh.midtones.linear);
+            buffer.SetGlobalColor(smhHighlightsId, smh.highlights.linear);
+            buffer.SetGlobalVector(smhRangeId, new Vector4(
+                smh.shadowsStart, smh.shadowsEnd, smh.highlightsStart, smh.highLightsEnd
+            ));
+        }
+
+
         void ConfigureChannelMixer()
         {
             ChannelMixerSettings channelMixer = settings.ChannelMixer;
@@ -251,6 +267,7 @@ namespace CustomSR
             ConfigureWhiteBalance();
             ConfigureSplitToning();
             ConfigureChannelMixer();
+            ConfigureShadowsMidtonesHighlights();
 
             PostFXSettings.ToneMappingSettings.Mode mode = settings.ToneMapping.mode;
 

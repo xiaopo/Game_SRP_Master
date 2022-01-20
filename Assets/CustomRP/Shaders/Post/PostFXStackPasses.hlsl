@@ -190,6 +190,7 @@ float4 _ColorFilter;
 float4 _WhiteBalance;
 float4 _SplitToningShadows, _SplitToningHighlights;
 float4 _ChannelMixerRed, _ChannelMixerGreen, _ChannelMixerBlue;
+float4 _SMHShadows, _SMHMidtones, _SMHHighlights, _SMHRange;
 
 float3 ColorGradePostExposure(float3 color)
 {
@@ -217,6 +218,17 @@ float3 ColorGradingChannelMixer(float3 color) {
     return mul( float3x3(_ChannelMixerRed.rgb, _ChannelMixerGreen.rgb, _ChannelMixerBlue.rgb),color );
 }
 
+float3 ColorGradingShadowsMidtonesHighlights(float3 color)
+{
+    float luminance = Luminance(color);
+    float shadowsWeight = 1.0 - smoothstep(_SMHRange.x, _SMHRange.y, luminance);
+    float highlightsWeight = smoothstep(_SMHRange.z, _SMHRange.w, luminance);
+    float midtonesWeight = 1.0 - shadowsWeight - highlightsWeight;
+    return
+		color * _SMHShadows.rgb * shadowsWeight +
+		color * _SMHMidtones.rgb * midtonesWeight +
+		color * _SMHHighlights.rgb * highlightsWeight;
+}
 
 float3 ColorGradingContrast(float3 color)
 {
@@ -256,6 +268,7 @@ float3 ColorGrade(float3 color)
     color = ColorGradeSplitToning(color);
     color = ColorGradingChannelMixer(color);
     color = max(color, 0.0);
+    color = ColorGradingShadowsMidtonesHighlights(color);
     color = ColorGradingHueShift(color);
     color = ColorGradingSaturation(color);
     return max(color, 0.0);
