@@ -44,6 +44,13 @@ namespace CustomSR
         int bloomPyramidId;
         int colorAdjustmentsId = Shader.PropertyToID("_ColorAdjustments");
         int colorFilterId = Shader.PropertyToID("_ColorFilter");
+        int whiteBalanceId = Shader.PropertyToID("_WhiteBalance");
+        int splitToningShadowsId = Shader.PropertyToID("_SplitToningShadows");
+        int splitToningHighlightsId = Shader.PropertyToID("_SplitToningHighlights");
+        int channelMixerRedId = Shader.PropertyToID("_ChannelMixerRed");
+        int channelMixerGreenId = Shader.PropertyToID("_ChannelMixerGreen");
+        int channelMixerBlueId = Shader.PropertyToID("_ChannelMixerBlue");
+
         bool useHDR;
         public PostFXStack()
         {
@@ -215,10 +222,36 @@ namespace CustomSR
 
             buffer.SetGlobalColor(colorFilterId, colorAdjustments.colorFilter.linear);
         }
+
+        void ConfigureChannelMixer()
+        {
+            ChannelMixerSettings channelMixer = settings.ChannelMixer;
+            buffer.SetGlobalVector(channelMixerRedId, channelMixer.red);
+            buffer.SetGlobalVector(channelMixerGreenId, channelMixer.green);
+            buffer.SetGlobalVector(channelMixerBlueId, channelMixer.blue);
+        }
+
+        void ConfigureSplitToning()
+        {
+            SplitToningSettings splitToning = settings.SplitToning;
+            Color splitColor = splitToning.shadows;
+            splitColor.a = splitToning.balance * 0.01f;
+            buffer.SetGlobalColor(splitToningShadowsId, splitColor);
+            buffer.SetGlobalColor(splitToningHighlightsId, splitToning.highlights);
+        }
+        void ConfigureWhiteBalance()
+        {
+            WhiteBalanceSettings whiteBalance = settings.WhiteBalance;
+            buffer.SetGlobalVector(whiteBalanceId, ColorUtils.ColorBalanceToLMSCoeffs(whiteBalance.temperature, whiteBalance.tint));
+        }
+
         void DoColorGradingAndToneMapping(int sourceId)
         {
             ConfigureColorAdjustments();
-            
+            ConfigureWhiteBalance();
+            ConfigureSplitToning();
+            ConfigureChannelMixer();
+
             PostFXSettings.ToneMappingSettings.Mode mode = settings.ToneMapping.mode;
 
             Pass pass = mode < 0 ? Pass.Copy : Pass.ToneMappingNone + (int)mode;

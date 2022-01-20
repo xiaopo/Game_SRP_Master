@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: NewShaderVariants
+  m_Shaders:
+  - first: {fileID: 4800000, guid: 42f444f1d9454114fa8e04c06d039666, type: 3}
+    second:
+      variants: []
+  - first: {fileID: 4800000, guid: 54d5b8a88b1ee4d4d9b8f0833739bf7c, type: 3}
+    second:
+      variants:
+      - keywords: _CASCADE_BLEND_DITHER _OTHER_PCF7
+        passType: 13
+      - keywords: LIGHTMAP_ON _CASCADE_BLEND_DITHER _OTHER_PCF7
+        passType: 13

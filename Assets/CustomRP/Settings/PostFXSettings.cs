@@ -86,8 +86,57 @@ namespace CustomSR
             colorFilter = Color.white
         };
 
+        [Serializable]
+        public struct WhiteBalanceSettings
+        {
+
+            [Range(-100f, 100f)]
+            public float temperature, tint;
+        }
+
+        [SerializeField]
+        WhiteBalanceSettings whiteBalance = default;
+
+        public WhiteBalanceSettings WhiteBalance => whiteBalance;
+
         public ColorAdjustmentsSettings ColorAdjustments => colorAdjustments;
 
+        [Serializable]
+        public struct SplitToningSettings
+        {
+
+            [ColorUsage(false)]
+            public Color shadows, highlights;
+
+            [Range(-100f, 100f)]
+            public float balance;
+        }
+
+        [SerializeField]
+        SplitToningSettings splitToning = new SplitToningSettings
+        {
+            shadows = Color.gray,
+            highlights = Color.gray
+        };
+
+        public SplitToningSettings SplitToning => splitToning;
+
+        [Serializable]
+        public struct ChannelMixerSettings
+        {
+
+            public Vector3 red, green, blue;
+        }
+
+        [SerializeField]
+        ChannelMixerSettings channelMixer = new ChannelMixerSettings
+        {
+            red = Vector3.right,
+            green = Vector3.up,
+            blue = Vector3.forward
+        };
+
+        public ChannelMixerSettings ChannelMixer => channelMixer;
         public Material Material
         {
             get
