@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shader: {fileID: 4800000, guid: 42f444f1d9454114fa8e04c06d039666, type: 3}
   bloom:
-    maxIterations: 1
+    maxIterations: 0
     downscaleLimit: 15
     bicubicUpsampling: 1
     threshold: 0.67
@@ -42,3 +42,11 @@ MonoBehaviour:
     red: {x: 1, y: 0, z: 0}
     green: {x: 0, y: 1, z: 0}
     blue: {x: 0, y: 0, z: 1}
+  shadowsMidtonesHighlights:
+    shadows: {r: 0.8207547, g: 0.60648805, b: 0, a: 1}
+    midtones: {r: 1, g: 1, b: 1, a: 1}
+    highlights: {r: 1, g: 1, b: 1, a: 1}
+    shadowsStart: 0
+    shadowsEnd: 0.3
+    highlightsStart: 0.55
+    highLightsEnd: 1

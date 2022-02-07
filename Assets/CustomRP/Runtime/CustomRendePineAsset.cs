@@ -21,6 +21,10 @@ namespace CustomSR
         [SerializeField]
         public PostFXSettings postFXSettings = default;
 
+        public enum ColorLUTResolution:int { _16 = 16, _32 = 32, _64 = 64 }
+
+        [SerializeField]
+        public ColorLUTResolution colorLUTResolution = ColorLUTResolution._32;
         protected override RenderPipeline CreatePipeline()
         {
             return new CustomRenderPipeline(this);

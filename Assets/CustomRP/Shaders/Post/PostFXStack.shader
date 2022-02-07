@@ -33,6 +33,16 @@ Shader"Hidden/Custom RP/Post FX Stack"
 			ENDHLSL
 		}
 
+		Pass{
+				Name "Final"
+
+				HLSLPROGRAM
+					#pragma target 3.5
+					#pragma vertex DefaultPassVertex
+					#pragma fragment FinalPassFragment 
+				ENDHLSL
+		}
+
 		Pass {
 			Name "Bloom Vertical"
 
@@ -94,12 +104,12 @@ Shader"Hidden/Custom RP/Post FX Stack"
 		}
 	
 		Pass {
-			Name "Bloom MappingNone"
+			Name "Bloom ColorGradingNone"
 
 			HLSLPROGRAM
 				#pragma target 3.5
 				#pragma vertex DefaultPassVertex
-				#pragma fragment ToneMappingNonePassFragment 
+				#pragma fragment ColorGradingNonePassFragment
 			ENDHLSL
 		}
 
@@ -109,7 +119,7 @@ Shader"Hidden/Custom RP/Post FX Stack"
 			HLSLPROGRAM
 				#pragma target 3.5
 				#pragma vertex DefaultPassVertex
-				#pragma fragment ToneMappingACESPassFragment 
+				#pragma fragment ColorGradingACESPassFragment
 			ENDHLSL
 		}
 
@@ -119,7 +129,7 @@ Shader"Hidden/Custom RP/Post FX Stack"
 			HLSLPROGRAM
 				#pragma target 3.5
 				#pragma vertex DefaultPassVertex
-				#pragma fragment ToneMappingNeutralPassFragment 
+				#pragma fragment ColorGradingNeutralPassFragment 
 			ENDHLSL
 		}
 
@@ -129,7 +139,7 @@ Shader"Hidden/Custom RP/Post FX Stack"
 			HLSLPROGRAM
 				#pragma target 3.5
 				#pragma vertex DefaultPassVertex
-				#pragma fragment ToneMappingReinhardPassFragment 
+				#pragma fragment ColorGradingReinhardPassFragment 
 			ENDHLSL
 		}
 		

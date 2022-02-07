@@ -47,7 +47,7 @@ namespace CustomSR
             //渲染灯光
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
             //后处理
-            postFXStack.Setup(contenxt, camera, asset.postFXSettings,useHDR);
+            postFXStack.Setup(contenxt, camera, asset.postFXSettings,useHDR, (int)asset.colorLUTResolution);
             buffer.EndSample(SampleName);
 
             SetUp();
