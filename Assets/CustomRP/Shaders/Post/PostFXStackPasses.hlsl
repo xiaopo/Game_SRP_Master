@@ -1,3 +1,24 @@
+/*
+* Shadows Midtones Highlights
+* The final tool that we'll support is Shadows Midtones Highlights. It works like split-toning, 
+* except that it also allows adjustment of the midtones and decouples the shadow and highlight regions
+* 
+* ACES Color Spaces
+* When ACES tone mapping is used Unity performs most color grading in ACES color spaces instead of linear color space, to produce better results
+* 
+* LUT( lookup table)
+* The LUT is a 3D texture, typically 32×32×32. 
+* Filling that texture and sampling it later is much less work than performing color grading directly on the entire image. 
+* URP and HDRP use the same approach
+* 
+* Log C LUT
+* Compared to linear space Log C adds a little more resolution to the darkest values. 
+* It overtakes the linear value at roughly 0.5. 
+* After that the intensity rises quickly so the matrix resolution decreases a lot. This is needed to cover HDR values, 
+* but if we don't need those it's better stick with linear space, 
+* otherwise almost half of the resolution is wasted. Add a boolean to the shader to control this
+*/
+
 #ifndef CUSTOM_POST_FX_PASSES_INCLUDED
 #define CUSTOM_POST_FX_PASSES_INCLUDED
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
@@ -198,11 +219,8 @@ float4 _SplitToningShadows, _SplitToningHighlights;
 float4 _ChannelMixerRed, _ChannelMixerGreen, _ChannelMixerBlue;
 float4 _SMHShadows, _SMHMidtones, _SMHHighlights, _SMHRange;
 
-float3 ColorGradePostExposure(float3 color)
-{
-    return color * _ColorAdjustments.x;
-}
-
+//What's LMS color space?
+//It describes colors as the responses of the three photoreceptor cone types in the human eye
 float3 ColorGradeWhiteBalance(float3 color) 
 {
     color = LinearToLMS(color);
@@ -210,6 +228,11 @@ float3 ColorGradeWhiteBalance(float3 color)
     return LMSToLinear(color);
 }
 
+/*
+* 给 shadow 和 hightlight 染色
+* The split-toning tool is used to tint shadows and highlights of an image separately. 
+* A typical example is to push shadows toward cool blue and highlights toward warm orange.
+*/
 float3 ColorGradeSplitToning(float3 color,bool useACES)
 {
     color = PositivePow(color, 1.0 / 2.2);
@@ -221,20 +244,35 @@ float3 ColorGradeSplitToning(float3 color,bool useACES)
     return PositivePow(color, 2.2);
 }
 
+//通过矩阵来混合 RGB 颜色
 float3 ColorGradingChannelMixer(float3 color) {
     return mul( float3x3(_ChannelMixerRed.rgb, _ChannelMixerGreen.rgb, _ChannelMixerBlue.rgb),color );
 }
 
+//控制中间色调和控制Shadow、hightlight的范围
+//allows adjustment of the midtones and decouples the shadow and highlight regions
 float3 ColorGradingShadowsMidtonesHighlights(float3 color, bool useACES)
 {
     float luminance = Luminance(color, useACES);
     float shadowsWeight = 1.0 - smoothstep(_SMHRange.x, _SMHRange.y, luminance);
     float highlightsWeight = smoothstep(_SMHRange.z, _SMHRange.w, luminance);
     float midtonesWeight = 1.0 - shadowsWeight - highlightsWeight;
-    return
-		color * _SMHShadows.rgb * shadowsWeight +
+    return 
+        color * _SMHShadows.rgb * shadowsWeight +
 		color * _SMHMidtones.rgb * midtonesWeight +
 		color * _SMHHighlights.rgb * highlightsWeight;
+}
+
+//曝光度
+float3 ColorGradePostExposure(float3 color)
+{
+    return color * _ColorAdjustments.x;
+}
+
+//颜色滤镜
+float3 ColorGradeColorFilter(float3 color)
+{
+    return color * _ColorFilter.rgb;
 }
 
  //对比度
@@ -245,11 +283,7 @@ float3 ColorGradingContrast(float3 color, bool useACES)
     return useACES ? ACES_to_ACEScg(ACEScc_to_ACES(color)) : LogCToLinear(color);
 }
 
-float3 ColorGradeColorFilter(float3 color)
-{
-    return color * _ColorFilter.rgb;
-}
-
+//色调偏移
 float3 ColorGradingHueShift(float3 color)
 {
     color = RgbToHsv(color);
@@ -258,6 +292,7 @@ float3 ColorGradingHueShift(float3 color)
     return HsvToRgb(color);
 }
 
+//饱和度
 float3 ColorGradingSaturation(float3 color, bool useACES)
 {
     float luminance = Luminance(color, useACES);
@@ -285,6 +320,7 @@ float4 _ColorGradingLUTParameters;
 bool _ColorGradingLUTInLogC;
 float3 GetColorGradedLUT(float2 uv, bool useACES = false)
 {
+    //find the LUT input color via the GetLutStripValue function
     float3 color = GetLutStripValue(uv, _ColorGradingLUTParameters);
     return ColorGrade(_ColorGradingLUTInLogC ? LogCToLinear(color) : color, useACES);
 }
@@ -292,7 +328,9 @@ float3 GetColorGradedLUT(float2 uv, bool useACES = false)
 
 float3 ApplyColorGradingLUT(float3 color)
 {
-    return ApplyLut2D(TEXTURE2D_ARGS(_ColorGradingLUT, sampler_linear_clamp),saturate(_ColorGradingLUTInLogC ? LinearToLogC(color) : color),_ColorGradingLUTParameters.xyz);
+    return ApplyLut2D(TEXTURE2D_ARGS(_ColorGradingLUT, sampler_linear_clamp),
+        saturate(_ColorGradingLUTInLogC ? LinearToLogC(color) : color),
+        _ColorGradingLUTParameters.xyz);
 }
 
 float4 ColorGradingNonePassFragment(Varyings input) : SV_TARGET
