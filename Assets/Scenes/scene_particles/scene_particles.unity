@@ -2580,7 +2580,6 @@ GameObject:
   m_Component:
   - component: {fileID: 816192044}
   - component: {fileID: 816192043}
-  - component: {fileID: 816192042}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2588,14 +2587,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &816192042
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 816192041}
-  m_Enabled: 1
 --- !u!20 &816192043
 Camera:
   m_ObjectHideFlags: 0
@@ -2646,13 +2637,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 816192041}
-  m_LocalRotation: {x: -0.25186935, y: 0.66311973, z: -0.25268233, w: -0.65801656}
+  m_LocalRotation: {x: 0.25132665, y: -0.6633306, z: 0.25214013, w: 0.65821946}
   m_LocalPosition: {x: 17.345196, y: 16.696087, z: -0.28902107}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 41.71, y: -90.48701, z: -0.115}
 --- !u!1 &821927582
 GameObject:
   m_ObjectHideFlags: 0
@@ -9065,7 +9056,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1411352966
 Transform:
   m_ObjectHideFlags: 0
@@ -9932,7 +9923,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 1
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1799861153
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -10547,7 +10538,7 @@ ParticleSystemRenderer:
   m_RenderMode: 0
   m_SortMode: 1
   m_MinParticleSize: 0
-  m_MaxParticleSize: 0.5
+  m_MaxParticleSize: 1
   m_CameraVelocityScale: 0
   m_VelocityScale: 0
   m_LengthScale: 2
@@ -10556,7 +10547,7 @@ ParticleSystemRenderer:
   m_ShadowBias: 0
   m_RenderAlignment: 0
   m_Pivot: {x: 0, y: 0, z: 0}
-  m_Flip: {x: 0.5, y: 0.5, z: 0.5}
+  m_Flip: {x: 0.5, y: 0.5, z: 0.2}
   m_UseCustomVertexStreams: 1
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
@@ -10819,7 +10810,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 23
+      scalar: 5
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -11912,20 +11903,29 @@ ParticleSystem:
           time: 0
           value: 0
           inSlope: 0
-          outSlope: 1
-          tangentMode: 0
-          weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 1
           outSlope: 0
           tangentMode: 0
           weightedMode: 0
           inWeight: 0.33333334
           outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 0.48173934
+          value: 0.893203
+          inSlope: -1.8845819
+          outSlope: -1.8845819
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.18179707
+          outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 0.9105838
+          value: 0.04854369
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0
+          outWeight: 0
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4

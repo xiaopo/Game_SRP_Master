@@ -1,5 +1,5 @@
-#ifndef CUSTOM_UNLIT_PASS_Instance_INCLUDED
-#define CUSTOM_UNLIT_PASS_Instance_INCLUDED
+#ifndef CUSTOM_UNLIT_PASS_PARTICLE_INCLUDED
+#define CUSTOM_UNLIT_PASS_PARTICLE_INCLUDED
 
 
 struct Attributes
@@ -76,6 +76,5 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
     return color;
 
 }
-
 
 #endif
