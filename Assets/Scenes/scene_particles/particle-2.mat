@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: particle-1
+  m_Name: particle-2
   m_Shader: {fileID: 4800000, guid: 5e4ce6663dee36c4f810ab41db069d5e, type: 3}
-  m_ShaderKeywords: _VERTEX_COLORS
+  m_ShaderKeywords: _FLIPBOOK_BLENDING _VERTEX_COLORS
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -40,7 +40,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 998935d4a14167d44a15db1054d5c828, type: 3}
+        m_Texture: {fileID: 2800000, guid: 3d9eefbb30191fa4bb974ccfa3deded4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -58,9 +58,10 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _Clippling: 0
-    - _Cutoff: 0.5
+    - _Cutoff: 0.124
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
+    - _FlipbookBlending: 1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1

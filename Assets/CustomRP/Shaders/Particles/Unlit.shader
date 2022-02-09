@@ -11,14 +11,15 @@ Shader "CustomRP/Particles/Unlit"
 
         _Cutoff("Alpha Cutoff",Range(0.0,1.0)) = 0.5
         [Toggle(_CLIPPING)]_Clippling("Alpha Clipping",Float) = 0
- 
+        [Toggle(_VERTEX_COLORS)] _VertexColors("Vertex Colors", Float) = 0
+        [Toggle(_FLIPBOOK_BLENDING)] _FlipbookBlending("Flipbook Blending", Float) = 0
     }
 
     SubShader
     {
         HLSLINCLUDE
         #include "../../ShaderLibrary/Common.hlsl"
-        #include "UnlitInput.hlsl"
+        #include "../Unlit/UnlitInput.hlsl"
         ENDHLSL
 
         Tags{ "RenderType" = "Opaque" "Queue"="Transparent"}    
@@ -38,7 +39,8 @@ Shader "CustomRP/Particles/Unlit"
             #pragma fragment UnlitPassFragment
 
             #pragma shader_feature _CLIPPING
-            #pragma multi_compile_instancing
+            #pragma shader_feature _VERTEX_COLORS
+            #pragma shader_feature _FLIPBOOK_BLENDING
 
             #include "UnlitPass.hlsl"
 

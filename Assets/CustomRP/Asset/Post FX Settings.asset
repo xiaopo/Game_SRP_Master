@@ -43,8 +43,8 @@ MonoBehaviour:
     green: {x: 0, y: 1, z: 0}
     blue: {x: 0, y: 0, z: 1}
   shadowsMidtonesHighlights:
-    shadows: {r: 1, g: 1, b: 1, a: 1}
-    midtones: {r: 0.91380954, g: 0.9339623, b: 0.91193485, a: 1}
+    shadows: {r: 0.8584906, g: 0.06074225, b: 0.06074225, a: 1}
+    midtones: {r: 0.2232111, g: 0.8301887, b: 0.2232111, a: 1}
     highlights: {r: 1, g: 1, b: 1, a: 1}
     shadowsStart: 0
     shadowsEnd: 0
