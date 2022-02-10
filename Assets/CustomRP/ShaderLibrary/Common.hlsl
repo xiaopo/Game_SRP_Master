@@ -20,6 +20,28 @@
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Packing.hlsl"
+
+//orthographic: 1 ,otherwise: 0
+bool IsOrthographicCamera() {
+    return unity_OrthoParams.w;
+}
+
+/*
+* For an orthographic camera the best we can do is rely on the Z component of the screen-space position vector, 
+* which contains the converted clip-space depth of the fragment. 
+* This is the raw value that is used for depth comparisons and is written to the depth buffer if depth writing is enabled. 
+* It's a value in the 0¨C1 range and is linear for orthographic projections. 
+* To convert it to view-space depth we have to scale it by the camera's near¨Cfar range and then add the near plane distance. 
+* The near and far distances are stored in the Y and Z components of _ProjectionParams 
+*/
+
+float OrthographicDepthBufferToLinear(float rawDepth) 
+{
+#if UNITY_REVERSED_Z//We also need to reverse the raw depth if a reversed depth buffer is used
+    rawDepth = 1.0 - rawDepth;
+#endif
+    return (_ProjectionParams.z - _ProjectionParams.y) * rawDepth + _ProjectionParams.y;
+}
 #include "Fragment.hlsl"
 
 float Square(float v)
@@ -56,11 +78,12 @@ float DistanceSquared(float3 pA, float3 pB)
 void ClipLOD(Fragment fragment,float fade)
 {
 #if defined(LOD_FADE_CROSSFADE)
-	//float dither = (positionCS.y % 32) / 32;
+	//float dither = (fragment.positionCS.y % 32) / 32;
     float dither = InterleavedGradientNoise(fragment.positionSS, 0);
     clip(fade + (fade < 0.0 ? dither : -dither));
 #endif
 }
+
 
 
 #endif

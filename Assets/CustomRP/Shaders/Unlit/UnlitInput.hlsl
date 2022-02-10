@@ -10,6 +10,8 @@ UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 UNITY_DEFINE_INSTANCED_PROP(float4,_MainColor)
 UNITY_DEFINE_INSTANCED_PROP(float4,_MainTex_ST)
 UNITY_DEFINE_INSTANCED_PROP(float,_Cutoff)
+UNITY_DEFINE_INSTANCED_PROP(float, _NearFadeDistance)
+UNITY_DEFINE_INSTANCED_PROP(float, _NearFadeRange)
 
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
@@ -22,6 +24,7 @@ struct InputConfig
     float3 flipbookUVB;
     bool flipbookBlending;
     Fragment fragment;
+    bool nearFade;
 };
 
 InputConfig GetInputConfig(float4 positionSS,float2 baseUV)
@@ -32,6 +35,7 @@ InputConfig GetInputConfig(float4 positionSS,float2 baseUV)
     c.baseUV = baseUV;
     c.flipbookUVB = 0.0;
     c.flipbookBlending = false;
+    c.nearFade = false;
     return c;
 }
 
@@ -53,6 +57,12 @@ float4 GetBase(InputConfig c)
     if (c.flipbookBlending)
     {
         mainMap = lerp(mainMap, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, c.flipbookUVB.xy),c.flipbookUVB.z);
+    }
+
+    if (c.nearFade) 
+    {
+        float nearAttenuation = (c.fragment.depth - INPUT_PROP(_NearFadeDistance)) / INPUT_PROP(_NearFadeRange);
+        mainMap.a *= saturate(nearAttenuation);
     }
 
     float4 color = INPUT_PROP(_MainColor);

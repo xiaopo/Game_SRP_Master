@@ -73,7 +73,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     UNITY_SETUP_INSTANCE_ID(input);
     
     InputConfig config = GetInputConfig(input.position,input.baseuv);
-
+    //return float4(config.fragment.depth.xxx / 20.0, 1.0);
     ClipLOD(config.fragment, unity_LODFade.x);
     
    

@@ -17,11 +17,7 @@ struct Attributes
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
-/*
-*SV_Position ”Ô“Â
-* vertex function: clip-space position ,as 4D homogeneous coordinates
-* fragment function: screen-space as known as window-space
-*/
+
 struct Varyings
 {
     float4 positionCS_SS : SV_Position;
@@ -64,13 +60,17 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(input);
     InputConfig config = GetInputConfig(input.positionCS_SS,input.baseUV);
-    
+    //return float4(config.fragment.depth.xxx / 20.0, 1.0);
 #if defined(_VERTEX_COLORS)
     config.color = input.color;
 #endif
 #if defined(_FLIPBOOK_BLENDING)
     config.flipbookUVB = input.flipbookUVB;
     config.flipbookBlending = true;
+#endif
+
+#if defined(_NEAR_FADE)
+    config.nearFade = true;
 #endif
 
     float4 color = GetBase(config);

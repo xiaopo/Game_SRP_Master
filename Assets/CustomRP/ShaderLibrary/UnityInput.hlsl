@@ -38,5 +38,6 @@ float4x4 glstate_matrix_projection;
 //Ïà»úÎ»ÖÃ
 float3 _WorldSpaceCameraPos;
 float4 _ProjectionParams;
+float4 unity_OrthoParams;
 
 #endif
