@@ -24,7 +24,11 @@ namespace CustomSR
 
         Lighting lighting = new Lighting();//灯光
         PostFXStack postFXStack = new PostFXStack();
-        static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+        //static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
+
+        static int colorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
+        static int  depthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
+
         bool useHDR;
         public void Render(ScriptableRenderContext contenxt,Camera camera, CustomRendePineAsset asset)
         {
@@ -59,7 +63,7 @@ namespace CustomSR
             DrawGizmosBeforeFX();
             //后处理
             if (postFXStack.IsActive){
-                postFXStack.Render(frameBufferId);
+                postFXStack.Render(colorAttachmentId);
             }
             DrawGizmosAfterFX();
             //释放申请的RT内存空间
@@ -134,10 +138,20 @@ namespace CustomSR
             {
                 if (flags > CameraClearFlags.Color) flags = CameraClearFlags.Color;
 
-                //intermediate frame buffer for the camera
-                buffer.GetTemporaryRT(frameBufferId, camera.pixelWidth, camera.pixelHeight,32, FilterMode.Bilinear, useHDR ? 
-                    RenderTextureFormat.DefaultHDR :RenderTextureFormat.Default);
-                buffer.SetRenderTarget(frameBufferId,RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+                //frame buffer for the camera
+
+                buffer.GetTemporaryRT(colorAttachmentId, camera.pixelWidth, camera.pixelHeight, 0, 
+                    FilterMode.Bilinear, useHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default);
+
+                buffer.GetTemporaryRT(depthAttachmentId, camera.pixelWidth, camera.pixelHeight, 32, FilterMode.Point, RenderTextureFormat.Depth);
+               
+                buffer.SetRenderTarget(
+                    colorAttachmentId,
+                    RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
+                    depthAttachmentId,
+                    RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store
+                );
+
             }
 
             buffer.ClearRenderTarget(
@@ -188,7 +202,9 @@ namespace CustomSR
             lighting.Cleanup();
             if (postFXStack.IsActive)
             {
-                buffer.ReleaseTemporaryRT(frameBufferId);
+                //buffer.ReleaseTemporaryRT(frameBufferId);
+                buffer.ReleaseTemporaryRT(colorAttachmentId);
+			    buffer.ReleaseTemporaryRT(depthAttachmentId);
             }
         }
 
