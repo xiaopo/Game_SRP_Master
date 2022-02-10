@@ -72,9 +72,11 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(input);
     
-    ClipLOD(input.position.xy, unity_LODFade.x);
+    InputConfig config = GetInputConfig(input.position,input.baseuv);
+
+    ClipLOD(config.fragment, unity_LODFade.x);
     
-    InputConfig config = GetInputConfig(input.baseuv);
+   
     #if defined(_MASK_MAP)
 		config.useMask = true;
 	#endif
@@ -112,7 +114,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.smoothness = GetSmoothness(config); 
     surface.fresnelStrength = GetFresnel(config);
     surface.depth = -TransformWorldToView(input.worldPos).z;
-    surface.dither = InterleavedGradientNoise(input.position.xy, 0);
+    surface.dither = InterleavedGradientNoise(config.fragment.positionSS, 0);
     
 
 #if defined(_PREMULTIPLY_ALPHA)

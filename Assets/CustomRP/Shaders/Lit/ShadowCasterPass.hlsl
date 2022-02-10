@@ -42,15 +42,17 @@ void ShadowCasterPassFragment(Varyings input)
 {
     UNITY_SETUP_INSTANCE_ID(input);
     
-    ClipLOD(input.position.xy, unity_LODFade.x);
-    
-    InputConfig config = GetInputConfig(input.uv);
+
+    InputConfig config = GetInputConfig(input.position,input.uv);
+
+    ClipLOD(config.fragment, unity_LODFade.x);
+   
     float4 albedo = GetBase(config);
     
 #if defined(_SHADOWS_CLIP)
         clip(albedo.a - GetCutoff(config));
 #elif defined(_SHADOWS_DITHER)
-		float dither = InterleavedGradientNoise(input.position.xy, 0);
+		float dither = InterleavedGradientNoise(config.fragment.positionSS, 0);
 		clip(baseMap.a - dither);
 #endif
     

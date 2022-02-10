@@ -17,9 +17,14 @@ struct Attributes
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
+/*
+*SV_Position ”Ô“Â
+* vertex function: clip-space position ,as 4D homogeneous coordinates
+* fragment function: screen-space as known as window-space
+*/
 struct Varyings
 {
-    float4 position : SV_Position;
+    float4 positionCS_SS : SV_Position;
 #if defined(_VERTEX_COLORS)
     float4 color : VAR_COLOR;
 #endif
@@ -39,7 +44,7 @@ Varyings UnlitPassVertex(Attributes input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
 
     float3 positionWS = TransformObjectToWorld(input.psotion);
-    output.position = TransformWorldToHClip(positionWS);
+    output.positionCS_SS = TransformWorldToHClip(positionWS);
     
 #if defined(_VERTEX_COLORS)
     output.color = input.color;
@@ -58,20 +63,20 @@ Varyings UnlitPassVertex(Attributes input)
 float4 UnlitPassFragment(Varyings input) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(input);
-    InputConfig c = GetInputConfig(input.baseUV);
+    InputConfig config = GetInputConfig(input.positionCS_SS,input.baseUV);
     
 #if defined(_VERTEX_COLORS)
-    c.color = input.color;
+    config.color = input.color;
 #endif
 #if defined(_FLIPBOOK_BLENDING)
-    c.flipbookUVB = input.flipbookUVB;
-    c.flipbookBlending = true;
+    config.flipbookUVB = input.flipbookUVB;
+    config.flipbookBlending = true;
 #endif
 
-    float4 color = GetBase(c);
+    float4 color = GetBase(config);
     
 #if defined(_CLIPPING)
-    clip(color.a - GetCutoff(c));
+    clip(color.a - GetCutoff(config));
  #endif
     return color;
 
