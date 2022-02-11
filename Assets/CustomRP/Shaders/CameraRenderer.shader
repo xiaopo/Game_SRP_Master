@@ -14,7 +14,7 @@ Shader "Hidden/CustomRP/CameraRenderer"
 
 		Pass 
 		{
-			Name "Copy"
+			Name "Camera Copy"
 
 			HLSLPROGRAM
 				#pragma target 3.5
