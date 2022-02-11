@@ -74,8 +74,8 @@ Material:
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SoftParticles: 1
-    - _SoftParticlesDistance: 2.52
-    - _SoftParticlesRange: 7.43
+    - _SoftParticlesDistance: 0
+    - _SoftParticlesRange: 1
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _StencilComparison: 3
