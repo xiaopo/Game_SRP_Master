@@ -7,8 +7,23 @@ namespace CustomSR
     [CreateAssetMenu(menuName = "Rendering/CreateCustomRenderPipeline")]
     public class CustomRendePineAsset : RenderPipelineAsset
     {
+        [System.Serializable]
+        public struct CameraBufferSettings
+        {
+
+            public bool allowHDR;
+
+            public bool copyDepth, copyDepthReflections;
+        }
+
         // Start is called before the first frame update
-        public bool allowHDR = true;
+        //public bool allowHDR = true;
+        [SerializeField]
+        public CameraBufferSettings cameraBuffer = new CameraBufferSettings
+        {
+            allowHDR = true
+        };
+
         public bool useDynamicBatching = true;
         public bool useGPUInstancing = true;
         public bool useSRPBatcher = true;
@@ -25,6 +40,9 @@ namespace CustomSR
 
         [SerializeField]
         public ColorLUTResolution colorLUTResolution = ColorLUTResolution._32;
+
+        [SerializeField]
+        public Shader cameraRendererShader = default;
         protected override RenderPipeline CreatePipeline()
         {
             return new CustomRenderPipeline(this);

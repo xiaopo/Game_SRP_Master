@@ -61,13 +61,18 @@ namespace CustomSR
             }
         };
 
-        protected override void Dispose(bool disposing)
+        //protected override void Dispose(bool disposing)
+        //{
+        //    base.Dispose(disposing);
+        //    Lightmapping.ResetDelegate();
+        //}
+        partial void DisposeForEditor()
         {
-            base.Dispose(disposing);
+            //base.Dispose(disposing);
             Lightmapping.ResetDelegate();
         }
-
-        
 #endif
+
+        partial void DisposeForEditor();
     }
 }

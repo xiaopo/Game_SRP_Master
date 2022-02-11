@@ -5,10 +5,11 @@ namespace CustomSR
 {
     public partial class CustomRenderPipeline : RenderPipeline
     {
-        CameraRenderer render = new CameraRenderer();
+        CameraRenderer renderer;
         public CustomRendePineAsset asset;
         public CustomRenderPipeline(CustomRendePineAsset asset)
         {
+            renderer = new CameraRenderer(asset.cameraRendererShader);
             GraphicsSettings.useScriptableRenderPipelineBatching = asset.useSRPBatcher;
             //灯光使用线性强度
             GraphicsSettings.lightsUseLinearIntensity = true;
@@ -22,8 +23,15 @@ namespace CustomSR
         {
             foreach (Camera cam in cameras)
             {
-                this.render.Render(context, cam, asset);
+                this.renderer.Render(context, cam, asset);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            DisposeForEditor();
+            renderer.Dispose();
         }
 
     }
