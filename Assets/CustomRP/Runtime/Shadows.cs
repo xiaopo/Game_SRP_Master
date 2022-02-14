@@ -148,7 +148,7 @@ namespace CustomSR
             //清除深度缓冲区
             buffer.ClearRenderTarget(true, false, Color.clear);
           
-           
+          
             //float f = 1f - settings.directional.cascadeFade;
             //buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1.0f / settings.maxDistance, 1.0f / settings.distanceFade,1.0f/(1.0f - f * f)));
             buffer.EndSample(bufferName);

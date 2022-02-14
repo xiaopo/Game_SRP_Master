@@ -28,10 +28,8 @@ Varyings UnlitPassVertex(Attributes input)
     float3 positionWS = TransformObjectToWorld(input.psotion);
     output.position = TransformWorldToHClip(positionWS);
     
-
     output.baseUV = TransformBaseUV(input.baseUV);
     return output;
-
 }
 
 //framgment function
@@ -40,12 +38,12 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
     UNITY_SETUP_INSTANCE_ID(input);
     InputConfig config = GetInputConfig(input.position,input.baseUV);
     float4 color = GetBase(config);
-    
+
 #if defined(_CLIPPING)
     clip(color.a - GetCutoff(config));
  #endif
-    return color;
 
+    return color;
 }
 
 

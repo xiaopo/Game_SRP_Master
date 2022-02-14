@@ -59,6 +59,12 @@ namespace CustomSR
         {
             if (Handles.ShouldRenderGizmos())
             {
+                if (useIntermediateBuffer)
+                {
+                    Draw(depthAttachmentId, BuiltinRenderTextureType.CameraTarget, true);
+                    ExecuteBuffer();
+                }
+
                 contenxt.DrawGizmos(camera, GizmoSubset.PreImageEffects);
                 //context.DrawGizmos(camera, GizmoSubset.PostImageEffects);
             }

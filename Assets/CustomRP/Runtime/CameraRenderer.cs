@@ -30,10 +30,17 @@ namespace CustomSR
         static int  depthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
         static int depthTextureId = Shader.PropertyToID("_CameraDepthTexture");
         static int sourceTextureId = Shader.PropertyToID("_SourceTexture");
+        static bool copyTextureSupported = SystemInfo.copyTextureSupport > CopyTextureSupport.None;
 
         bool useHDR;
         bool useDepthTexture, useIntermediateBuffer;
         Material material;
+
+        /*
+         * As the depth texture is optional it might not exist. When a shader samples it anyway the result will be random. 
+         * It could be either an empty texture or an old copy, potentially of another camera. 
+         * It's also possible that a shader samples the depth texture too early, during the opaque rendering phase
+         * **/
         Texture2D missingTexture;
         public CameraRenderer(Shader shader)
         {
@@ -179,10 +186,10 @@ namespace CustomSR
                                         useHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default);
 
                 buffer.GetTemporaryRT(depthAttachmentId, camera.pixelWidth, camera.pixelHeight, 32, FilterMode.Point, RenderTextureFormat.Depth);
-               
-                buffer.SetRenderTarget( colorAttachmentId,RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,//color buffer
-                                        depthAttachmentId,RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store//depth buffer
-                );
+
+                buffer.SetRenderTarget(colorAttachmentId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,//color buffer
+                                        depthAttachmentId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);//depth buffer
+
 
             }
 
@@ -233,19 +240,28 @@ namespace CustomSR
         #endregion
 
         #region attachments of buffer
-        void Draw(RenderTargetIdentifier from, RenderTargetIdentifier to)
+        void Draw(RenderTargetIdentifier from, RenderTargetIdentifier to, bool isDepth = false)
         {
             buffer.SetGlobalTexture(sourceTextureId, from);
             buffer.SetRenderTarget(to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-            buffer.DrawProcedural(Matrix4x4.identity, material, 0, MeshTopology.Triangles, 3);
+            buffer.DrawProcedural(Matrix4x4.identity, material, isDepth ? 1 : 0, MeshTopology.Triangles, 3);
         }
 
         void CopyAttachments()
         {
             if (useDepthTexture)
             {
-                buffer.GetTemporaryRT( depthTextureId, camera.pixelWidth, camera.pixelHeight, 32, FilterMode.Point, RenderTextureFormat.Depth);
-                buffer.CopyTexture(depthAttachmentId, depthTextureId);
+                buffer.GetTemporaryRT(depthTextureId, camera.pixelWidth, camera.pixelHeight, 32, FilterMode.Point, RenderTextureFormat.Depth);
+
+                if (copyTextureSupported)
+                    buffer.CopyTexture(depthAttachmentId, depthTextureId);
+                else
+                {
+                    Draw(depthAttachmentId, depthTextureId,true);
+                    buffer.SetRenderTarget( colorAttachmentId, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
+                                            depthAttachmentId,RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                }
+
                 ExecuteBuffer();
             }
         }
