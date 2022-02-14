@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraBuffer:
     allowHDR: 1
+    copyColor: 1
+    copyColorReflection: 0
     copyDepth: 1
     copyDepthReflections: 0
   useDynamicBatching: 1

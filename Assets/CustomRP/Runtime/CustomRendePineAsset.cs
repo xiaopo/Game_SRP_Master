@@ -13,10 +13,14 @@ namespace CustomSR
 
             public bool allowHDR;
 
-            public bool copyDepth, copyDepthReflections;
+            public bool copyColor;
+            public bool copyColorReflection;
+
+            public bool copyDepth;
+            public bool copyDepthReflections;
         }
 
-        // Start is called before the first frame update
+        //Start is called before the first frame update
         //public bool allowHDR = true;
         [SerializeField]
         public CameraBufferSettings cameraBuffer = new CameraBufferSettings
@@ -29,7 +33,6 @@ namespace CustomSR
         public bool useSRPBatcher = true;
         public bool useLightsPerObject = false;
         
-
         [SerializeField]
         public ShadowSettings shadows = default;
 

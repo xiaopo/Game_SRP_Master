@@ -1,6 +1,9 @@
 #ifndef FRAGMENT_INCLUDED
 #define FRAGMENT_INCLUDED
 
+TEXTURE2D(_CameraColorTexture);
+SAMPLER(sampler_CameraColorTexture);
+
 TEXTURE2D(_CameraDepthTexture);
 SAMPLER(sampler_point_clamp);
 
@@ -26,9 +29,7 @@ struct Fragment
 *This is the view-space depth, so it's the distance from the camera XY plane, not its near plane.
 */
 
-/*
-*Orthographic 
-*/
+
 Fragment GetFragment(float4 positionSS) 
 {
 	Fragment f;
@@ -40,6 +41,13 @@ Fragment GetFragment(float4 positionSS)
 	f.bufferDepth = IsOrthographicCamera() ? OrthographicDepthBufferToLinear(f.bufferDepth) :LinearEyeDepth(f.bufferDepth, _ZBufferParams);
 
 	return f;
+}
+
+float4 GetBufferColor(Fragment fragment, float2 uvOffset = float2(0.0, 0.0))
+{
+	float2 uv = fragment.screenUV + uvOffset;
+
+	return SAMPLE_TEXTURE2D_LOD(_CameraColorTexture, sampler_CameraColorTexture, uv,0);
 }
 
 #endif

@@ -1,6 +1,9 @@
 #ifndef CUSTOM_UNLIT_INPUT_INCLUDED
 #define CUSTOM_UNLIT_INPUT_INCLUDED
 
+TEXTURE2D(_DistortionMap);
+SAMPLER(sampler_DistortionMap);
+
 TEXTURE2D(_MainTex);//定义一张2D文理
 SAMPLER(sampler_MainTex);//指定一个采样器
 
@@ -14,6 +17,7 @@ UNITY_DEFINE_INSTANCED_PROP(float, _NearFadeDistance)
 UNITY_DEFINE_INSTANCED_PROP(float, _NearFadeRange)
 UNITY_DEFINE_INSTANCED_PROP(float, _SoftParticlesDistance)
 UNITY_DEFINE_INSTANCED_PROP(float, _SoftParticlesRange)
+UNITY_DEFINE_INSTANCED_PROP(float, _DistortionStrength)
 
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
@@ -43,6 +47,17 @@ InputConfig GetInputConfig(float4 positionSS,float2 baseUV)
     return c;
 }
 
+float2 GetDistortion(InputConfig c) 
+{
+    float4 rawMap = SAMPLE_TEXTURE2D(_DistortionMap, sampler_DistortionMap, c.baseUV);
+    if (c.flipbookBlending)
+    {
+        rawMap = lerp(rawMap, SAMPLE_TEXTURE2D(_DistortionMap, sampler_DistortionMap, c.flipbookUVB.xy),c.flipbookUVB.z);
+    }
+
+    return DecodeNormal(rawMap, INPUT_PROP(_DistortionStrength)).xy;
+}
+
 float2 TransformBaseUV(float2 baseUV)
 {
     float4 baseST = INPUT_PROP(_MainTex_ST);
@@ -60,6 +75,7 @@ float4 GetBase(InputConfig c)
 
     if (c.flipbookBlending)
     {
+        //
         mainMap = lerp(mainMap, SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, c.flipbookUVB.xy),c.flipbookUVB.z);
     }
 

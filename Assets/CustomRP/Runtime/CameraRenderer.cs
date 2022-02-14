@@ -28,12 +28,13 @@ namespace CustomSR
 
         static int colorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
         static int  depthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
+        static int colorTextureId = Shader.PropertyToID("_CameraColorTexture");
         static int depthTextureId = Shader.PropertyToID("_CameraDepthTexture");
         static int sourceTextureId = Shader.PropertyToID("_SourceTexture");
         static bool copyTextureSupported = SystemInfo.copyTextureSupport > CopyTextureSupport.None;
 
         bool useHDR;
-        bool useDepthTexture, useIntermediateBuffer;
+        bool useColorTexture, useDepthTexture, useIntermediateBuffer;
         Material material;
 
         /*
@@ -62,10 +63,12 @@ namespace CustomSR
             this.useDepthTexture = true;
             if (camera.cameraType == CameraType.Reflection)
             {
+                useColorTexture = asset.cameraBuffer.copyColorReflection;
                 useDepthTexture = asset.cameraBuffer.copyDepthReflections;
             }
             else
             {
+                useColorTexture = asset.cameraBuffer.copyColor;
                 useDepthTexture = asset.cameraBuffer.copyDepth;
             }
 
@@ -156,7 +159,9 @@ namespace CustomSR
             //2.draw sky box
             contenxt.DrawSkybox(camera);
 
-            CopyAttachments();
+            if (useColorTexture || useDepthTexture) { 
+                CopyAttachments();
+            }
 
             //3.draw transparent
             sortingSetting.criteria = SortingCriteria.CommonTransparent;
@@ -175,7 +180,7 @@ namespace CustomSR
             //得到相机的清除状态
             CameraClearFlags flags = camera.clearFlags;
 
-            useIntermediateBuffer = useDepthTexture || postFXStack.IsActive;
+            useIntermediateBuffer = useColorTexture || useDepthTexture || postFXStack.IsActive;
             if (useIntermediateBuffer)
             {
                 if (flags > CameraClearFlags.Color) flags = CameraClearFlags.Color;
@@ -200,7 +205,7 @@ namespace CustomSR
 
             buffer.BeginSample(SampleName);
 
-            //buffer.SetGlobalTexture(colorTextureId, missingTexture);
+            buffer.SetGlobalTexture(colorTextureId, missingTexture);
             buffer.SetGlobalTexture(depthTextureId, missingTexture);
 
             ExecuteBuffer();
@@ -249,21 +254,43 @@ namespace CustomSR
 
         void CopyAttachments()
         {
-            if (useDepthTexture)
+            if (useColorTexture)
             {
-                buffer.GetTemporaryRT(depthTextureId, camera.pixelWidth, camera.pixelHeight, 32, FilterMode.Point, RenderTextureFormat.Depth);
-
+                buffer.GetTemporaryRT(colorTextureId, camera.pixelWidth, camera.pixelHeight, 0, FilterMode.Bilinear, useHDR ? RenderTextureFormat.DefaultHDR : RenderTextureFormat.Default );
                 if (copyTextureSupported)
-                    buffer.CopyTexture(depthAttachmentId, depthTextureId);
+                {
+                    buffer.CopyTexture(colorAttachmentId, colorTextureId);
+                }
                 else
                 {
-                    Draw(depthAttachmentId, depthTextureId,true);
-                    buffer.SetRenderTarget( colorAttachmentId, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
-                                            depthAttachmentId,RenderBufferLoadAction.Load, RenderBufferStoreAction.Store);
+                    Draw(colorAttachmentId, colorTextureId);
                 }
-
-                ExecuteBuffer();
             }
+
+            if (useDepthTexture)
+            {
+                buffer.GetTemporaryRT( depthTextureId, camera.pixelWidth, camera.pixelHeight,32, FilterMode.Point, RenderTextureFormat.Depth);
+                if (copyTextureSupported)
+                {
+                    buffer.CopyTexture(depthAttachmentId, depthTextureId);
+                }
+                else
+                {
+                    Draw(depthAttachmentId, depthTextureId, true);
+                    //buffer.SetRenderTarget(…);
+                }
+                //ExecuteBuffer();
+            }
+
+            if (!copyTextureSupported)
+            {
+                buffer.SetRenderTarget(
+                    colorAttachmentId,RenderBufferLoadAction.Load, RenderBufferStoreAction.Store,
+                    depthAttachmentId,RenderBufferLoadAction.Load, RenderBufferStoreAction.Store
+                );
+            }
+
+            ExecuteBuffer();
         }
 
         #endregion
@@ -274,11 +301,12 @@ namespace CustomSR
             {
                 buffer.ReleaseTemporaryRT(colorAttachmentId);
                 buffer.ReleaseTemporaryRT(depthAttachmentId);
-    
+
+                if (useColorTexture)
+                    buffer.ReleaseTemporaryRT(colorTextureId);
+
                 if (useDepthTexture)
-                {
                     buffer.ReleaseTemporaryRT(depthTextureId);
-                }
             }
         }
 

@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: particle-2
   m_Shader: {fileID: 4800000, guid: 2e35a1d677560984a8ec5e3f7a129cba, type: 3}
-  m_ShaderKeywords: _FLIPBOOK_BLENDING _NEAR_FADE _SOFT_PARTICLES _VERTEX_COLORS
+  m_ShaderKeywords: _DISTORTION _FLIPBOOK_BLENDING _NEAR_FADE _SOFT_PARTICLES _VERTEX_COLORS
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -33,6 +33,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DistortionMap:
+        m_Texture: {fileID: 2800000, guid: ec630eeb002c973469ca2cfea44a0e69, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -60,6 +64,8 @@ Material:
     - _Clippling: 0
     - _Cutoff: 0.124
     - _DetailNormalMapScale: 1
+    - _Distortion: 1
+    - _DistortionStrength: 0.054
     - _DstBlend: 10
     - _FlipbookBlending: 1
     - _GlossMapScale: 1
@@ -74,8 +80,8 @@ Material:
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SoftParticles: 1
-    - _SoftParticlesDistance: 1.3
-    - _SoftParticlesRange: 1
+    - _SoftParticlesDistance: 3.3
+    - _SoftParticlesRange: 4.7
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _StencilComparison: 3

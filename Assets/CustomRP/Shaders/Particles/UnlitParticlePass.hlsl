@@ -60,7 +60,10 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
 {
     UNITY_SETUP_INSTANCE_ID(input);
     InputConfig config = GetInputConfig(input.positionCS_SS,input.baseUV);
+
+    //return GetBufferColor(config.fragment, 0.05);
     //return float4(config.fragment.bufferDepth.xxx / 20.0, 1.0);
+
 #if defined(_VERTEX_COLORS)
     config.color = input.color;
 #endif
@@ -80,6 +83,12 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
 #if defined(_CLIPPING)
     clip(color.a - GetCutoff(config));
  #endif
+
+#if defined(_DISTORTION)
+    float2 distortion = GetDistortion(config) * color.a;
+    color.rgb = GetBufferColor(config.fragment, distortion).rgb;
+#endif
+
     return color;
 
 }
