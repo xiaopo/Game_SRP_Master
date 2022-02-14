@@ -18,6 +18,7 @@ UNITY_DEFINE_INSTANCED_PROP(float, _NearFadeRange)
 UNITY_DEFINE_INSTANCED_PROP(float, _SoftParticlesDistance)
 UNITY_DEFINE_INSTANCED_PROP(float, _SoftParticlesRange)
 UNITY_DEFINE_INSTANCED_PROP(float, _DistortionStrength)
+UNITY_DEFINE_INSTANCED_PROP(float, _DistortionBlend)
 
 UNITY_INSTANCING_BUFFER_END(UnityPerMaterial)
 
@@ -45,6 +46,9 @@ InputConfig GetInputConfig(float4 positionSS,float2 baseUV)
     c.nearFade = false;
     c.softParticles = false;
     return c;
+}
+float GetDistortionBlend(InputConfig c) {
+    return INPUT_PROP(_DistortionBlend);
 }
 
 float2 GetDistortion(InputConfig c) 

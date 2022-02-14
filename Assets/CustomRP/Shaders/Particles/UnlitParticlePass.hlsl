@@ -1,6 +1,14 @@
 #ifndef CUSTOM_UNLIT_PASS_PARTICLE_INCLUDED
 #define CUSTOM_UNLIT_PASS_PARTICLE_INCLUDED
 
+/*
+Now the distorted color texture samples fade as well, 
+which makes the undistorted background and other particles partially visible again. 
+The result is a smooth mess that doesn't make physical sense but is enough to provide the illusion of atmospheric refraction.
+This can be improved further by tweaking the distortion strength along with smoothly fading particles in and out by adjusting their color during their lifetime.
+Also, the offset vectors are aligned with the screen and aren't affected by the orientation of the particle. 
+So if the particles are set to rotate during their lifetime their individual distortion patterns will appear to twist.
+*/
 
 struct Attributes
 {
@@ -85,8 +93,10 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
  #endif
 
 #if defined(_DISTORTION)
+
     float2 distortion = GetDistortion(config) * color.a;
-    color.rgb = GetBufferColor(config.fragment, distortion).rgb;
+    color.rgb = lerp(GetBufferColor(config.fragment, distortion).rgb, color.rgb, saturate(color.a - GetDistortionBlend(config)));
+   
 #endif
 
     return color;

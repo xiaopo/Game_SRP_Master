@@ -62,10 +62,11 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _Clippling: 0
-    - _Cutoff: 0.124
+    - _Cutoff: 0.04
     - _DetailNormalMapScale: 1
     - _Distortion: 1
-    - _DistortionStrength: 0.054
+    - _DistortionBlend: 1
+    - _DistortionStrength: 0.0833
     - _DstBlend: 10
     - _FlipbookBlending: 1
     - _GlossMapScale: 1
@@ -75,13 +76,13 @@ Material:
     - _Mode: 0
     - _NearFade: 1
     - _NearFadeDistance: 4.75
-    - _NearFadeRange: 7.71
+    - _NearFadeRange: 4.83
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SoftParticles: 1
-    - _SoftParticlesDistance: 3.3
-    - _SoftParticlesRange: 4.7
+    - _SoftParticlesDistance: 4.2
+    - _SoftParticlesRange: 4.24
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _StencilComparison: 3
