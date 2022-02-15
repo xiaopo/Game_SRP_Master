@@ -30,6 +30,7 @@ namespace CustomSR
             ToneMappingReinhard,
         }
 
+        CameraSettings.FinalBlendMode finalBlendMode;
         ScriptableRenderContext context;
         Camera camera;
         PostFXSettings settings;
@@ -57,6 +58,9 @@ namespace CustomSR
         int colorGradingLUTId = Shader.PropertyToID("_ColorGradingLUT");
         int colorGradingLUTParametersId = Shader.PropertyToID("_ColorGradingLUTParameters");
         int colorGradingLUTInLogId = Shader.PropertyToID("_ColorGradingLUTInLogC");
+        int finalSrcBlendId = Shader.PropertyToID("_FinalSrcBlend");
+        int finalDstBlendId = Shader.PropertyToID("_FinalDstBlend");
+
         int colorLUTResolution;
         bool useHDR;
         public PostFXStack()
@@ -68,8 +72,9 @@ namespace CustomSR
             }
         }
 
-        public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings,bool useHDR,int colorLUTResolution)
+        public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings,bool useHDR,int colorLUTResolution, CameraSettings.FinalBlendMode finalBlendMode)
         {
+            this.finalBlendMode = finalBlendMode;
             this.context = context;
             this.camera = camera;
             this.settings = settings;
@@ -110,8 +115,14 @@ namespace CustomSR
 
         void DrawFinal(RenderTargetIdentifier from)
         {
+            buffer.SetGlobalFloat(finalSrcBlendId, (float)finalBlendMode.source);
+            buffer.SetGlobalFloat(finalDstBlendId, (float)finalBlendMode.destination);
+
             buffer.SetGlobalTexture(fxSourceId, from);
-            buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,RenderBufferLoadAction.Load, RenderBufferStoreAction.Store );
+            buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,
+                finalBlendMode.destination == BlendMode.Zero ?RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load, 
+                RenderBufferStoreAction.Store );
+
             buffer.SetViewport(camera.pixelRect);
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)Pass.Final, MeshTopology.Triangles, 3);
         }

@@ -31,6 +31,7 @@ namespace CustomSR
         static int depthTextureId = Shader.PropertyToID("_CameraDepthTexture");
         static int sourceTextureId = Shader.PropertyToID("_SourceTexture");
         static bool copyTextureSupported = SystemInfo.copyTextureSupport > CopyTextureSupport.None;
+        static CameraSettings defaultCameraSettings = new CameraSettings();
 
         bool useHDR;
         bool useColorTexture, useDepthTexture, useIntermediateBuffer;
@@ -59,6 +60,11 @@ namespace CustomSR
             this.camera = camera;
             this.asset = asset;
 
+            CustomRenderPipelineCamera crpCamera = null;
+            camera.TryGetComponent< CustomRenderPipelineCamera>(out crpCamera);
+
+            CameraSettings cameraSettings = crpCamera ? crpCamera.Settings : defaultCameraSettings;
+
             this.useDepthTexture = true;
             if (camera.cameraType == CameraType.Reflection)
             {
@@ -86,7 +92,7 @@ namespace CustomSR
             //渲染灯光
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
             //后处理
-            postFXStack.Setup(contenxt, camera, asset.postFXSettings,useHDR, (int)asset.colorLUTResolution);
+            postFXStack.Setup(contenxt, camera, asset.postFXSettings,useHDR, (int)asset.colorLUTResolution, cameraSettings.finalBlendMode);
             buffer.EndSample(SampleName);
 
             SetUp();

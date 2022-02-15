@@ -7,6 +7,7 @@ namespace CustomSR
     [CreateAssetMenu(menuName = "Rendering/CreateCustomRenderPipeline")]
     public class CustomRendePineAsset : RenderPipelineAsset
     {
+
         [System.Serializable]
         public struct CameraBufferSettings
         {
