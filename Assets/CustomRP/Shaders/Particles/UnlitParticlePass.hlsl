@@ -94,7 +94,9 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
 
 #if defined(_DISTORTION)
 
+    //
     float2 distortion = GetDistortion(config) * color.a;
+
     color.rgb = lerp(GetBufferColor(config.fragment, distortion).rgb, color.rgb, saturate(color.a - GetDistortionBlend(config)));
    
 #endif

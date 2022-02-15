@@ -24,7 +24,6 @@ namespace CustomSR
 
         Lighting lighting = new Lighting();//灯光
         PostFXStack postFXStack = new PostFXStack();
-        //static int frameBufferId = Shader.PropertyToID("_CameraFrameBuffer");
 
         static int colorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
         static int  depthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
