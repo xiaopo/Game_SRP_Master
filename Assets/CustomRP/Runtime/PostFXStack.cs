@@ -108,6 +108,14 @@ namespace CustomSR
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
         }
 
+        void DrawFinal(RenderTargetIdentifier from)
+        {
+            buffer.SetGlobalTexture(fxSourceId, from);
+            buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,RenderBufferLoadAction.Load, RenderBufferStoreAction.Store );
+            buffer.SetViewport(camera.pixelRect);
+            buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)Pass.Final, MeshTopology.Triangles, 3);
+        }
+
         bool DoBloom(int sourceId)
         {
             //buffer.BeginSample("Bloom");
@@ -284,7 +292,9 @@ namespace CustomSR
             Draw(sourceId, colorGradingLUTId, pass);
 
             buffer.SetGlobalVector(colorGradingLUTParametersId, new Vector4(1f / lutWidth, 1f / lutHeight, lutHeight - 1f));
-            Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Final);
+           
+            //Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Final);
+            DrawFinal(sourceId);
             buffer.ReleaseTemporaryRT(colorGradingLUTId);
         }
     }

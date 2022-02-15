@@ -34,7 +34,7 @@ Shader "CustomRP/Unlit"
         {
             Name "Unlit"
 
-            Blend[_SrcBlend][_DstBlend]
+            Blend[_SrcBlend][_DstBlend], One OneMinusSrcAlpha
             ZWrite[_ZWrite]
 
              Stencil
