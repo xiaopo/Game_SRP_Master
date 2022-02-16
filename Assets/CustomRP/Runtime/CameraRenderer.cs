@@ -24,6 +24,7 @@ namespace CustomSR
 
         Lighting lighting = new Lighting();//灯光
         PostFXStack postFXStack = new PostFXStack();
+        PostFXSettings postFXSettings;
 
         static int colorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
         static int  depthAttachmentId = Shader.PropertyToID("_CameraDepthAttachment");
@@ -59,12 +60,17 @@ namespace CustomSR
             this.contenxt = contenxt;
             this.camera = camera;
             this.asset = asset;
+            postFXSettings = asset.postFXSettings;
 
             CustomRenderPipelineCamera crpCamera = null;
             camera.TryGetComponent< CustomRenderPipelineCamera>(out crpCamera);
 
             CameraSettings cameraSettings = crpCamera ? crpCamera.Settings : defaultCameraSettings;
-
+            if (cameraSettings.overridePostFX)
+            {
+                postFXSettings = cameraSettings.postFXSettings;
+            }
+            
             this.useDepthTexture = true;
             if (camera.cameraType == CameraType.Reflection)
             {
@@ -92,7 +98,7 @@ namespace CustomSR
             //渲染灯光
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
             //后处理
-            postFXStack.Setup(contenxt, camera, asset.postFXSettings,useHDR, (int)asset.colorLUTResolution, cameraSettings.finalBlendMode);
+            postFXStack.Setup(contenxt, camera, postFXSettings,useHDR, (int)asset.colorLUTResolution, cameraSettings.finalBlendMode);
             buffer.EndSample(SampleName);
 
             SetUp();
