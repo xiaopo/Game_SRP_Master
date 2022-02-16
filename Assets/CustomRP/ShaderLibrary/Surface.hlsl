@@ -15,6 +15,7 @@ struct Surface
     float3 viewDirection;//йс╫г
     float depth;
     float dither;
+    uint renderingLayerMask;
 };
 
 #endif

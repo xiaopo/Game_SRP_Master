@@ -244,7 +244,7 @@ namespace CustomSR
         void RenderSpotShadows(int index, int split, int tileSize)
         {
             ShadowedOtherLight light = shadowedOtherLights[index];
-            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
+            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex) { useRenderingLayerMaskTest = true };
 
             cullingResults.ComputeSpotShadowMatricesAndCullingPrimitives(light.visibleLightIndex,
                                                                         out Matrix4x4 viewMatrix,
@@ -277,7 +277,7 @@ namespace CustomSR
         void RenderPointShadows(int index, int split, int tileSize)
         {
             ShadowedOtherLight light = shadowedOtherLights[index];
-            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
+            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex) { useRenderingLayerMaskTest = true };
 
 
             //The field of view for cubemap faces is always 90°, thus the world-space tile size at distance 1 is always 2
@@ -382,7 +382,7 @@ namespace CustomSR
         void RenderDirectionalShadows(int lightIndex, int split, int tileSize)
         {
             ShadowedDirectionLight light = ShadowedDirectionalLights[lightIndex];
-            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex);
+            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex) { useRenderingLayerMaskTest = true };
 
             int cascadeCount = settings.directional.cascadeCount;
             //转换到对应的行
@@ -433,7 +433,7 @@ namespace CustomSR
             cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, bias);
         }
 
-        public Vector4 ReserveDirectionalShadows(Light light,int visibleLightIndex, int visibleIndex)
+        public Vector4 ReserveDirectionalShadows(Light light,int visibleLightIndex)
         {
             //储存可见光的索引，前提是光源开启了阴影投射并且阴影强度不能为0
             if(shadowedDirLightCount < maxShadowedDirLightCount  

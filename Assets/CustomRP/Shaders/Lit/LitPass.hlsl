@@ -115,7 +115,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.fresnelStrength = GetFresnel(config);
     surface.depth = -TransformWorldToView(input.worldPos).z;
     surface.dither = InterleavedGradientNoise(config.fragment.positionSS, 0);
-    
+    surface.renderingLayerMask = asuint(unity_RenderingLayer.x);
 
 #if defined(_PREMULTIPLY_ALPHA)
     BRDF brdf = GetBRDF(surface,true);

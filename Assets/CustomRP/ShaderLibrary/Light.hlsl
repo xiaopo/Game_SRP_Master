@@ -6,14 +6,15 @@
 CBUFFER_START(_CustomLight)
     int _DirectionLightCount;//有效平行光个数
     float4 _DirectionLightColors[MAX_DIRECTIONAL_LIGHT_COUNT];
-    float4 _DirectionLightDrections[MAX_DIRECTIONAL_LIGHT_COUNT];
+    float4 _DirectionalLightDirectionsAndMasks[MAX_DIRECTIONAL_LIGHT_COUNT];
+
     float4 _DirectionalLightShadowData[MAX_DIRECTIONAL_LIGHT_COUNT];
     float4 _OtherLightShadowData[MAX_OTHER_LIGHT_COUNT];
 
     int _OtherLightCount;
     float4 _OtherLightColors[MAX_OTHER_LIGHT_COUNT];
     float4 _OtherLightPositions[MAX_OTHER_LIGHT_COUNT];
-    float4 _OtherLightDirections[MAX_OTHER_LIGHT_COUNT];
+    float4 _OtherLightDirectionsAndMasks[MAX_OTHER_LIGHT_COUNT];
     float4 _OtherLightSpotAngles[MAX_OTHER_LIGHT_COUNT];
 CBUFFER_END
 
@@ -22,6 +23,7 @@ struct Light
     float3 color;
     float3 direction;
     float attenuation;
+    uint renderingLayerMask;
 };
 
 //----------- direction light
@@ -34,6 +36,10 @@ int GetDirectionLightCount()
 int GetOtherLightCount()
 {
     return _OtherLightCount;
+}
+
+bool RenderingLayersOverlap(Surface surface, Light light) {
+    return (surface.renderingLayerMask & light.renderingLayerMask) != 0;
 }
 
 DirectionalShadowData GetDirectionalShadowData(int lightIndex, ShadowData shadowData)
@@ -65,8 +71,9 @@ Light GetDirectionLight(int index, Surface surfaceWS, ShadowData shadowData)
 {
     Light light;
     light.color = _DirectionLightColors[index].rgb;
-    light.direction = _DirectionLightDrections[index].xyz;
-    
+    light.direction = _DirectionalLightDirectionsAndMasks[index].xyz;
+    light.renderingLayerMask = asuint(_DirectionalLightDirectionsAndMasks[index].w);
+
     DirectionalShadowData dirshadowData = GetDirectionalShadowData(index, shadowData);
     light.attenuation = GetDirectionalShadowAttenuation(dirshadowData, shadowData,surfaceWS);
 
@@ -91,7 +98,8 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     //Spot light
     float4 spotAngles = _OtherLightSpotAngles[index];
     //spotAttenuation =  saturate(d * a + b)^2 
-    float3 spotDirection = _OtherLightDirections[index].xyz;
+    float3 spotDirection = _OtherLightDirectionsAndMasks[index].xyz;
+    light.renderingLayerMask = asuint(_OtherLightDirectionsAndMasks[index].w);
     float spotAttenuation = Square(saturate(dot(spotDirection, light.direction) * spotAngles.x + spotAngles.y));
     
     //other light with shadowmask

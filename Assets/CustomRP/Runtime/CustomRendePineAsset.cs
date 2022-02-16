@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 namespace CustomSR
 {
     [CreateAssetMenu(menuName = "Rendering/CreateCustomRenderPipeline")]
-    public class CustomRendePineAsset : RenderPipelineAsset
+    public partial  class CustomRendePineAsset : RenderPipelineAsset
     {
 
         [System.Serializable]
@@ -51,5 +51,7 @@ namespace CustomSR
         {
             return new CustomRenderPipeline(this);
         }
+
+
     }
 }

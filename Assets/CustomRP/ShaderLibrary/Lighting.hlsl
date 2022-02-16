@@ -26,7 +26,9 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
     {
         //Get Color and direction by light index 
         Light light = GetDirectionLight(i, surface, shadowData);
-        color += GetLighting(surface, brdf, light);
+        if (RenderingLayersOverlap(surface, light)) {
+            color += GetLighting(surface, brdf, light);
+        }
     }
     
     //point light and spot light
@@ -35,13 +37,17 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
         {
             int lightIndex = unity_LightIndices[(uint)j / 4][(uint) j % 4];
 			Light light = GetOtherLight(lightIndex, surface, shadowData);
-			color += GetLighting(surface, brdf, light);
+            if (RenderingLayersOverlap(surface, light)) {
+                color += GetLighting(surface, brdf, light);
+            }
 		}
 	#else
         for (int j = 0; j < GetOtherLightCount(); j++)
         {
             Light light = GetOtherLight(j, surface, shadowData);
-            color += GetLighting(surface, brdf, light);
+            if (RenderingLayersOverlap(surface, light)) {
+                color += GetLighting(surface, brdf, light);
+            }
         }
     #endif
     

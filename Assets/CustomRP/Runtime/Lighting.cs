@@ -22,25 +22,25 @@ namespace CustomSR
         const int maxOtherLightCount = 64;
         static int dirLightCountId = Shader.PropertyToID("_DirectionLightCount");
         static int dirLightColorsId = Shader.PropertyToID("_DirectionLightColors");
-        static int dirLightDirectionsId = Shader.PropertyToID("_DirectionLightDrections");
+        static int dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirectionsAndMasks");
         static int dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
 
 
         static int otherLightCountId = Shader.PropertyToID("_OtherLightCount");
         static int otherLightColorsId = Shader.PropertyToID("_OtherLightColors");
         static int otherLightPositionsId = Shader.PropertyToID("_OtherLightPositions");
-        static int otherLightDirectionsId = Shader.PropertyToID("_OtherLightDirections");
+        static int otherLightDirectionsId = Shader.PropertyToID("_OtherLightDirectionsAndMasks");
         static int otherLightSpotAnglesId = Shader.PropertyToID("_OtherLightSpotAngles");
         static int otherLightShadowDataId = Shader.PropertyToID("_OtherLightShadowData");
 
         //储存可见光的颜色和方向
         static Vector4[] dirLightColors = new Vector4[maxDirLightCount];
-        static Vector4[] dirLightDirectioins = new Vector4[maxDirLightCount];
+        static Vector4[] dirLightDirectionsAndMasks = new Vector4[maxDirLightCount];
         static Vector4[] dirLightShadowData = new Vector4[maxDirLightCount];
 
         static Vector4[] otherLightColors = new Vector4[maxOtherLightCount];
         static Vector4[] otherLightPositions = new Vector4[maxOtherLightCount];
-        static Vector4[] otherLightDirections = new Vector4[maxOtherLightCount];
+        static Vector4[] otherLightDirectionsAndMasks = new Vector4[maxOtherLightCount];
         static Vector4[] otherLightSpotAngles = new Vector4[maxOtherLightCount];
         static Vector4[] otherLightShadowData = new Vector4[maxOtherLightCount];
 
@@ -81,24 +81,25 @@ namespace CustomSR
             for (i = 0; i < visibleLights.Length; i++)
             {
                 VisibleLight visibleLight = visibleLights[i];
+                Light light = visibleLight.light;
                 int newIndex = -1;
                 switch (visibleLight.lightType)
                 {
                     case LightType.Directional:
                         if (dirLightCount < maxDirLightCount){
-                            SetupDirectionalLight(dirLightCount++,i,ref visibleLight);
+                            SetupDirectionalLight(dirLightCount++,i,ref visibleLight, light);
                         }
                         break;
                     case LightType.Point:
                         if (otherLightCount < maxOtherLightCount){
                             newIndex = otherLightCount;
-                            SetupPointLight(otherLightCount++,i,ref visibleLight);
+                            SetupPointLight(otherLightCount++,i,ref visibleLight, light);
                         }
                         break;
                     case LightType.Spot:
                         if (otherLightCount < maxOtherLightCount){
                             newIndex = otherLightCount;
-                            SetupSpotLight(otherLightCount++,i,ref visibleLight);
+                            SetupSpotLight(otherLightCount++,i,ref visibleLight, light);
                         }
                         break;
                 }
@@ -128,7 +129,7 @@ namespace CustomSR
                 //方向光
                 buffer.SetGlobalInt(dirLightCountId, dirLightCount);
                 buffer.SetGlobalVectorArray(dirLightColorsId, dirLightColors);
-                buffer.SetGlobalVectorArray(dirLightDirectionsId, dirLightDirectioins);
+                buffer.SetGlobalVectorArray(dirLightDirectionsId, dirLightDirectionsAndMasks);
                 buffer.SetGlobalVectorArray(dirLightShadowDataId, dirLightShadowData);
             }
 
@@ -139,7 +140,7 @@ namespace CustomSR
                 //point and spot light
                 buffer.SetGlobalVectorArray(otherLightColorsId, otherLightColors);
                 buffer.SetGlobalVectorArray(otherLightPositionsId, otherLightPositions); 
-                buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirections);
+                buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirectionsAndMasks);
                 buffer.SetGlobalVectorArray(otherLightSpotAnglesId, otherLightSpotAngles);
 
                 buffer.SetGlobalVectorArray(otherLightShadowDataId, otherLightShadowData);
@@ -147,15 +148,16 @@ namespace CustomSR
             }
         }
 
-        void SetupDirectionalLight (int index, int visibleIndex, ref VisibleLight visibleLight)
+        void SetupDirectionalLight (int index, int visibleIndex, ref VisibleLight visibleLight, Light light)
         {
             if (index >= maxDirLightCount) return;
 
             dirLightColors[index] = visibleLight.finalColor;
             //第三列取反得到light direction
-            dirLightDirectioins[index] = -visibleLight.localToWorldMatrix.GetColumn(2);
-
-            dirLightShadowData[index] = shadows.ReserveDirectionalShadows(visibleLight.light, index, visibleIndex);
+            Vector4 dirAndMask = -visibleLight.localToWorldMatrix.GetColumn(2);
+            dirAndMask.w = light.renderingLayerMask;
+            dirLightDirectionsAndMasks[index] = dirAndMask;
+            dirLightShadowData[index] = shadows.ReserveDirectionalShadows(light, visibleIndex);
         }
 
         void SetupOtherLightPosition(int index, ref VisibleLight visibleLight)
@@ -170,24 +172,31 @@ namespace CustomSR
         }
 
         // point light
-        void SetupPointLight(int index, int visibleIndex, ref VisibleLight visibleLight)
+        void SetupPointLight(int index, int visibleIndex, ref VisibleLight visibleLight,Light light)
         {
             SetupOtherLightPosition(index, ref visibleLight);
             otherLightSpotAngles[index] = new Vector4(0f, 1f);
 
-            Light light = visibleLight.light;
+            Vector4 dirAndmask = Vector4.zero;
+            dirAndmask.w = light.renderingLayerMask;
+            otherLightDirectionsAndMasks[index] = dirAndmask;
+           // Light light = visibleLight.light;
             otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
         }
 
         //spot light
-        void SetupSpotLight(int index, int visibleIndex, ref VisibleLight visibleLight)
+        void SetupSpotLight(int index, int visibleIndex, ref VisibleLight visibleLight, Light light)
         {
             SetupOtherLightPosition(index, ref visibleLight);
 
             //第三列取反可得光照方向
-            otherLightDirections[index] =  -visibleLight.localToWorldMatrix.GetColumn(2);
 
-            Light light = visibleLight.light;
+            Vector4 dirAndMask = -visibleLight.localToWorldMatrix.GetColumn(2);
+            dirAndMask.w = light.renderingLayerMask;
+            otherLightDirectionsAndMasks[index] = dirAndMask;
+
+
+            //Light light = visibleLight.light;
 
             /**
              * formula
@@ -215,6 +224,7 @@ namespace CustomSR
             //shadow data
             otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
         }
+
 
         public void Cleanup()
         {
