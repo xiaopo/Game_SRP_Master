@@ -22,14 +22,14 @@ namespace CustomSR
         const int maxOtherLightCount = 64;
         static int dirLightCountId = Shader.PropertyToID("_DirectionLightCount");
         static int dirLightColorsId = Shader.PropertyToID("_DirectionLightColors");
-        static int dirLightDirectionsId = Shader.PropertyToID("_DirectionalLightDirectionsAndMasks");
+        static int dirLightDirectionsAndMasksId = Shader.PropertyToID("_DirectionalLightDirectionsAndMasks");
         static int dirLightShadowDataId = Shader.PropertyToID("_DirectionalLightShadowData");
 
 
         static int otherLightCountId = Shader.PropertyToID("_OtherLightCount");
         static int otherLightColorsId = Shader.PropertyToID("_OtherLightColors");
         static int otherLightPositionsId = Shader.PropertyToID("_OtherLightPositions");
-        static int otherLightDirectionsId = Shader.PropertyToID("_OtherLightDirectionsAndMasks");
+        static int otherLightDirectionsAndMasksId = Shader.PropertyToID("_OtherLightDirectionsAndMasks");
         static int otherLightSpotAnglesId = Shader.PropertyToID("_OtherLightSpotAngles");
         static int otherLightShadowDataId = Shader.PropertyToID("_OtherLightShadowData");
 
@@ -129,7 +129,7 @@ namespace CustomSR
                 //方向光
                 buffer.SetGlobalInt(dirLightCountId, dirLightCount);
                 buffer.SetGlobalVectorArray(dirLightColorsId, dirLightColors);
-                buffer.SetGlobalVectorArray(dirLightDirectionsId, dirLightDirectionsAndMasks);
+                buffer.SetGlobalVectorArray(dirLightDirectionsAndMasksId, dirLightDirectionsAndMasks);
                 buffer.SetGlobalVectorArray(dirLightShadowDataId, dirLightShadowData);
             }
 
@@ -140,7 +140,7 @@ namespace CustomSR
                 //point and spot light
                 buffer.SetGlobalVectorArray(otherLightColorsId, otherLightColors);
                 buffer.SetGlobalVectorArray(otherLightPositionsId, otherLightPositions); 
-                buffer.SetGlobalVectorArray(otherLightDirectionsId, otherLightDirectionsAndMasks);
+                buffer.SetGlobalVectorArray(otherLightDirectionsAndMasksId, otherLightDirectionsAndMasks);
                 buffer.SetGlobalVectorArray(otherLightSpotAnglesId, otherLightSpotAngles);
 
                 buffer.SetGlobalVectorArray(otherLightShadowDataId, otherLightShadowData);
