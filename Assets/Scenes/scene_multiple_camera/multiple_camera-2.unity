@@ -168,7 +168,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 3
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 43ff88f1fb681e0489674cf243fdc19e, type: 2}
@@ -281,7 +281,7 @@ Light:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 32771
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
@@ -654,6 +654,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings:
+    renderingLayerMask: 2
+    maskLights: 1
     overridePostFX: 1
     postFXSettings: {fileID: 11400000, guid: 5f19a27bcd9d8564f85bcd7eab3b940b, type: 2}
     finalBlendMode:

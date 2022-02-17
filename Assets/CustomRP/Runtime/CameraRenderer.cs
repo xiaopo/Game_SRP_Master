@@ -96,14 +96,15 @@ namespace CustomSR
             buffer.BeginSample(SampleName);
             ExecuteBuffer();
             //渲染灯光
-            lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject);
+            lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject,
+                cameraSettings.maskLights ? cameraSettings.renderingLayerMask : -1);
             //后处理
             postFXStack.Setup(contenxt, camera, postFXSettings,useHDR, (int)asset.colorLUTResolution, cameraSettings.finalBlendMode);
             buffer.EndSample(SampleName);
 
             SetUp();
             //绘制几何体
-            DrawVisibleGeometry();
+            DrawVisibleGeometry(cameraSettings.renderingLayerMask);
             //绘制SRP不支持的着色器类型
             DrawUnsupportedShaders();
             //绘制辅助线
@@ -130,7 +131,7 @@ namespace CustomSR
                                         new ShaderTagId("SRPDefaultUnlit"),
                                         new ShaderTagId("CustomLit")
                                       };
-        void DrawVisibleGeometry()
+        void DrawVisibleGeometry(int renderingLayerMask)
         {
 
             PerObjectData lightsPerObjectFlags = asset.useLightsPerObject ? PerObjectData.LightData | PerObjectData.LightIndices : PerObjectData.None;
@@ -163,7 +164,7 @@ namespace CustomSR
 
 
             //设置哪些类型的渲染队列可以被绘制
-            var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
+            var filteringSettings = new FilteringSettings(RenderQueueRange.opaque, renderingLayerMask: (uint)renderingLayerMask);
 
             //1.绘制 opaque
             contenxt.DrawRenderers(culingResouts, ref drawingSettings, ref filteringSettings);

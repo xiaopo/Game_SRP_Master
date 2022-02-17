@@ -1,16 +1,19 @@
 
 using System;
 using UnityEngine.Rendering;
+using UnityEngine;
 namespace CustomSR
 {
+    public class RenderingLayerMaskFieldAttribute : PropertyAttribute { }
+
     [Serializable]
     public class CameraSettings
     {
-
+        [RenderingLayerMaskField]
+        public int renderingLayerMask = -1;
+        public bool maskLights = false;
         public bool overridePostFX = false;
-
         public PostFXSettings postFXSettings = default;
-
 
         [Serializable]
         public struct FinalBlendMode

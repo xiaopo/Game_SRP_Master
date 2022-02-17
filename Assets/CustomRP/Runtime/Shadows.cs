@@ -331,7 +331,7 @@ namespace CustomSR
             }
         }
 
-        public Vector4 ReserveOtherShadows(Light light, int visibleLightIndex, int visibleIndex)
+        public Vector4 ReserveOtherShadows(Light light, int visibleLightIndex)
         {
             if (light.shadows == LightShadows.None || light.shadowStrength <= 0f)
             {

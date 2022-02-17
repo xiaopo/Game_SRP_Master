@@ -50,7 +50,7 @@ namespace CustomSR
         CullingResults cullingResults;
 
         Shadows shadows = new Shadows();
-        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings, bool useLightsPerObject)
+        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings, bool useLightsPerObject, int renderingLayerMask)
         {
             this.cullingResults = cullingResults;
 
@@ -58,7 +58,7 @@ namespace CustomSR
             //传递阴影数据
             shadows.Setup(context, cullingResults, shadowSettings);
             //发送光源数据
-            SetupLights(useLightsPerObject);
+            SetupLights(useLightsPerObject, renderingLayerMask);
             //渲染阴影
             shadows.Render();
             buffer.EndSample(bufferName);
@@ -67,7 +67,7 @@ namespace CustomSR
             buffer.Clear();
         }
 
-        void SetupLights(bool useLightsPerObject)
+        void SetupLights(bool useLightsPerObject, int renderingLayerMask)
         {
             //Unity 会在剔除阶段计算哪些光源会影响相机的可见性
             //得到所有可见光
@@ -83,27 +83,32 @@ namespace CustomSR
                 VisibleLight visibleLight = visibleLights[i];
                 Light light = visibleLight.light;
                 int newIndex = -1;
-                switch (visibleLight.lightType)
+                if ((light.renderingLayerMask & renderingLayerMask) != 0)
                 {
-                    case LightType.Directional:
-                        if (dirLightCount < maxDirLightCount){
-                            SetupDirectionalLight(dirLightCount++,i,ref visibleLight, light);
-                        }
-                        break;
-                    case LightType.Point:
-                        if (otherLightCount < maxOtherLightCount){
-                            newIndex = otherLightCount;
-                            SetupPointLight(otherLightCount++,i,ref visibleLight, light);
-                        }
-                        break;
-                    case LightType.Spot:
-                        if (otherLightCount < maxOtherLightCount){
-                            newIndex = otherLightCount;
-                            SetupSpotLight(otherLightCount++,i,ref visibleLight, light);
-                        }
-                        break;
+                    switch (visibleLight.lightType)
+                    {
+                        case LightType.Directional:
+                            if (dirLightCount < maxDirLightCount)
+                            {
+                                SetupDirectionalLight(dirLightCount++, i, ref visibleLight, light);
+                            }
+                            break;
+                        case LightType.Point:
+                            if (otherLightCount < maxOtherLightCount)
+                            {
+                                newIndex = otherLightCount;
+                                SetupPointLight(otherLightCount++, i, ref visibleLight, light);
+                            }
+                            break;
+                        case LightType.Spot:
+                            if (otherLightCount < maxOtherLightCount)
+                            {
+                                newIndex = otherLightCount;
+                                SetupSpotLight(otherLightCount++, i, ref visibleLight, light);
+                            }
+                            break;
+                    }
                 }
-
                 if (useLightsPerObject) {
                     indexMap[i] = newIndex;  
                 }
@@ -155,7 +160,7 @@ namespace CustomSR
             dirLightColors[index] = visibleLight.finalColor;
             //第三列取反得到light direction
             Vector4 dirAndMask = -visibleLight.localToWorldMatrix.GetColumn(2);
-            dirAndMask.w = light.renderingLayerMask;
+            dirAndMask.w = light.renderingLayerMask.ReinterpretAsFloat();
             dirLightDirectionsAndMasks[index] = dirAndMask;
             dirLightShadowData[index] = shadows.ReserveDirectionalShadows(light, visibleIndex);
         }
@@ -178,10 +183,11 @@ namespace CustomSR
             otherLightSpotAngles[index] = new Vector4(0f, 1f);
 
             Vector4 dirAndmask = Vector4.zero;
-            dirAndmask.w = light.renderingLayerMask;
+            dirAndmask.w = light.renderingLayerMask.ReinterpretAsFloat();
             otherLightDirectionsAndMasks[index] = dirAndmask;
            // Light light = visibleLight.light;
-            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
+            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index);
+
         }
 
         //spot light
@@ -192,7 +198,7 @@ namespace CustomSR
             //第三列取反可得光照方向
 
             Vector4 dirAndMask = -visibleLight.localToWorldMatrix.GetColumn(2);
-            dirAndMask.w = light.renderingLayerMask;
+            dirAndMask.w = light.renderingLayerMask.ReinterpretAsFloat();
             otherLightDirectionsAndMasks[index] = dirAndMask;
 
 
@@ -222,7 +228,7 @@ namespace CustomSR
             otherLightSpotAngles[index] = new Vector4(angleRangeInv, paramB);
 
             //shadow data
-            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index, visibleIndex);
+            otherLightShadowData[index] = shadows.ReserveOtherShadows(light, index);
         }
 
 
