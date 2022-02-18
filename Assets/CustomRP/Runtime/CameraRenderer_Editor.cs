@@ -92,6 +92,7 @@ namespace CustomSR
             if(camera.cameraType == CameraType.SceneView)
             {
                 ScriptableRenderContext.EmitWorldGeometryForSceneView(camera);
+                useScaledRendering = false;
             }
         }
     #endif

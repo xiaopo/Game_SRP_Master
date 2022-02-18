@@ -63,6 +63,7 @@ namespace CustomSR
 
         int colorLUTResolution;
         bool useHDR;
+        Vector2Int bufferSize;
         public PostFXStack()
         {
             bloomPyramidId = Shader.PropertyToID("_BloomPyramid0");
@@ -72,7 +73,8 @@ namespace CustomSR
             }
         }
 
-        public void Setup(ScriptableRenderContext context, Camera camera, PostFXSettings settings,bool useHDR,int colorLUTResolution, CameraSettings.FinalBlendMode finalBlendMode)
+        public void Setup(ScriptableRenderContext context, Camera camera, Vector2Int bufferSize,
+            PostFXSettings settings,bool useHDR,int colorLUTResolution, CameraSettings.FinalBlendMode finalBlendMode)
         {
             this.finalBlendMode = finalBlendMode;
             this.context = context;
@@ -81,7 +83,7 @@ namespace CustomSR
             this.useHDR = useHDR;
             this.colorLUTResolution = colorLUTResolution;
             this.settings = camera.cameraType <= CameraType.SceneView ? settings : null;
-
+            this.bufferSize = bufferSize;
             ApplySceneViewState();
         }
 
@@ -134,8 +136,17 @@ namespace CustomSR
             PostFXSettings.BloomSettings bloom = settings.Bloom;
             buffer.SetGlobalFloat(bloomBucibicUpsamplingId, bloom.bicubicUpsampling ? 1f : 0f);
 
-            int width = camera.pixelWidth >> 1;
-            int height = camera.pixelHeight >> 1;
+            int width, height;
+            if (bloom.ignoreRenderScale)
+            {
+                width = camera.pixelWidth >> 1;
+                height = camera.pixelHeight  >> 1;
+            }
+            else
+            {
+                width = bufferSize.x  >> 1;
+                height = bufferSize.y >> 1;
+            }
 
             if (bloom.maxIterations == 0 || bloom.intensity <= 0 || height < bloom.downscaleLimit * 2 || width < bloom.downscaleLimit * 2)
             {
@@ -224,7 +235,7 @@ namespace CustomSR
 
             buffer.SetGlobalFloat(bloomIntensityId, finalIntensity);
             buffer.SetGlobalTexture(fxSource2Id, sourceId);
-            buffer.GetTemporaryRT(bloomResultId, camera.pixelWidth, camera.pixelHeight, 0, FilterMode.Bilinear, format);
+            buffer.GetTemporaryRT(bloomResultId, bufferSize.x, bufferSize.y, 0, FilterMode.Bilinear, format);
 
             Draw(fromId, bloomResultId, finalPass);
             buffer.ReleaseTemporaryRT(fromId);
@@ -233,8 +244,6 @@ namespace CustomSR
             return true;
         }
 
-
-       
         void ConfigureColorAdjustments()
         {
             ColorAdjustmentsSettings colorAdjustments = settings.ColorAdjustments;

@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.Rendering;
 namespace CustomSR
@@ -19,6 +18,9 @@ namespace CustomSR
 
             public bool copyDepth;
             public bool copyDepthReflections;
+
+            [Range(0.1f, 2f)]
+            public float renderScale;
         }
 
         //Start is called before the first frame update
@@ -26,7 +28,8 @@ namespace CustomSR
         [SerializeField]
         public CameraBufferSettings cameraBuffer = new CameraBufferSettings
         {
-            allowHDR = true
+            allowHDR = true,
+            renderScale = 1f
         };
 
         public bool useDynamicBatching = true;
