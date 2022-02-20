@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Rendering;
+using static CustomSR.CustomRendePineAsset;
 using static CustomSR.PostFXSettings;
 
 namespace CustomSR
@@ -28,6 +29,7 @@ namespace CustomSR
             ToneMappingACES,
             ToneMappingNeutral,
             ToneMappingReinhard,
+            FinalRescale
         }
 
         CameraSettings.FinalBlendMode finalBlendMode;
@@ -60,10 +62,13 @@ namespace CustomSR
         int colorGradingLUTInLogId = Shader.PropertyToID("_ColorGradingLUTInLogC");
         int finalSrcBlendId = Shader.PropertyToID("_FinalSrcBlend");
         int finalDstBlendId = Shader.PropertyToID("_FinalDstBlend");
+        int finalResultId = Shader.PropertyToID("_FinalResult");
+        int copyBicubicId = Shader.PropertyToID("_CopyBicubic");
 
         int colorLUTResolution;
         bool useHDR;
         Vector2Int bufferSize;
+        CameraBufferSettings.BicubicRescalingMode bicubicRescaling;
         public PostFXStack()
         {
             bloomPyramidId = Shader.PropertyToID("_BloomPyramid0");
@@ -74,7 +79,8 @@ namespace CustomSR
         }
 
         public void Setup(ScriptableRenderContext context, Camera camera, Vector2Int bufferSize,
-            PostFXSettings settings,bool useHDR,int colorLUTResolution, CameraSettings.FinalBlendMode finalBlendMode)
+            PostFXSettings settings,bool useHDR,int colorLUTResolution, 
+            CameraSettings.FinalBlendMode finalBlendMode, CameraBufferSettings.BicubicRescalingMode bicubicRescaling)
         {
             this.finalBlendMode = finalBlendMode;
             this.context = context;
@@ -84,6 +90,7 @@ namespace CustomSR
             this.colorLUTResolution = colorLUTResolution;
             this.settings = camera.cameraType <= CameraType.SceneView ? settings : null;
             this.bufferSize = bufferSize;
+            this.bicubicRescaling = bicubicRescaling;
             ApplySceneViewState();
         }
 
@@ -115,7 +122,7 @@ namespace CustomSR
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
         }
 
-        void DrawFinal(RenderTargetIdentifier from)
+        void DrawFinal(RenderTargetIdentifier from, Pass pass)
         {
             buffer.SetGlobalFloat(finalSrcBlendId, (float)finalBlendMode.source);
             buffer.SetGlobalFloat(finalDstBlendId, (float)finalBlendMode.destination);
@@ -126,7 +133,7 @@ namespace CustomSR
                 RenderBufferStoreAction.Store );
 
             buffer.SetViewport(camera.pixelRect);
-            buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)Pass.Final, MeshTopology.Triangles, 3);
+            buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass, MeshTopology.Triangles, 3);
         }
 
         bool DoBloom(int sourceId)
@@ -312,9 +319,26 @@ namespace CustomSR
             Draw(sourceId, colorGradingLUTId, pass);
 
             buffer.SetGlobalVector(colorGradingLUTParametersId, new Vector4(1f / lutWidth, 1f / lutHeight, lutHeight - 1f));
-           
-            //Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Final);
-            DrawFinal(sourceId);
+
+            if (bufferSize.x == camera.pixelWidth)
+            {
+                DrawFinal(sourceId, Pass.Final);
+            }
+            else
+            {
+                buffer.SetGlobalFloat(finalSrcBlendId, 1f);
+                buffer.SetGlobalFloat(finalDstBlendId, 0f);
+                buffer.GetTemporaryRT(finalResultId, bufferSize.x, bufferSize.y, 0,FilterMode.Bilinear, RenderTextureFormat.Default);
+                Draw(sourceId, finalResultId, Pass.Final);
+
+                bool bicubicSampling = bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpAndDown ||
+                bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpOnly && bufferSize.x < camera.pixelWidth;
+
+                buffer.SetGlobalFloat(copyBicubicId, bicubicSampling ? 1f : 0f);
+                DrawFinal(finalResultId, Pass.FinalRescale);
+                buffer.ReleaseTemporaryRT(finalResultId);
+            }
+
             buffer.ReleaseTemporaryRT(colorGradingLUTId);
         }
     }

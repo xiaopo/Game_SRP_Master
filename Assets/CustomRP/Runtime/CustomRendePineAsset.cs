@@ -6,10 +6,11 @@ namespace CustomSR
     [CreateAssetMenu(menuName = "Rendering/CreateCustomRenderPipeline")]
     public partial  class CustomRendePineAsset : RenderPipelineAsset
     {
-
+       
         [System.Serializable]
         public struct CameraBufferSettings
         {
+            public enum BicubicRescalingMode { Off, UpOnly, UpAndDown }
 
             public bool allowHDR;
 
@@ -21,6 +22,8 @@ namespace CustomSR
 
             [Range(0.1f, 2f)]
             public float renderScale;
+
+            public BicubicRescalingMode bicubicRescaling;
         }
 
         //Start is called before the first frame update

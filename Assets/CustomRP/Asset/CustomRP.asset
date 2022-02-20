@@ -18,14 +18,15 @@ MonoBehaviour:
     copyColorReflection: 0
     copyDepth: 1
     copyDepthReflections: 0
-    renderScale: 0.5
+    renderScale: 1
+    bicubicRescaling: 1
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1
   useLightsPerObject: 1
   shadows:
-    maxDistance: 200
-    distanceFade: 0.263
+    maxDistance: 50
+    distanceFade: 0.482
     directional:
       atlasSize: 1024
       filter: 2

@@ -116,7 +116,8 @@ namespace CustomSR
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject,
                 cameraSettings.maskLights ? cameraSettings.renderingLayerMask : -1);
             //后处理
-            postFXStack.Setup(contenxt, camera, bufferSize,postFXSettings,useHDR, (int)asset.colorLUTResolution, cameraSettings.finalBlendMode);
+            postFXStack.Setup(contenxt, camera, bufferSize,postFXSettings,useHDR, (int)asset.colorLUTResolution, 
+                cameraSettings.finalBlendMode, asset.cameraBuffer.bicubicRescaling);
             buffer.EndSample(SampleName);
 
             SetUp();
