@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CustomRP
   m_EditorClassIdentifier: 
   cameraBuffer:
-    allowHDR: 0
+    allowHDR: 1
     copyColor: 1
     copyColorReflection: 0
     copyDepth: 1
@@ -37,8 +37,8 @@ MonoBehaviour:
       cascadeFade: 0.905
       cascadeBlend: 1
     other:
-      atlasSize: 1024
-      filter: 0
+      atlasSize: 2048
+      filter: 2
   postFXSettings: {fileID: 11400000, guid: 5f19a27bcd9d8564f85bcd7eab3b940b, type: 2}
   colorLUTResolution: 32
   cameraRendererShader: {fileID: 4800000, guid: 7b1d6512203ffc34fb10d1c117197850,

@@ -118,7 +118,6 @@ namespace CustomSR
             //设置渲染目标，准备渲染
             buffer.SetRenderTarget(to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
-            //draw triangles on screen with a material to render
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
         }
 

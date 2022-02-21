@@ -54,7 +54,7 @@ Varyings DefaultPassVertex(uint vertexID : SV_VertexID)
     
     output.screenUV = float2(vertexID <= 1 ? 0.0 : 2.0,
                              vertexID == 1 ? 2.0 : 0.0);
-    
+    //Unity indicates whether a manual flip is needed via the X component of a _ProjectionParams vector
     if (_ProjectionParams.x < 0.0)
     {
        output.screenUV.y = 1.0 - output.screenUV.y;
