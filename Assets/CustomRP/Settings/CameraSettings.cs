@@ -18,7 +18,6 @@ namespace CustomSR
         [Serializable]
         public struct FinalBlendMode
         {
-
             public BlendMode source, destination;
         }
 

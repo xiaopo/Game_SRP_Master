@@ -330,8 +330,7 @@ namespace CustomSR
                 buffer.GetTemporaryRT(finalResultId, bufferSize.x, bufferSize.y, 0,FilterMode.Bilinear, RenderTextureFormat.Default);
                 Draw(sourceId, finalResultId, Pass.Final);
 
-                bool bicubicSampling = bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpAndDown ||
-                bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpOnly && bufferSize.x < camera.pixelWidth;
+                bool bicubicSampling = (bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpAndDown || bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpOnly) && bufferSize.x < camera.pixelWidth;
 
                 buffer.SetGlobalFloat(copyBicubicId, bicubicSampling ? 1f : 0f);
                 DrawFinal(finalResultId, Pass.FinalRescale);

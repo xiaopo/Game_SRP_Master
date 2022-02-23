@@ -202,13 +202,9 @@ float4 BloomScatterFinalPassFragment(Varyings input) : SV_TARGET
 {
     float3 lowRes;
     if (_BloomBicubicUpsampling)
-    {
         lowRes = GetSourceBicubic(input.screenUV).rgb;
-    }
     else
-    {
         lowRes = GetSource(input.screenUV).rgb;
-    }
 
     float4 highRes = GetSource2(input.screenUV);
     lowRes += highRes.rgb - ApplyBloomThreshold(highRes.rgb);
@@ -328,12 +324,11 @@ float3 GetColorGradedLUT(float2 uv, bool useACES = false)
     return ColorGrade(_ColorGradingLUTInLogC ? LogCToLinear(color) : color, useACES);
 }
 
-
 float3 ApplyColorGradingLUT(float3 color)
 {
     return ApplyLut2D(TEXTURE2D_ARGS(_ColorGradingLUT, sampler_linear_clamp),
-        saturate(_ColorGradingLUTInLogC ? LinearToLogC(color) : color),
-        _ColorGradingLUTParameters.xyz);
+    saturate(_ColorGradingLUTInLogC ? LinearToLogC(color) : color),
+    _ColorGradingLUTParameters.xyz);
 }
 
 float4 ColorGradingNonePassFragment(Varyings input) : SV_TARGET
