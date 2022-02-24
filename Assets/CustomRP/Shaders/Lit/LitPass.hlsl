@@ -76,7 +76,6 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     //return float4(config.fragment.depth.xxx / 20.0, 1.0);
     ClipLOD(config.fragment, unity_LODFade.x);
     
-   
     #if defined(_MASK_MAP)
 		config.useMask = true;
 	#endif
@@ -92,7 +91,7 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
         clip(albedo.a - GetCutoff(config));
     #endif
     
-    //Create a surface struct by those infomation
+
     Surface surface;
     surface.position = input.worldPos;
 
@@ -108,7 +107,6 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     surface.color = albedo.rgb;
     surface.alpha = albedo.a;
     
-    //with 1 indicating that it is fully metallic. The default is fully dielectric
     surface.metallic = GetMetallic(config);
     surface.occlusion = GetOcclusion(config);
     surface.smoothness = GetSmoothness(config); 
@@ -128,7 +126,6 @@ float4 LitPassFragment(Varyings input) : SV_TARGET
     color += GetEmission(config);
     
     return float4(color, GetFinalAlpha(surface.alpha));
-
 }
 
 #endif

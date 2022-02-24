@@ -120,7 +120,7 @@ namespace CustomSR
                     indexMap[i] = -1;
                 }
 
-                cullingResults.SetLightIndexMap(indexMap);
+                if(indexMap.Length > 0)cullingResults.SetLightIndexMap(indexMap);
                 indexMap.Dispose();
                 Shader.EnableKeyword(lightsPerObjectKeyword);
             }
@@ -128,11 +128,10 @@ namespace CustomSR
                 Shader.DisableKeyword(lightsPerObjectKeyword);
             }
 
-
+            buffer.SetGlobalInt(dirLightCountId, dirLightCount);
             if (dirLightCount > 0)
             {
                 //方向光
-                buffer.SetGlobalInt(dirLightCountId, dirLightCount);
                 buffer.SetGlobalVectorArray(dirLightColorsId, dirLightColors);
                 buffer.SetGlobalVectorArray(dirLightDirectionsAndMasksId, dirLightDirectionsAndMasks);
                 buffer.SetGlobalVectorArray(dirLightShadowDataId, dirLightShadowData);

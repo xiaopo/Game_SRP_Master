@@ -128,7 +128,6 @@ float3 SampleLightMap(float2 lightMapUV)
 GI GetGI(float2 lightMapUV, Surface surfaceWS, BRDF brdf)
 {
     GI gi;
-   
     gi.diffuse = SampleLightMap(lightMapUV) + SampleLightProbe(surfaceWS);
     gi.specular = SampleEnvironment(surfaceWS, brdf);
     gi.shadowMask.distance = false;

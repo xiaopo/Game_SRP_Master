@@ -29,6 +29,7 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
         if (RenderingLayersOverlap(surface, light)) {
             color += GetLighting(surface, brdf, light);
         }
+
     }
     
     //point light and spot light

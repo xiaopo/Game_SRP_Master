@@ -13,20 +13,20 @@ MonoBehaviour:
   m_Name: CustomRP
   m_EditorClassIdentifier: 
   cameraBuffer:
-    allowHDR: 1
+    allowHDR: 0
     copyColor: 1
     copyColorReflection: 0
     copyDepth: 1
     copyDepthReflections: 0
-    renderScale: 1
-    bicubicRescaling: 2
+    renderScale: 1.99
+    bicubicRescaling: 1
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1
   useLightsPerObject: 1
   shadows:
-    maxDistance: 50
-    distanceFade: 0.482
+    maxDistance: 80
+    distanceFade: 0.508
     directional:
       atlasSize: 1024
       filter: 2
@@ -37,9 +37,9 @@ MonoBehaviour:
       cascadeFade: 0.905
       cascadeBlend: 1
     other:
-      atlasSize: 2048
-      filter: 2
+      atlasSize: 1024
+      filter: 1
   postFXSettings: {fileID: 11400000, guid: 5f19a27bcd9d8564f85bcd7eab3b940b, type: 2}
-  colorLUTResolution: 64
+  colorLUTResolution: 32
   cameraRendererShader: {fileID: 4800000, guid: 7b1d6512203ffc34fb10d1c117197850,
     type: 3}
