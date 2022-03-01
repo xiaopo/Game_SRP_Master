@@ -21,6 +21,7 @@ namespace CustomSR
         Lighting lighting = new Lighting();//灯光
         PostFXStack postFXStack = new PostFXStack();
         PostFXSettings postFXSettings;
+        CustomRendePineAsset.CameraBufferSettings bufferSettings;
 
         static int bufferSizeId = Shader.PropertyToID("_CameraBufferSize");
         static int colorAttachmentId = Shader.PropertyToID("_CameraColorAttachment");
@@ -58,6 +59,7 @@ namespace CustomSR
             this.camera = camera;
             this.asset = asset;
             postFXSettings = asset.postFXSettings;
+            bufferSettings = asset.cameraBuffer;
 
             CustomRenderPipelineCamera crpCamera = null;
             camera.TryGetComponent< CustomRenderPipelineCamera>(out crpCamera);
@@ -71,16 +73,16 @@ namespace CustomSR
             this.useDepthTexture = true;
             if (camera.cameraType == CameraType.Reflection)
             {
-                useColorTexture = asset.cameraBuffer.copyColorReflection;
-                useDepthTexture = asset.cameraBuffer.copyDepthReflections;
+                useColorTexture = bufferSettings.copyColorReflection;
+                useDepthTexture = bufferSettings.copyDepthReflections;
             }
             else
             {
-                useColorTexture = asset.cameraBuffer.copyColor;
-                useDepthTexture = asset.cameraBuffer.copyDepth;
+                useColorTexture = bufferSettings.copyColor;
+                useDepthTexture = bufferSettings.copyDepth;
             }
 
-            float renderScale = cameraSettings.GetRenderScale(asset.cameraBuffer.renderScale);
+            float renderScale = cameraSettings.GetRenderScale(bufferSettings.renderScale);
             useScaledRendering = renderScale < 0.99f || renderScale > 1.01f;
 
             //设置命令缓冲区名字
@@ -91,7 +93,7 @@ namespace CustomSR
 
             if (!Cull(asset.shadows.maxDistance)) return;///被剔除
 
-            useHDR = asset.cameraBuffer.allowHDR && camera.allowHDR;
+            useHDR = bufferSettings.allowHDR && camera.allowHDR;
             if (useScaledRendering)
             {
                 renderScale = Mathf.Clamp(renderScale, 0.1f, 2f);
@@ -111,8 +113,11 @@ namespace CustomSR
             lighting.Setup(contenxt, culingResouts, asset.shadows, asset.useLightsPerObject,
                 cameraSettings.maskLights ? cameraSettings.renderingLayerMask : -1);
             //后处理
+            bufferSettings.fxaa.enabled &= cameraSettings.allowFXAA;
             postFXStack.Setup(contenxt, camera, bufferSize,postFXSettings,useHDR, (int)asset.colorLUTResolution, 
-                cameraSettings.finalBlendMode, asset.cameraBuffer.bicubicRescaling);
+                cameraSettings.finalBlendMode, bufferSettings.bicubicRescaling,
+                bufferSettings.fxaa);
+
             buffer.EndSample(SampleName);
 
             SetUp();

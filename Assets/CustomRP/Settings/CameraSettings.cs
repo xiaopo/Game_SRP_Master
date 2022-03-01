@@ -14,6 +14,7 @@ namespace CustomSR
         public bool maskLights = false;
         public bool overridePostFX = false;
         public PostFXSettings postFXSettings = default;
+        public bool allowFXAA = false;
 
         [Serializable]
         public struct FinalBlendMode

@@ -18,7 +18,7 @@ namespace CustomSR
         {
             BloomHorizontal,
             Copy,
-            Final,
+            ApplyColorGrading,
             BloomVertical,
             BloomCombine,
             BloomPrefilter,
@@ -29,7 +29,10 @@ namespace CustomSR
             ToneMappingACES,
             ToneMappingNeutral,
             ToneMappingReinhard,
-            FinalRescale
+            FinalRescale,
+            ApplyColorGradingWithLuma,
+            FXAA,
+            FXAAWithLuma
         }
 
         CameraSettings.FinalBlendMode finalBlendMode;
@@ -62,6 +65,7 @@ namespace CustomSR
         int colorGradingLUTInLogId = Shader.PropertyToID("_ColorGradingLUTInLogC");
         int finalSrcBlendId = Shader.PropertyToID("_FinalSrcBlend");
         int finalDstBlendId = Shader.PropertyToID("_FinalDstBlend");
+        int colorGradingResultId = Shader.PropertyToID("_ColorGradingResult");
         int finalResultId = Shader.PropertyToID("_FinalResult");
         int copyBicubicId = Shader.PropertyToID("_CopyBicubic");
 
@@ -69,6 +73,7 @@ namespace CustomSR
         bool useHDR;
         Vector2Int bufferSize;
         CameraBufferSettings.BicubicRescalingMode bicubicRescaling;
+        CameraBufferSettings.FXAA fxaa;
         public PostFXStack()
         {
             bloomPyramidId = Shader.PropertyToID("_BloomPyramid0");
@@ -80,7 +85,8 @@ namespace CustomSR
 
         public void Setup(ScriptableRenderContext context, Camera camera, Vector2Int bufferSize,
             PostFXSettings settings,bool useHDR,int colorLUTResolution, 
-            CameraSettings.FinalBlendMode finalBlendMode, CameraBufferSettings.BicubicRescalingMode bicubicRescaling)
+            CameraSettings.FinalBlendMode finalBlendMode, CameraBufferSettings.BicubicRescalingMode bicubicRescaling,
+            CameraBufferSettings.FXAA fxaa)
         {
             this.finalBlendMode = finalBlendMode;
             this.context = context;
@@ -91,6 +97,8 @@ namespace CustomSR
             this.settings = camera.cameraType <= CameraType.SceneView ? settings : null;
             this.bufferSize = bufferSize;
             this.bicubicRescaling = bicubicRescaling;
+            this.fxaa = fxaa;
+
             ApplySceneViewState();
         }
 
@@ -99,11 +107,11 @@ namespace CustomSR
             //buffer.Blit(sourceId, BuiltinRenderTextureType.CameraTarget);
             if (DoBloom(sourceId))
             {
-                DoColorGradingAndToneMapping(bloomResultId);
+                DoFinal(bloomResultId);
                 buffer.ReleaseTemporaryRT(bloomResultId);
             }
             else{
-                DoColorGradingAndToneMapping(sourceId);
+                DoFinal(sourceId);
             }
 
             context.ExecuteCommandBuffer(buffer);
@@ -298,7 +306,7 @@ namespace CustomSR
             buffer.SetGlobalVector(whiteBalanceId, ColorUtils.ColorBalanceToLMSCoeffs(whiteBalance.temperature, whiteBalance.tint));
         }
 
-        void DoColorGradingAndToneMapping(int sourceId)
+        void DoFinal(int sourceId)
         {
             ConfigureColorAdjustments();
             ConfigureWhiteBalance();
@@ -319,16 +327,42 @@ namespace CustomSR
 
             buffer.SetGlobalVector(colorGradingLUTParametersId, new Vector4(1f / lutWidth, 1f / lutHeight, lutHeight - 1f));
 
+            buffer.SetGlobalFloat(finalSrcBlendId, 1f);
+            buffer.SetGlobalFloat(finalDstBlendId, 0f);
+
+            if (fxaa.enabled)
+            {
+                buffer.GetTemporaryRT(colorGradingResultId, bufferSize.x, bufferSize.y, 0, FilterMode.Bilinear, RenderTextureFormat.Default);
+
+                Draw(sourceId, colorGradingResultId, Pass.ApplyColorGrading);
+            }
+
             if (bufferSize.x == camera.pixelWidth)
             {
-                DrawFinal(sourceId, Pass.Final);
+                if (fxaa.enabled)
+                {
+                    DrawFinal(colorGradingResultId, Pass.FXAA);
+                    buffer.ReleaseTemporaryRT(colorGradingResultId);
+                }
+                else
+                {
+                    DrawFinal(sourceId, Pass.ApplyColorGrading);
+                }
             }
             else
             {
-                buffer.SetGlobalFloat(finalSrcBlendId, 1f);
-                buffer.SetGlobalFloat(finalDstBlendId, 0f);
+
                 buffer.GetTemporaryRT(finalResultId, bufferSize.x, bufferSize.y, 0,FilterMode.Bilinear, RenderTextureFormat.Default);
-                Draw(sourceId, finalResultId, Pass.Final);
+
+                if (fxaa.enabled)
+                {
+                    Draw(colorGradingResultId, finalResultId, Pass.FXAA);
+                    buffer.ReleaseTemporaryRT(colorGradingResultId);
+                }
+                else
+                {
+                    Draw(sourceId, finalResultId, Pass.ApplyColorGrading);
+                }
 
                 bool bicubicSampling = (bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpAndDown || bicubicRescaling == CameraBufferSettings.BicubicRescalingMode.UpOnly) && bufferSize.x < camera.pixelWidth;
 

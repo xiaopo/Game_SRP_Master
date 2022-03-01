@@ -20,6 +20,8 @@ MonoBehaviour:
     copyDepthReflections: 0
     renderScale: 1.99
     bicubicRescaling: 1
+    fxaa:
+      enabled: 1
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1

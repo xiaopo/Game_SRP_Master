@@ -1,4 +1,5 @@
 
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 namespace CustomSR
@@ -7,7 +8,7 @@ namespace CustomSR
     public partial  class CustomRendePineAsset : RenderPipelineAsset
     {
        
-        [System.Serializable]
+        [Serializable]
         public struct CameraBufferSettings
         {
             public enum BicubicRescalingMode { Off, UpOnly, UpAndDown }
@@ -24,10 +25,17 @@ namespace CustomSR
             public float renderScale;
 
             public BicubicRescalingMode bicubicRescaling;
+
+            [Serializable]
+            public struct FXAA
+            {
+                public bool enabled;
+            }
+
+            public FXAA fxaa;
         }
 
-        //Start is called before the first frame update
-        //public bool allowHDR = true;
+
         [SerializeField]
         public CameraBufferSettings cameraBuffer = new CameraBufferSettings
         {

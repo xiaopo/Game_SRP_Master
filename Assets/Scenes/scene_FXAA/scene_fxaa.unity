@@ -791,14 +791,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1776740082
-AudioListener:
+--- !u!114 &1776740082
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1776740081}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b95b25517f4fce449d42a5adb22a9ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings:
+    renderingLayerMask: -1
+    maskLights: 0
+    overridePostFX: 0
+    postFXSettings: {fileID: 0}
+    allowFXAA: 1
+    finalBlendMode:
+      source: 1
+      destination: 0
+    renderScaleMode: 0
+    renderScale: 1
 --- !u!20 &1776740083
 Camera:
   m_ObjectHideFlags: 0
