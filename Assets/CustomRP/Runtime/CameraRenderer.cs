@@ -114,7 +114,7 @@ namespace CustomSR
                 cameraSettings.maskLights ? cameraSettings.renderingLayerMask : -1);
             //后处理
             bufferSettings.fxaa.enabled &= cameraSettings.allowFXAA;
-            postFXStack.Setup(contenxt, camera, bufferSize,postFXSettings,useHDR, (int)asset.colorLUTResolution, 
+            postFXStack.Setup(contenxt, camera, bufferSize,postFXSettings,useHDR, cameraSettings.keepAlpha, (int)asset.colorLUTResolution, 
                 cameraSettings.finalBlendMode, bufferSettings.bicubicRescaling,
                 bufferSettings.fxaa);
 

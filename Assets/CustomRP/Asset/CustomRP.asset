@@ -22,6 +22,8 @@ MonoBehaviour:
     bicubicRescaling: 1
     fxaa:
       enabled: 1
+      fixedThreshold: 0.0483
+      relativeThreshold: 0.125
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1
