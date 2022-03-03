@@ -46,6 +46,17 @@ namespace CustomSR
                 //   0.063 - overkill (slower)
                 [Range(0.063f, 0.333f)]
                 public float relativeThreshold;
+
+
+                // Choose the amount of sub-pixel aliasing removal.
+                // This can effect sharpness.
+                //   1.00 - upper limit (softer)
+                //   0.75 - default amount of filtering
+                //   0.50 - lower limit (sharper, less sub-pixel aliasing removal)
+                //   0.25 - almost off
+                //   0.00 - completely off
+                [Range(0f, 1f)]
+                public float subpixelBlending;
             }
 
             public FXAA fxaa;
@@ -60,7 +71,8 @@ namespace CustomSR
             fxaa = new CameraBufferSettings.FXAA
             {
                 fixedThreshold = 0.0833f,
-                relativeThreshold = 0.166f
+                relativeThreshold = 0.166f,
+                subpixelBlending = 0.75f
             }
         };
 
