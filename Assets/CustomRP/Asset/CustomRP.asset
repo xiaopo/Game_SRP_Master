@@ -23,8 +23,8 @@ MonoBehaviour:
     fxaa:
       enabled: 1
       fixedThreshold: 0.0483
-      relativeThreshold: 0.125
-      subpixelBlending: 0.454
+      relativeThreshold: 0.085
+      subpixelBlending: 0.449
   useDynamicBatching: 1
   useGPUInstancing: 1
   useSRPBatcher: 1
