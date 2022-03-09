@@ -132,10 +132,12 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
         uvStep.y = GetSourceTexelSize().y;
     }
     
+    //与混合反方向上邻居求均值
     float edgeLuma = 0.5 * (luma.m + edge.otherLuma);
     //FXAA uses a quarter of the luma gradient of the edge as the threshold for this check
     float gradientThreshold = 0.25 * edge.lumaGradient;
     
+    //direction of positive 
     float2 uvP = edgeUV + uvStep;
     float lumaGradientP = abs(GetLuma(uvP) - edgeLuma);
     bool atEndP = lumaGradientP >= gradientThreshold;
@@ -147,17 +149,38 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
         atEndP = lumaGradientP >= gradientThreshold;
     }
     
-    float distanceToEndP;
+    //direction of nagative
+    float2 uvN = edgeUV - uvStep;
+    float lumaGradientN = abs(GetLuma(uvN) - edgeLuma);
+    bool atEndN = lumaGradientN >= gradientThreshold;
+
+    for (int i = 0; i < 99 && !atEndN; i++)
+    {
+        uvN -= uvStep;
+        lumaGradientN = abs(GetLuma(uvN) - edgeLuma);
+        atEndN = lumaGradientN >= gradientThreshold;
+    }
+    
+    float distanceToEndP, distanceToEndN;;
     if (edge.isHorizontal)
     {
         distanceToEndP = uvP.x - uv.x;
+        distanceToEndN = uv.x - uvN.x;
     }
     else
     {
         distanceToEndP = uvP.y - uv.y;
+        distanceToEndN = uv.y - uvN.y;
     }
 
-    return 10.0 * distanceToEndP;
+    float distanceToNearestEnd;
+    if (distanceToEndP <= distanceToEndN)
+        distanceToNearestEnd = distanceToEndP;
+    else
+        distanceToNearestEnd = distanceToEndN;
+
+	
+    return 10.0 * distanceToNearestEnd;
 }
 
 float4 FXAAPassFragment(Varyings input) : SV_TARGET

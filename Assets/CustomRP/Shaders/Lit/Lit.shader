@@ -56,7 +56,7 @@ Shader "CustomRP/Lit"
 
             LOD 100
 
-            //Name "Lit"
+            Name "Lit"
             Blend[_SrcBlend][_DstBlend], One OneMinusSrcAlpha
             ZWrite[_ZWrite]
 
