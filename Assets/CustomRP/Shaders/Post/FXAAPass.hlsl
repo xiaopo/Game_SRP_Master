@@ -139,29 +139,33 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
     
     //direction of positive 
     float2 uvP = edgeUV + uvStep;
-    float lumaGradientP = abs(GetLuma(uvP) - edgeLuma);
-    bool atEndP = lumaGradientP >= gradientThreshold;
+    float lumaDeltaP = GetLuma(uvP) - edgeLuma;
+    bool atEndP = abs(lumaDeltaP) >= gradientThreshold;
 	
-    for (int i = 0; i < 99 && !atEndP; i++)
+    for (int i = 0; i < 3 && !atEndP; i++)
     {
         uvP += uvStep;
-        lumaGradientP = abs(GetLuma(uvP) - edgeLuma);
-        atEndP = lumaGradientP >= gradientThreshold;
+        lumaDeltaP = GetLuma(uvP) - edgeLuma;
+        atEndP = abs(lumaDeltaP) >= gradientThreshold;
     }
-    
+    if (!atEndP){
+        uvP += uvStep;
+    }
     //direction of nagative
     float2 uvN = edgeUV - uvStep;
-    float lumaGradientN = abs(GetLuma(uvN) - edgeLuma);
-    bool atEndN = lumaGradientN >= gradientThreshold;
+    float lumaDeltaN = GetLuma(uvN) - edgeLuma;
+    bool atEndN = abs(lumaDeltaN) >= gradientThreshold;
 
-    for (int i = 0; i < 99 && !atEndN; i++)
+    for (int j = 0; j < 3 && !atEndN; j++)
     {
         uvN -= uvStep;
-        lumaGradientN = abs(GetLuma(uvN) - edgeLuma);
-        atEndN = lumaGradientN >= gradientThreshold;
+        lumaDeltaN = GetLuma(uvN) - edgeLuma;
+        atEndN = abs(lumaDeltaN) >= gradientThreshold;
     }
-    
-    float distanceToEndP, distanceToEndN;;
+    if (!atEndN){
+        uvN -= uvStep;
+    }
+    float distanceToEndP, distanceToEndN;
     if (edge.isHorizontal)
     {
         distanceToEndP = uvP.x - uv.x;
@@ -174,13 +178,24 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
     }
 
     float distanceToNearestEnd;
+    bool deltaSign;
     if (distanceToEndP <= distanceToEndN)
+    {
         distanceToNearestEnd = distanceToEndP;
+        deltaSign = lumaDeltaP >= 0;
+    }
     else
+    {
         distanceToNearestEnd = distanceToEndN;
+        deltaSign = lumaDeltaN >= 0;
+    }
 
-	
-    return 10.0 * distanceToNearestEnd;
+    if (deltaSign == (luma.m - edgeLuma >= 0)){
+        return 0.0;
+    }
+    else{
+        return 0.5 - distanceToNearestEnd / (distanceToEndP + distanceToEndN);
+    }
 }
 
 float4 FXAAPassFragment(Varyings input) : SV_TARGET
@@ -188,18 +203,12 @@ float4 FXAAPassFragment(Varyings input) : SV_TARGET
     LumaNeighborhood luma = GetLumaNeighborhood(input.screenUV);
     if (CanSkipFXAA(luma))
     {
-        //return GetSource(input.screenUV);
-        return 0.0;
+        return GetSource(input.screenUV);
     }
     
-
     FXAAEdge edge = GetFXAAEdge(luma);
+    float blendFactor = max(GetSubpixelBlendFactor(luma), GetEdgeBlendFactor(luma, edge, input.screenUV));
 
-    //float blendFactor = GetSubpixelBlendFactor(luma);
-    
-    float blendFactor = GetEdgeBlendFactor(luma, edge, input.screenUV);
-    return blendFactor;
-    
     float2 blendUV = input.screenUV;
     if (edge.isHorizontal)
     {
