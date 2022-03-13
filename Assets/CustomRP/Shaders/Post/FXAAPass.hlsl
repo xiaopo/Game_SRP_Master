@@ -1,6 +1,22 @@
 #ifndef CUSTOM_FXAA_PASS_INCLUDED
 #define CUSTOM_FXAA_PASS_INCLUDED
 
+#if defined(FXAA_QUALITY_LOW)
+	#define EXTRA_EDGE_STEPS 3
+	#define EDGE_STEP_SIZES 1.5, 2.0, 2.0
+	#define LAST_EDGE_STEP_GUESS 8.0
+#elif defined(FXAA_QUALITY_MEDIUM)
+	#define EXTRA_EDGE_STEPS 8
+	#define EDGE_STEP_SIZES 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0
+	#define LAST_EDGE_STEP_GUESS 8.0
+#else
+	#define EXTRA_EDGE_STEPS 10
+	#define EDGE_STEP_SIZES 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0
+	#define LAST_EDGE_STEP_GUESS 8.0
+#endif
+
+static const float edgeStepSizes[EXTRA_EDGE_STEPS] = { EDGE_STEP_SIZES };
+
 float4 _FXAAConfig;
 
 struct FXAAEdge
@@ -142,28 +158,30 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
     float lumaDeltaP = GetLuma(uvP) - edgeLuma;
     bool atEndP = abs(lumaDeltaP) >= gradientThreshold;
 	
-    for (int i = 0; i < 3 && !atEndP; i++)
+    UNITY_UNROLL
+    for (int i = 0; i < EXTRA_EDGE_STEPS && !atEndP; i++)
     {
-        uvP += uvStep;
+        uvP += uvStep * edgeStepSizes[i];
         lumaDeltaP = GetLuma(uvP) - edgeLuma;
         atEndP = abs(lumaDeltaP) >= gradientThreshold;
     }
     if (!atEndP){
-        uvP += uvStep;
+        uvP += uvStep * LAST_EDGE_STEP_GUESS;
     }
     //direction of nagative
     float2 uvN = edgeUV - uvStep;
     float lumaDeltaN = GetLuma(uvN) - edgeLuma;
     bool atEndN = abs(lumaDeltaN) >= gradientThreshold;
 
-    for (int j = 0; j < 3 && !atEndN; j++)
+    UNITY_UNROLL
+    for (int j = 0; j < EXTRA_EDGE_STEPS && !atEndN; j++)
     {
-        uvN -= uvStep;
+        uvN -= uvStep * edgeStepSizes[i];
         lumaDeltaN = GetLuma(uvN) - edgeLuma;
         atEndN = abs(lumaDeltaN) >= gradientThreshold;
     }
     if (!atEndN){
-        uvN -= uvStep;
+        uvN -= uvStep * LAST_EDGE_STEP_GUESS;
     }
     float distanceToEndP, distanceToEndN;
     if (edge.isHorizontal)
