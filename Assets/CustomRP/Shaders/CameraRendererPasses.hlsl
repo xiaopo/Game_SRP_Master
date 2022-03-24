@@ -3,6 +3,7 @@
 
 TEXTURE2D(_SourceTexture);
 SAMPLER(sampler_linear_clamp);
+SAMPLER(sampler_point_clamp);
 
 struct Varyings
 {
