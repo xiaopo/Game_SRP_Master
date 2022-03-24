@@ -200,8 +200,6 @@ namespace CustomSR
 
             contenxt.DrawRenderers(culingResouts, ref drawingSettings, ref filteringSettings);
         }
-       
-
         void SetUp()
         {
             //设置相机的属性和矩阵
