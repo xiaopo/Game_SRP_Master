@@ -25,6 +25,7 @@ Shader "CustomRP/Particles/UnlitParticle"
         [NoScaleOffset] _DistortionMap("Distortion Vectors", 2D) = "bumb" {}
         _DistortionStrength("Distortion Strength", Range(0.0, 0.2)) = 0.1
         _DistortionBlend("Distortion Blend", Range(0.0, 1.0)) = 1
+
     }
 
     SubShader

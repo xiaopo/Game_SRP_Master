@@ -5,6 +5,7 @@ TEXTURE2D(_CameraColorTexture);
 SAMPLER(sampler_CameraColorTexture);
 
 TEXTURE2D(_CameraDepthTexture);
+SAMPLER(sampler_point_clamp);
 
 float4 _CameraBufferSize;
 

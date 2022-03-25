@@ -78,8 +78,8 @@ namespace CustomSR
             }
             else
             {
-                useColorTexture = bufferSettings.copyColor;
-                useDepthTexture = bufferSettings.copyDepth;
+                useColorTexture = bufferSettings.copyColor && cameraSettings.copyColor;
+                useDepthTexture = bufferSettings.copyDepth && cameraSettings.copyDepth;
             }
 
             float renderScale = cameraSettings.GetRenderScale(bufferSettings.renderScale);
@@ -189,7 +189,9 @@ namespace CustomSR
             //2.draw sky box
             contenxt.DrawSkybox(camera);
 
-            if (useColorTexture || useDepthTexture) { 
+            if (useColorTexture || useDepthTexture) {
+                //We cannot sample the depth buffer at the same time that it's used for rendering.
+                //We have to make a copy of it
                 CopyAttachments();
             }
 

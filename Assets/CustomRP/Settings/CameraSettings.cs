@@ -16,7 +16,7 @@ namespace CustomSR
         public PostFXSettings postFXSettings = default;
         public bool allowFXAA = false;
         public bool keepAlpha = false;
-
+        public bool copyColor = true, copyDepth = true;
         [Serializable]
         public struct FinalBlendMode
         {

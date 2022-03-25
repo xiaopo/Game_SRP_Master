@@ -86,6 +86,7 @@ float4 UnlitPassFragment(Varyings input) : SV_TARGET
 #if defined(_SOFT_PARTICLES)
     config.softParticles = true;
 #endif
+
     float4 color = GetBase(config);
     
 #if defined(_CLIPPING)
