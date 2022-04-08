@@ -36,13 +36,18 @@ CBUFFER_END
 
 float4x4 unity_MatrixVP;
 float4x4 unity_MatrixV;
-
 float4x4 glstate_matrix_projection;
-//œ‡ª˙Œª÷√
+
+
+//World space position of the camera.
 float3 _WorldSpaceCameraPos;
+//x is 1.0 (or ®C1.0 if currently rendering with a flipped projection matrix), y is the camera°Øs near plane, z is the camera°Øs far plane and w is 1/FarPlane.
 float4 _ProjectionParams;
+//x is orthographic camera°Øs width, y is orthographic camera°Øs height, z is unused and w is 1.0 when camera is orthographic, 0.0 when perspective.
 float4 unity_OrthoParams;
+//x is the width of the camera°Øs target texture in pixels, y is the height of the camera°Øs target texture in pixels, z is 1.0 + 1.0 / width and w is 1.0 + 1.0 / height.
 float4 _ScreenParams;
+//Used to linearize Z buffer values. x is (1-far/near), y is (far/near), z is (x/far) and w is (y/far).
 float4 _ZBufferParams;
 
 #endif

@@ -31,11 +31,11 @@ struct Fragment
 *This is the view-space depth, so it's the distance from the camera XY plane, not its near plane.
 */
 
-
 Fragment GetFragment(float4 positionSS) 
 {
 	Fragment f;
 	f.positionSS = positionSS.xy;
+	//_ScreenParams
     f.screenUV = f.positionSS * _CameraBufferSize.xy;
 	
 	f.depth = IsOrthographicCamera() ? OrthographicDepthBufferToLinear(positionSS.z) : positionSS.w;
