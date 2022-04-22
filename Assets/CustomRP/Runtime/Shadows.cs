@@ -421,15 +421,17 @@ namespace CustomSR
         
         void SetCascadeData(int index,Vector4 cullingSphere,float titleSize)
         {
-            //radius square
-            cullingSphere.w *= cullingSphere.w;
-            cascadeCullingSpheres[index] = cullingSphere;
-
+            
             //dividing the diameter of the culling sphere by the tile size
             float texelSize = 2f * cullingSphere.w / titleSize;
+
             float filterSize = texelSize * ((float)settings.directional.filter + 1f);
             //In the worst case we end up having to offset along the square's diagonal, so let's scale it by √2.
             float bias = filterSize * 1.4142136f;
+
+            //radius square
+            cullingSphere.w *= cullingSphere.w;
+            cascadeCullingSpheres[index] = cullingSphere;
             cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, bias);
         }
 

@@ -382,7 +382,6 @@ namespace CustomSR
             {
 
                 buffer.GetTemporaryRT(finalResultId, bufferSize.x, bufferSize.y, 0,FilterMode.Bilinear, RenderTextureFormat.Default);
-
                 if (fxaa.enabled)
                 {
                     Draw(colorGradingResultId, finalResultId, keepAlpha ? Pass.FXAA : Pass.FXAAWithLuma);
