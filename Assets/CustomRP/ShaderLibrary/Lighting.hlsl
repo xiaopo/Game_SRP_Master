@@ -1,10 +1,10 @@
 #ifndef CUSTOM_LIGHTING_INCLUDED
 #define CUSTOM_LIGHTING_INCLUDED
 
-//¼ÆËãÈëÉä¹âÕÕ
+//è®¡ç®—å…¥å°„å…‰ç…§
 float3 IncomingLight(Surface surface,Light light)
 {
-    //À¼²®ÌØ¹âÕÕ
+    //å…°ä¼¯ç‰¹å…‰ç…§
     return saturate(dot(surface.normal, light.direction) * light.attenuation) * light.color;
 }
 
@@ -13,11 +13,11 @@ float3 GetLighting(Surface surface,BRDF brdf,Light light)
     return IncomingLight(surface, light) * DirectBRDF(surface,brdf,light);
 }
 
-//¸ù¾İÎïÌåµÄ±íÃæĞÅÏ¢»ñÈ¡×îÖÕ¹âÕÕ½á¹û
+//æ ¹æ®ç‰©ä½“çš„è¡¨é¢ä¿¡æ¯è·å–æœ€ç»ˆå…‰ç…§ç»“æœ
 float3 GetLighting(Surface surface,BRDF brdf,GI gi)
 {
 
-    //¿É¼û·½Ïò¹âµÄÕÕÃ÷½á¹û½øĞĞÀÛ¼ÓµÃµ½×îÖÕÕÕÃ÷½á¹û
+    //å¯è§æ–¹å‘å…‰çš„ç…§æ˜ç»“æœè¿›è¡Œç´¯åŠ å¾—åˆ°æœ€ç»ˆç…§æ˜ç»“æœ
     ShadowData shadowData = GetShadowData(surface);
     shadowData.shadowMask = gi.shadowMask;
 

@@ -4,7 +4,7 @@
 #define MAX_OTHER_LIGHT_COUNT 64
 
 CBUFFER_START(_CustomLight)
-    int _DirectionLightCount;//ÓĞĞ§Æ½ĞĞ¹â¸öÊı
+    int _DirectionLightCount;//æœ‰æ•ˆå¹³è¡Œå…‰ä¸ªæ•°
     float4 _DirectionLightColors[MAX_DIRECTIONAL_LIGHT_COUNT];
     float4 _DirectionalLightDirectionsAndMasks[MAX_DIRECTIONAL_LIGHT_COUNT];
 
@@ -66,7 +66,7 @@ OtherShadowData GetOtherShadowData(int lightIndex)
     return data;
 }
 
-//»ñÈ¡Ö¸¶¨Ë÷ÒıµÄ·½ÏòµÄÊı¾İ
+//è·å–æŒ‡å®šç´¢å¼•çš„æ–¹å‘çš„æ•°æ®
 Light GetDirectionLight(int index, Surface surfaceWS, ShadowData shadowData)
 {
     Light light;
@@ -86,7 +86,7 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     Light light;
     light.color = _OtherLightColors[index].rgb;
     float3 position = _OtherLightPositions[index].xyz;
-    //Ë¥¼õÊÇRÆ½·½µÄ·´±È
+    //è¡°å‡æ˜¯Rå¹³æ–¹çš„åæ¯”
     float3 ray = position - surfaceWS.position;
     light.direction = normalize(ray);
     float distanceSqr = max(dot(ray, ray), 0.00001);

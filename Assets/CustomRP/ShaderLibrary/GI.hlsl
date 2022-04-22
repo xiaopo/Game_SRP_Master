@@ -24,7 +24,7 @@ SAMPLER(samplerunity_SpecCube0);
     #define GI_ATTRIBUTE_DATA float2 lmpuv:TEXCOORD1;
     #define GI_VARYINGS_DATA float2 lmpuv:VAR_LIGHT_MAP_UV;
     #define TRANSFER_GI_DATA(input,output) output.lmpuv = input.lmpuv * unity_LightmapST.xy + unity_LightmapST.zw;
-    #define GI_FRAGMENT_DATA(input) input.lmpuv//ºê²ÎÊıÁĞ±í
+    #define GI_FRAGMENT_DATA(input) input.lmpuv//å®å‚æ•°åˆ—è¡¨
 #else
     #define GI_ATTRIBUTE_DATA
     #define GI_VARYINGS_DATA

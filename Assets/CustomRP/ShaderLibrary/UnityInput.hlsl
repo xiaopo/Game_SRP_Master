@@ -41,11 +41,11 @@ float4x4 glstate_matrix_projection;
 
 //World space position of the camera.
 float3 _WorldSpaceCameraPos;
-//x is 1.0 (or ¨C1.0 if currently rendering with a flipped projection matrix), y is the camera¡¯s near plane, z is the camera¡¯s far plane and w is 1/FarPlane.
+//x is 1.0 (or â€“1.0 if currently rendering with a flipped projection matrix), y is the cameraâ€™s near plane, z is the cameraâ€™s far plane and w is 1/FarPlane.
 float4 _ProjectionParams;
-//x is orthographic camera¡¯s width, y is orthographic camera¡¯s height, z is unused and w is 1.0 when camera is orthographic, 0.0 when perspective.
+//x is orthographic cameraâ€™s width, y is orthographic cameraâ€™s height, z is unused and w is 1.0 when camera is orthographic, 0.0 when perspective.
 float4 unity_OrthoParams;
-//x is the width of the camera¡¯s target texture in pixels, y is the height of the camera¡¯s target texture in pixels, z is 1.0 + 1.0 / width and w is 1.0 + 1.0 / height.
+//x is the width of the cameraâ€™s target texture in pixels, y is the height of the cameraâ€™s target texture in pixels, z is 1.0 + 1.0 / width and w is 1.0 + 1.0 / height.
 float4 _ScreenParams;
 //Used to linearize Z buffer values. x is (1-far/near), y is (far/near), z is (x/far) and w is (y/far).
 float4 _ZBufferParams;

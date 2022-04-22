@@ -1,15 +1,15 @@
 #ifndef CUSTOM_LIT_INPUT_INCLUDED
 #define CUSTOM_LIT_INPUT_INCLUDED
 
-TEXTURE2D(_BaseMap);//2DÎÄÀí
-SAMPLER(sampler_BaseMap);//Ö¸¶¨Ò»¸ö²ÉÑùÆ÷
+TEXTURE2D(_BaseMap);//2Dæ–‡ç†
+SAMPLER(sampler_BaseMap);//æŒ‡å®šä¸€ä¸ªé‡‡æ ·å™¨
 
-//basemap Ò»ÑùµÄ²ÉÑùÆ÷
+//basemap ä¸€æ ·çš„é‡‡æ ·å™¨
 TEXTURE2D(_EmissionMap);
 
 //MODS: metallic occlusion detail smoothness
 TEXTURE2D(_MaskMap);
-//Ï¸½ÚÎÆÀí
+//ç»†èŠ‚çº¹ç†
 TEXTURE2D(_DetailMap);
 SAMPLER(sampler_DetailMap);
 
@@ -17,7 +17,7 @@ SAMPLER(sampler_DetailMap);
 TEXTURE2D(_NormalMap);
 TEXTURE2D(_DetailNormalMap);
 
-//ÎÆÀíºÍ²ÉÑùÆ÷ÊÇÈ«¾Ö×ÊÔ´£¬²»ÄÜ·ÅÈë»º³åÇøÖĞ
+//çº¹ç†å’Œé‡‡æ ·å™¨æ˜¯å…¨å±€èµ„æºï¼Œä¸èƒ½æ”¾å…¥ç¼“å†²åŒºä¸­
 
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 
@@ -118,7 +118,7 @@ float4 GetBase(InputConfig c)
     {
         float detail = GetDetail(c).r * INPUT_PROP(_DetailAlbedo);
         float mask = GetMask(c).b;
-         //ÏßĞÔ¿Õ¼äµ½gamma¿Õ¼äµÄ½üËÆ×ª»»
+         //çº¿æ€§ç©ºé—´åˆ°gammaç©ºé—´çš„è¿‘ä¼¼è½¬æ¢
         map.rgb = lerp(sqrt(map.rgb), detail < 0.0 ? 0.0 : 1.0, abs(detail) * mask);
         map.rgb *= map.rgb;
     }

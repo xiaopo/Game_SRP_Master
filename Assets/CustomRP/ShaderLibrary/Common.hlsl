@@ -30,8 +30,8 @@ bool IsOrthographicCamera() {
 * For an orthographic camera the best we can do is rely on the Z component of the screen-space position vector, 
 * which contains the converted clip-space depth of the fragment. 
 * This is the raw value that is used for depth comparisons and is written to the depth buffer if depth writing is enabled. 
-* It's a value in the 0¨C1 range and is linear for orthographic projections. 
-* To convert it to view-space depth we have to scale it by the camera's near¨Cfar range and then add the near plane distance. 
+* It's a value in the 0â€“1 range and is linear for orthographic projections. 
+* To convert it to view-space depth we have to scale it by the camera's nearâ€“far range and then add the near plane distance. 
 * The near and far distances are stored in the Y and Z components of _ProjectionParams 
 */
 

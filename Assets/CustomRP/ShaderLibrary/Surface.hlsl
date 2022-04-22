@@ -1,18 +1,18 @@
 #ifndef CUSTOM_SURFACE_INCLUDED
 #define CUSTOM_SURFACE_INCLUDED
-//±íÃæĞÅÏ¢
+//è¡¨é¢ä¿¡æ¯
 struct Surface
 {
     float3 position;//at world space
-    float3 normal;//ÊÀ½ç¿Õ¼ä
+    float3 normal;//ä¸–ç•Œç©ºé—´
     float3 interpolatedNormal;
-    float3 color;//Âş·´ÉäÑÕÉ«
-    float alpha;//Âş·´Éäalpha
-    float metallic;//½ğÊô¶È
+    float3 color;//æ¼«åå°„é¢œè‰²
+    float alpha;//æ¼«åå°„alpha
+    float metallic;//é‡‘å±åº¦
     float occlusion;
-    float smoothness;//¹â»¬¶È
+    float smoothness;//å…‰æ»‘åº¦
     float fresnelStrength;
-    float3 viewDirection;//ÊÓ½Ç
+    float3 viewDirection;//è§†è§’
     float depth;
     float dither;
     uint renderingLayerMask;

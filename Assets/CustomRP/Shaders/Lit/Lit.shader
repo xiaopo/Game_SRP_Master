@@ -5,8 +5,8 @@ Shader "CustomRP/Lit"
     {
         [Toggle(_MASK_MAP)] _MaskMapToggle("Mask Map", Float) = 0
         [NoScaleOffset] _MaskMap("Mask (MODS)",2D) = "white"{}
-        _Metallic("Metallic",Range(0,1)) = 0//½ğÊô¶È
-        _Smoothness("Smoothness",Range(0,1)) = 0.5//¹â»¬¶È
+        _Metallic("Metallic",Range(0,1)) = 0//é‡‘å±åº¦
+        _Smoothness("Smoothness",Range(0,1)) = 0.5//å…‰æ»‘åº¦
         _Occlusion("Occlusion", Range(0, 1)) = 0
         _Fresnel("Fresnel", Range(0, 1)) = 0
 
@@ -62,7 +62,7 @@ Shader "CustomRP/Lit"
 
             HLSLPROGRAM
             
-            #pragma target 3.5//¸Ã¼¶±ğÔ½¸ß£¬ÔÊĞíÊ¹ÓÃµÄÏÖ´úGPU¹¦ÄÜÔ½¶à£¬Èç¹û²»ÉèÖÃUnityÄ¬ÈÏÎª 2.5
+            #pragma target 3.5//è¯¥çº§åˆ«è¶Šé«˜ï¼Œå…è®¸ä½¿ç”¨çš„ç°ä»£GPUåŠŸèƒ½è¶Šå¤šï¼Œå¦‚æœä¸è®¾ç½®Unityé»˜è®¤ä¸º 2.5
             #pragma vertex  LitPassVertex
             #pragma fragment LitPassFragment
             
@@ -97,7 +97,7 @@ Shader "CustomRP/Lit"
 
             HLSLPROGRAM
 
-            #pragma target 3.5//¸Ã¼¶±ğÔ½¸ß£¬ÔÊĞíÊ¹ÓÃµÄÏÖ´úGPU¹¦ÄÜÔ½¶à£¬Èç¹û²»ÉèÖÃUnityÄ¬ÈÏÎª 2.5
+            #pragma target 3.5//è¯¥çº§åˆ«è¶Šé«˜ï¼Œå…è®¸ä½¿ç”¨çš„ç°ä»£GPUåŠŸèƒ½è¶Šå¤šï¼Œå¦‚æœä¸è®¾ç½®Unityé»˜è®¤ä¸º 2.5
 
             #pragma shader_feature _CLIPPING
             #pragma shader_feature _ _SHADOWS_CLIP _SHADOWS_DITHER

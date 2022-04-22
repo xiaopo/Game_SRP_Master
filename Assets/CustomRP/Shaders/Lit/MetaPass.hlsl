@@ -28,7 +28,7 @@ Varyings MetaPassVertex(Attributes input)
 {
     Varyings output;
   
-    //ÀûÓÃ xy ±£´ælightmap uv×ø±ê
+    //åˆ©ç”¨ xy ä¿å­˜lightmap uvåæ ‡
     input.position.xy = input.lightMapUV * unity_LightmapST.xy + unity_LightmapST.zw;
     
     //We still need the object-space vertex attribute as input because shaders expect it to exist.
@@ -36,7 +36,7 @@ Varyings MetaPassVertex(Attributes input)
     //We'll use the same dummy assignment that Unity's own meta pass uses, which is input.positionOS.z > 0.0 ? FLT_MIN : 0.0.
     input.position.z = input.position.z > 0.0 ? FLT_MIN : 0.0;
     
-    //¼ÌÐø×ªÒ»ÏÂ
+    //ç»§ç»­è½¬ä¸€ä¸‹
     output.position = TransformWorldToHClip(input.position);
     
     output.uv = TransformBaseUV(input.uv);

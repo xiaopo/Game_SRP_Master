@@ -4,10 +4,10 @@
 TEXTURE2D(_DistortionMap);
 SAMPLER(sampler_DistortionMap);
 
-TEXTURE2D(_MainTex);//¶¨ÒåÒ»ÕÅ2DÎÄÀí
-SAMPLER(sampler_MainTex);//Ö¸¶¨Ò»¸ö²ÉÑùÆ÷
+TEXTURE2D(_MainTex);//å®šä¹‰ä¸€å¼ 2Dæ–‡ç†
+SAMPLER(sampler_MainTex);//æŒ‡å®šä¸€ä¸ªé‡‡æ ·å™¨
 
-//ÎÆÀíºÍ²ÉÑùÆ÷ÊÇÈ«¾Ö×ÊÔ´£¬²»ÄÜ·ÅÈë»º³åÇøÖĞ
+//çº¹ç†å’Œé‡‡æ ·å™¨æ˜¯å…¨å±€èµ„æºï¼Œä¸èƒ½æ”¾å…¥ç¼“å†²åŒºä¸­
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 
 UNITY_DEFINE_INSTANCED_PROP(float4,_MainColor)

@@ -38,12 +38,11 @@ float GetLuma(float2 uv, float uOffset = 0.0, float vOffset = 0.0)
     uv += float2(uOffset, vOffset) * GetSourceTexelSize().xy;
     
     //gamama-adjusted 2.2,this case get a approximate value is 2
-    //return sqrt(Luminance(GetSource(uv)));
-    
-    //directly use the green color channel that avoids a dot product and square root operation
+    //return sqrt(Luminance(GetSource(uv))); 
 #if defined(FXAA_ALPHA_CONTAINS_LUMA)
 		return GetSource(uv).a;
 #else
+    //directly use the green color channel that avoids a dot product and square root operation
     return GetSource(uv).g;
 #endif
 }
@@ -107,7 +106,7 @@ FXAAEdge GetFXAAEdge(LumaNeighborhood luma)
     float gradientN = abs(lumaN - luma.m);
 
     //north and east is positive
-    //ÕâÀï¼ÆËã positive and negative µÄ ¶Ô±È¶È£¬ÒÔ´ËÀ´¾ö¶¨ pixelStepµÄÕı¸º
+    //è¿™é‡Œè®¡ç®— positive and negative çš„ å¯¹æ¯”åº¦ï¼Œä»¥æ­¤æ¥å†³å®š pixelStepçš„æ­£è´Ÿ
     if (gradientP < gradientN)
     {
         edge.pixelStep = -edge.pixelStep;
@@ -148,7 +147,7 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
         uvStep.y = GetSourceTexelSize().y;
     }
     
-    //Óë»ìºÏ·´·½ÏòÉÏÁÚ¾ÓÇó¾ùÖµ
+    //ä¸æ··åˆåæ–¹å‘ä¸Šé‚»å±…æ±‚å‡å€¼
     float edgeLuma = 0.5 * (luma.m + edge.otherLuma);
     //FXAA uses a quarter of the luma gradient of the edge as the threshold for this check
     float gradientThreshold = 0.25 * edge.lumaGradient;

@@ -7,7 +7,7 @@
 * When ACES tone mapping is used Unity performs most color grading in ACES color spaces instead of linear color space, to produce better results
 * 
 * LUT( lookup table)
-* The LUT is a 3D texture, typically 32¡Á32¡Á32. 
+* The LUT is a 3D texture, typically 32Ã—32Ã—32. 
 * Filling that texture and sampling it later is much less work than performing color grading directly on the entire image. 
 * URP and HDRP use the same approach
 * 
@@ -228,7 +228,7 @@ float3 ColorGradeWhiteBalance(float3 color)
 }
 
 /*
-* ¸ø shadow ºÍ hightlight È¾É«
+* ç»™ shadow å’Œ hightlight æŸ“è‰²
 * The split-toning tool is used to tint shadows and highlights of an image separately. 
 * A typical example is to push shadows toward cool blue and highlights toward warm orange.
 */
@@ -243,12 +243,12 @@ float3 ColorGradeSplitToning(float3 color,bool useACES)
     return PositivePow(color, 2.2);
 }
 
-//Í¨¹ı¾ØÕóÀ´»ìºÏ RGB ÑÕÉ«
+//é€šè¿‡çŸ©é˜µæ¥æ··åˆ RGB é¢œè‰²
 float3 ColorGradingChannelMixer(float3 color) {
     return mul( float3x3(_ChannelMixerRed.rgb, _ChannelMixerGreen.rgb, _ChannelMixerBlue.rgb),color );
 }
 
-//¿ØÖÆÖĞ¼äÉ«µ÷ºÍ¿ØÖÆShadow¡¢hightlightµÄ·¶Î§
+//æ§åˆ¶ä¸­é—´è‰²è°ƒå’Œæ§åˆ¶Shadowã€hightlightçš„èŒƒå›´
 //allows adjustment of the midtones and decouples the shadow and highlight regions
 float3 ColorGradingShadowsMidtonesHighlights(float3 color, bool useACES)
 {
@@ -262,19 +262,19 @@ float3 ColorGradingShadowsMidtonesHighlights(float3 color, bool useACES)
 		color * _SMHHighlights.rgb * highlightsWeight;
 }
 
-//ÆØ¹â¶È
+//æ›å…‰åº¦
 float3 ColorGradePostExposure(float3 color)
 {
     return color * _ColorAdjustments.x;
 }
 
-//ÑÕÉ«ÂË¾µ
+//é¢œè‰²æ»¤é•œ
 float3 ColorGradeColorFilter(float3 color)
 {
     return color * _ColorFilter.rgb;
 }
 
- //¶Ô±È¶È
+ //å¯¹æ¯”åº¦
 float3 ColorGradingContrast(float3 color, bool useACES)
 {
     color = useACES ? ACES_to_ACEScc(unity_to_ACES(color)) : LinearToLogC(color);
@@ -282,7 +282,7 @@ float3 ColorGradingContrast(float3 color, bool useACES)
     return useACES ? ACES_to_ACEScg(ACEScc_to_ACES(color)) : LogCToLinear(color);
 }
 
-//É«µ÷Æ«ÒÆ
+//è‰²è°ƒåç§»
 float3 ColorGradingHueShift(float3 color)
 {
     color = RgbToHsv(color);
@@ -291,7 +291,7 @@ float3 ColorGradingHueShift(float3 color)
     return HsvToRgb(color);
 }
 
-//±¥ºÍ¶È
+//é¥±å’Œåº¦
 float3 ColorGradingSaturation(float3 color, bool useACES)
 {
     float luminance = Luminance(color, useACES);

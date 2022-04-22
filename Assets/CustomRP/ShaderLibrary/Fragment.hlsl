@@ -20,7 +20,7 @@ struct Fragment
 /*
 *Perspective matrix
 * 
-*SV_Position ”Ô“Â
+*SV_Position ËØ≠‰πâ
 *vertex function: clip-space position ,as 4D homogeneous coordinates
 *fragment function: screen-space as known as window-space
 */

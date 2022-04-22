@@ -4,14 +4,14 @@
 //Bidirectional Reflectance Distribution
 struct BRDF
 {
-    float3 diffuse;//Âş·´ÉäÑÕÉ«
-    float3 specular;//¾µÃæ·´ÉäÑÕÉ«
-    float roughness;//´Ö²Ú¶È
+    float3 diffuse;//æ¼«åå°„é¢œè‰²
+    float3 specular;//é•œé¢åå°„é¢œè‰²
+    float roughness;//ç²—ç³™åº¦
     float perceptualRoughness;
     float fresnel;
 };
 
-//µç½éÖÊµÄ·´ÉäÂÊÆ½¾ùÔ¼0.04
+//ç”µä»‹è´¨çš„åå°„ç‡å¹³å‡çº¦0.04
 #define MIN_REFLECTIVITY 0.04
 
 float OneMinuseReflectivity(float metallic)
@@ -20,10 +20,10 @@ float OneMinuseReflectivity(float metallic)
     return range - metallic * range;
 }
 
-//¸ù¾İ¹«Ê½µÃµ½¾µÃæ·´ÉäÇ¿¶È
+//æ ¹æ®å…¬å¼å¾—åˆ°é•œé¢åå°„å¼ºåº¦
 float SpecularStrength(Surface surface,BRDF brdf,Light light)
 {
-    float3 h = SafeNormalize(light.direction + surface.viewDirection);//°ë½ÇÏòÁ¿
+    float3 h = SafeNormalize(light.direction + surface.viewDirection);//åŠè§’å‘é‡
     float nh2 = Square(saturate(dot(surface.normal,h)));// dot(N,H)^2
     float lh2 = Square(saturate(dot(light.direction, h)));//dot(L,H)^2
     float r2 = Square(brdf.roughness);// R ^2
@@ -49,7 +49,7 @@ float3 IndirectBRDF(Surface surface, BRDF brdf, float3 diffuse_gi, float3 specul
     return (diffuse_gi * brdf.diffuse + reflection) * surface.occlusion;
 }
 
-//»ñÈ¡¸ø¶¨±íÃæµÄBRDFÊı¾İ
+//è·å–ç»™å®šè¡¨é¢çš„BRDFæ•°æ®
 BRDF GetBRDF(Surface surface,bool applyAlphaToDiffuse = false)
 {
     BRDF brdf;
@@ -60,13 +60,13 @@ BRDF GetBRDF(Surface surface,bool applyAlphaToDiffuse = false)
         brdf.diffuse *= surface.alpha;
     }
     
-    //·Ç½ğÊô²»Ó°Ïì¾µÃæ·´ÉäÑÕÉ«
+    //éé‡‘å±ä¸å½±å“é•œé¢åå°„é¢œè‰²
     //The specular color of dielectric surfaces should be white
     //achieve by using the metallic property to interpolate between the minimus reflectivity and the surface color
     brdf.specular = lerp(MIN_REFLECTIVITY, surface.color, surface.metallic);
     
-    //´Ö²Ú¶ÈºÍ¹â»¬¶ÈÏà·´£¬Ö»ĞèÒªÊ¹ÓÃ1¼õÈ¥¹â»¬¶È¼´¿É
-    //Ê¹ÓÃCommonMaterialÄÚÖÃ·½·¨
+    //ç²—ç³™åº¦å’Œå…‰æ»‘åº¦ç›¸åï¼Œåªéœ€è¦ä½¿ç”¨1å‡å»å…‰æ»‘åº¦å³å¯
+    //ä½¿ç”¨CommonMaterialå†…ç½®æ–¹æ³•
     brdf.perceptualRoughness = PerceptualSmoothnessToPerceptualRoughness(surface.smoothness);
     brdf.roughness = PerceptualRoughnessToRoughness(brdf.perceptualRoughness);
     
