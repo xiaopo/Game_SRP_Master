@@ -88,6 +88,9 @@ float FadedShadowStrength(float d, float mx, float fx)
     //Suddenly cutting off shadows at the max distance can by very obvious, so let's make the transition smoother by linearly fading them. 
     //The fading starts some distance before the max, until we reach a strength of zero at the max
     return saturate((1.0 - d * mx) * fx);
+
+    //fade strength at before the maxDistance  (1 - depth/maxDistance)*fadeRange
+    // 
 }
 
 ShadowData GetShadowData(Surface surfaceWS)
