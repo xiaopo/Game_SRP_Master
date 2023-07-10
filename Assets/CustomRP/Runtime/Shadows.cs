@@ -120,7 +120,7 @@ namespace CustomSR
             else{
                 buffer.SetGlobalTexture(otherShadowAtlasId, dirShadowAtlasId);
             }
-
+            
             buffer.BeginSample(bufferName);
             SetKeywords(shadowMaskKeywords, useShadowMask ? QualitySettings.shadowmaskMode == ShadowmaskMode.Shadowmask ? 0:1 : -1);
 
@@ -142,7 +142,7 @@ namespace CustomSR
             int atlasSize = (int)settings.directional.atlasSize;
             buffer.BeginSample(bufferName);
             buffer.GetTemporaryRT(dirShadowAtlasId, atlasSize, atlasSize, 32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
-
+          
             //指定渲染数据储存到RT中
             buffer.SetRenderTarget(dirShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
             //清除深度缓冲区
@@ -153,6 +153,7 @@ namespace CustomSR
             //buffer.SetGlobalVector(shadowDistanceFadeId, new Vector4(1.0f / settings.maxDistance, 1.0f / settings.distanceFade,1.0f/(1.0f - f * f)));
             buffer.EndSample(bufferName);
             ExecuteBuffer();
+
             buffer.BeginSample(bufferName);
             //在shaowmap上渲染的小块数
             int tiles = shadowedDirLightCount * settings.directional.cascadeCount;
@@ -453,8 +454,13 @@ namespace CustomSR
 
                 if (!cullingResults.GetShadowCasterBounds( visibleLightIndex, out Bounds b ))
                 {
+                    /*
+                     * Besides that, it's possible that a visible light ends up not affecting any objects that cast shadows, 
+                     * either because they're configured not to or because the light only affects objects beyond the max shadow distance
+                     */
                     return new Vector4(-light.shadowStrength, 0f, 0f,maskChannel);
                 }
+
 
                 ShadowedDirectionalLights[shadowedDirLightCount] = new ShadowedDirectionLight { visibleLightIndex = visibleLightIndex,
                                                                                                      slopeScaleBias = light.shadowBias,
@@ -484,20 +490,41 @@ namespace CustomSR
                 m.m23 = -m.m23;
             }
 
-            m.m00 = (0.5f * (m.m00 + m.m30) + offset.x * m.m30) * scale;
-            m.m01 = (0.5f * (m.m01 + m.m31) + offset.x * m.m31) * scale;
-            m.m02 = (0.5f * (m.m02 + m.m32) + offset.x * m.m32) * scale;
-            m.m03 = (0.5f * (m.m03 + m.m33) + offset.x * m.m33) * scale;
-            m.m10 = (0.5f * (m.m10 + m.m30) + offset.y * m.m30) * scale;
-            m.m11 = (0.5f * (m.m11 + m.m31) + offset.y * m.m31) * scale;
-            m.m12 = (0.5f * (m.m12 + m.m32) + offset.y * m.m32) * scale;
-            m.m13 = (0.5f * (m.m13 + m.m33) + offset.y * m.m33) * scale;
-            m.m20 = 0.5f * (m.m20 + m.m30);
-            m.m21 = 0.5f * (m.m21 + m.m31);
-            m.m22 = 0.5f * (m.m22 + m.m32);
-            m.m23 = 0.5f * (m.m23 + m.m33);
+            //To build a matrix that converts the value range from [-1,1] to [0,1]
+            Matrix4x4 convert01 = Matrix4x4.identity;
+            convert01.m00 = 0.5f;
+            convert01.m11 = 0.5f;
+            convert01.m22 = 0.5f;
+            convert01.m03 = 0.5f;
+            convert01.m13 = 0.5f;
+            convert01.m23 = 0.5f;
 
-            return m;
+            //To apply the offset and scale to the original matrix
+            Matrix4x4 sliceos = Matrix4x4.identity;
+            sliceos.m00 = scale;
+            sliceos.m11 = scale;
+
+            sliceos.m03 = offset.x * scale;
+            sliceos.m13 = offset.y * scale;
+
+            return convert01 * sliceos * m;
+            //x
+   //         m.m00 = (0.5f * (m.m00 + m.m30) + offset.x * m.m30) * scale;
+   //         m.m01 = (0.5f * (m.m01 + m.m31) + offset.x * m.m31) * scale;
+   //         m.m02 = (0.5f * (m.m02 + m.m32) + offset.x * m.m32) * scale;
+   //         m.m03 = (0.5f * (m.m03 + m.m33) + offset.x * m.m33) * scale;
+			////y
+   //         m.m10 = (0.5f * (m.m10 + m.m30) + offset.y * m.m30) * scale;
+   //         m.m11 = (0.5f * (m.m11 + m.m31) + offset.y * m.m31) * scale;
+   //         m.m12 = (0.5f * (m.m12 + m.m32) + offset.y * m.m32) * scale;
+   //         m.m13 = (0.5f * (m.m13 + m.m33) + offset.y * m.m33) * scale;
+			////z
+   //         m.m20 = 0.5f * (m.m20 + m.m30);
+   //         m.m21 = 0.5f * (m.m21 + m.m31);
+   //         m.m22 = 0.5f * (m.m22 + m.m32);
+   //         m.m23 = 0.5f * (m.m23 + m.m33);
+
+            //return m;
         }
   
         public void Cleanup()
