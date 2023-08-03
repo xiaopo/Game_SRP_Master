@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Shadows Midtones Highlights
 * The final tool that we'll support is Shadows Midtones Highlights. It works like split-toning, 
 * except that it also allows adjustment of the midtones and decouples the shadow and highlight regions
@@ -93,6 +93,7 @@ float4 BloomHorizontalPassFragment(Varyings input) : SV_TARGET
         0.01621622, 0.05405405, 0.12162162, 0.19459459, 0.22702703,
 		0.19459459, 0.12162162, 0.05405405, 0.01621622
     };
+    [unroll]
     for (int i = 0; i < 9; i++)
     {
         float offset = offsets[i] * 2.0 * GetSourceTexelSize().x;
@@ -106,6 +107,7 @@ float4 BloomVerticalPassFragment(Varyings input) : SV_TARGET
     float3 color = 0.0;
     float offsets[] = { -3.23076923, -1.38461538, 0.0, 1.38461538, 3.23076923 };
     float weights[] = { 0.07027027, 0.31621622, 0.22702703, 0.31621622, 0.07027027 };
+    [unroll]
     for (int i = 0; i < 5; i++)
     {
         float offset = offsets[i] * GetSourceTexelSize().y;
@@ -149,7 +151,7 @@ float4 BloomPrefilterFirefliesPassFragment(Varyings input) : SV_TARGET
 		float2(-1.0, -1.0), float2(-1.0, 1.0), float2(1.0, -1.0), float2(1.0, 1.0),
 		//float2(-1.0, 0.0), float2(1.0, 0.0), float2(0.0, -1.0), float2(0.0, 1.0)
     };
-    
+    [unroll]
     for (int i = 0; i < 5; i++)
     {
         float3 c = GetSource(input.screenUV + offsets[i] * GetSourceTexelSize().xy * 2.0).rgb;
@@ -208,6 +210,7 @@ float4 BloomScatterFinalPassFragment(Varyings input) : SV_TARGET
 
     float4 highRes = GetSource2(input.screenUV);
     lowRes += highRes.rgb - ApplyBloomThreshold(highRes.rgb);
+    
     return float4(lerp(highRes.rgb, lowRes, _BloomIntensity), highRes.a);
 }
 
@@ -315,7 +318,7 @@ float3 ColorGrade(float3 color, bool useACES = false)
     return max(useACES ? ACEScg_to_ACES(color) : color, 0.0);
 }
 
-float4 _ColorGradingLUTParameters;
+float4 _ColorGradingLUTParameters;//lutHeight, 0.5f / lutWidth, 0.5f / lutHeight, lutHeight / (lutHeight - 1f)
 bool _ColorGradingLUTInLogC;
 float3 GetColorGradedLUT(float2 uv, bool useACES = false)
 {

@@ -1,4 +1,4 @@
-Shader "CustomRP/Lit"
+﻿Shader "CustomRP/Lit"
 {
 
     Properties

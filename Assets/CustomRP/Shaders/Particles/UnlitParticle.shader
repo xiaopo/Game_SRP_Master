@@ -1,4 +1,4 @@
-Shader "CustomRP/Particles/UnlitParticle"
+﻿Shader "CustomRP/Particles/UnlitParticle"
 {
    
     Properties

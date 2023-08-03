@@ -1,4 +1,4 @@
-Shader "Hidden/CustomRP/CameraRenderer" 
+﻿Shader "Hidden/CustomRP/CameraRenderer" 
 {
 	Properties
 	{

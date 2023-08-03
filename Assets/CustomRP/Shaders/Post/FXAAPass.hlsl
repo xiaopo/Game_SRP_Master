@@ -1,4 +1,4 @@
-#ifndef CUSTOM_FXAA_PASS_INCLUDED
+﻿#ifndef CUSTOM_FXAA_PASS_INCLUDED
 #define CUSTOM_FXAA_PASS_INCLUDED
 
 #if defined(FXAA_QUALITY_LOW)
@@ -147,9 +147,7 @@ float GetEdgeBlendFactor(LumaNeighborhood luma, FXAAEdge edge, float2 uv)
         uvStep.y = GetSourceTexelSize().y;
     }
     
-    //与混合反方向上邻居求均值
     float edgeLuma = 0.5 * (luma.m + edge.otherLuma);
-    //FXAA uses a quarter of the luma gradient of the edge as the threshold for this check
     float gradientThreshold = 0.25 * edge.lumaGradient;
     
     //direction of positive 

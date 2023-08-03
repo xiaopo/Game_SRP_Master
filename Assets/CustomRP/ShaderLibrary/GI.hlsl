@@ -1,4 +1,4 @@
-#ifndef CUSTOM_GI_INCLUDED
+﻿#ifndef CUSTOM_GI_INCLUDED
 #define CUSTOM_GI_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl"
@@ -102,7 +102,7 @@ float3 SampleLightProbe(Surface surfaceWS)
             coefficients[5] = unity_SHBb;
             coefficients[6] = unity_SHC;
             return max(0, SampleSH9(coefficients, surfaceWS.normal));
-    }
+        }
        
     #endif
 }

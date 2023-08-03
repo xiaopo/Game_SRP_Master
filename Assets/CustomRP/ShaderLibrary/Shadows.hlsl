@@ -1,4 +1,4 @@
-#ifndef CUSTOM_SHADOWS_INCLUDED
+﻿#ifndef CUSTOM_SHADOWS_INCLUDED
 #define CUSTOM_SHADOWS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Shadow/ShadowSamplingTent.hlsl"
@@ -153,6 +153,7 @@ float FilterDirectionalShadow(float3 positionSTS)
     float4 size = _ShadowAtlasSize.yyxx;
     DIRECTIONAL_FILTER_SETUP(size, positionSTS.xy, weights, positions);
     float shadow = 0;
+    [unroll]
     for (int i = 0; i < DIRECTIONAL_FILTER_SAMPLES; i++) {
 	    shadow += weights[i] * SampleDirectionalShadowAtlas(float3(positions[i].xy, positionSTS.z) );
     }
@@ -206,6 +207,7 @@ float FilterOtherShadow(float3 positionSTS, float3 bounds)
 		float4 size = _ShadowAtlasSize.wwzz;
 		OTHER_FILTER_SETUP(size, positionSTS.xy, weights, positions);
 		float shadow = 0;
+        [unroll]
 		for (int i = 0; i < OTHER_FILTER_SAMPLES; i++) {
 			shadow += weights[i] * SampleOtherShadowAtlas(float3(positions[i].xy, positionSTS.z),bounds);
 		}
@@ -311,7 +313,7 @@ float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS
     float3 normalBias = surfaceWS.interpolatedNormal * (distanceToLightPlane * tileData.w);
     float4 positionSTS = mul(_OtherShadowMatrices[tileIndex],float4(surfaceWS.position + normalBias, 1.0));
     
-    //it's a perspective projection,so have to divide the XYZ by its W (��γ���)
+    //it's a perspective projection,so have to divide the XYZ by its W 
     return FilterOtherShadow(positionSTS.xyz / positionSTS.w, tileData.xyz);
 }
 
@@ -331,6 +333,7 @@ float GetOtherShadowAttenuation(OtherShadowData other, ShadowData global, Surfac
         shadow = GetOtherShadow(other, global, surfaceWS);
         shadow = MixBakedAndRealtimeShadows(global, shadow, other.shadowMaskChannel, other.strength);
     }
+    
     return shadow;
 }
 

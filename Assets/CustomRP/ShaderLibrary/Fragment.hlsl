@@ -1,4 +1,4 @@
-#ifndef FRAGMENT_INCLUDED
+﻿#ifndef FRAGMENT_INCLUDED
 #define FRAGMENT_INCLUDED
 
 TEXTURE2D(_CameraColorTexture);

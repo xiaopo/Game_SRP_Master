@@ -1,4 +1,4 @@
-#ifndef CUSTOM_BRDF_INCLUDED
+﻿#ifndef CUSTOM_BRDF_INCLUDED
 #define CUSTOM_BRDF_INCLUDED
 
 //Bidirectional Reflectance Distribution

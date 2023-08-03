@@ -154,6 +154,7 @@ namespace CustomSR
             buffer.SetRenderTarget(to, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
 
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
+
         }
 
         void DrawFinal(RenderTargetIdentifier from, Pass pass)

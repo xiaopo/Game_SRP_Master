@@ -1,4 +1,4 @@
-#ifndef CUSTOM_LIGHTING_INCLUDED
+﻿#ifndef CUSTOM_LIGHTING_INCLUDED
 #define CUSTOM_LIGHTING_INCLUDED
 
 //计算入射光照
@@ -37,6 +37,7 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
         for (int j = 0; j < min(unity_LightData.y, 8); j++)
         {
             int lightIndex = unity_LightIndices[(uint)j / 4][(uint) j % 4];
+            
 			Light light = GetOtherLight(lightIndex, surface, shadowData);
             if (RenderingLayersOverlap(surface, light)) {
                 color += GetLighting(surface, brdf, light);

@@ -1,4 +1,4 @@
-#ifndef CUSTOM_LIGHT_INCLUDED
+﻿#ifndef CUSTOM_LIGHT_INCLUDED
 #define CUSTOM_LIGHT_INCLUDED
 #define MAX_DIRECTIONAL_LIGHT_COUNT 4
 #define MAX_OTHER_LIGHT_COUNT 64
@@ -86,18 +86,18 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     Light light;
     light.color = _OtherLightColors[index].rgb;
     float3 position = _OtherLightPositions[index].xyz;
-    //衰减是R平方的反比
+    
     float3 ray = position - surfaceWS.position;
     light.direction = normalize(ray);
     float distanceSqr = max(dot(ray, ray), 0.00001);
 
     //max(0,1 - (d^2 / r^2)^2)^2;
-    // w is the range inverse-squared
     float rangeAttenuation = Square(saturate(1.0 - Square(distanceSqr * _OtherLightPositions[index].w)));
     
-    //Spot light
+
+    //saturate(d * a + b)^2 
+    //The "spotangles" values are calculated on the CPU side, with the formula separated into x and y components respectively
     float4 spotAngles = _OtherLightSpotAngles[index];
-    //spotAttenuation =  saturate(d * a + b)^2 
     float3 spotDirection = _OtherLightDirectionsAndMasks[index].xyz;
     light.renderingLayerMask = asuint(_OtherLightDirectionsAndMasks[index].w);
     float spotAttenuation = Square(saturate(dot(spotDirection, light.direction) * spotAngles.x + spotAngles.y));
@@ -110,6 +110,7 @@ Light GetOtherLight(int index, Surface surfaceWS, ShadowData shadowData)
     
     float otherShadowVal = GetOtherShadowAttenuation(otherShadowData, shadowData, surfaceWS);
 
+    //To calculate the attenuation that consists of shadow, light, and range.
     light.attenuation = otherShadowVal * spotAttenuation * rangeAttenuation / distanceSqr;
 
     return light;  

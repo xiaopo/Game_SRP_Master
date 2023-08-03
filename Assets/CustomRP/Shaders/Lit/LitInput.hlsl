@@ -1,4 +1,4 @@
-#ifndef CUSTOM_LIT_INPUT_INCLUDED
+﻿#ifndef CUSTOM_LIT_INPUT_INCLUDED
 #define CUSTOM_LIT_INPUT_INCLUDED
 
 TEXTURE2D(_BaseMap);//2D文理
@@ -78,7 +78,7 @@ float3 GetNormalTS(InputConfig c)
     float4 map = SAMPLE_TEXTURE2D(_NormalMap, sampler_BaseMap, c.baseUV);
     float scale = INPUT_PROP(_NormalScale);
     float3 normal = DecodeNormal(map, scale);
-    
+    [branch]
     if (c.useDetail)
     {
         map = SAMPLE_TEXTURE2D(_DetailNormalMap, sampler_DetailMap, c.detailUV);
@@ -101,6 +101,7 @@ float3 GetEmission(InputConfig c)
 
 float4 GetDetail(InputConfig c)
 {
+     [branch]
     if (c.useDetail){
         float4 map = SAMPLE_TEXTURE2D(_DetailMap, sampler_DetailMap, c.detailUV);
         return map * 2.0 - 1.0;
