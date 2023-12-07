@@ -7,13 +7,11 @@ CBUFFER_START(UnityPerDraw)
     float4x4 UNITY_PREV_MATRIX_M;
     float4x4 UNITY_PREV_MATRIX_I_M;
     
-
     float4 unity_LODFade;
     real4 unity_WorldTransformParams;
     float4 unity_RenderingLayer;
 
     float4 unity_ProbesOcclusion;
-    
     float4 unity_SpecCube0_HDR;
 
     float4 unity_LightmapST;
@@ -27,10 +25,12 @@ CBUFFER_START(UnityPerDraw)
     float4 unity_SHBb;
     float4 unity_SHC;
 
-    float4 unity_ProbeVolumeParams;
+  
+
     real4 unity_LightData;
     real4 unity_LightIndices[2];
 
+    float4 unity_ProbeVolumeParams;
     float4x4 unity_ProbeVolumeWorldToObject;
     float4 unity_ProbeVolumeSizeInv;
     float4 unity_ProbeVolumeMin;
@@ -40,7 +40,6 @@ CBUFFER_END
 float4x4 unity_MatrixVP;
 float4x4 unity_MatrixV;
 float4x4 glstate_matrix_projection;
-
 
 //World space position of the camera.
 float3 _WorldSpaceCameraPos;

@@ -4,6 +4,7 @@
 	{
 		[Enum(UnityEngine.Rendering.BlendMode)] _CameraSrcBlend("Src Blend",Float) = 1
 		[Enum(UnityEngine.Rendering.BlendMode)] _CameraDstBlend("Dst Blend",Float) = 0
+
 	}
 
 	SubShader
@@ -15,6 +16,7 @@
 		HLSLINCLUDE
 		#include "../ShaderLibrary/Common.hlsl"
 		#include "CameraRendererPasses.hlsl"
+
 		ENDHLSL
 
 		Pass 

@@ -408,7 +408,7 @@ namespace CustomSR
             var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex) { useRenderingLayerMaskTest = true };
 
             int cascadeCount = settings.directional.cascadeCount;
-            //转换到对应的行
+            //转换到对应的起点
             int tileOffset = lightIndex * cascadeCount;
             Vector3 ratios = settings.directional.CascadeRatios;
 
