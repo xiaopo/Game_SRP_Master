@@ -75,6 +75,20 @@ namespace CustomSR
         {
             public int visibleLightIndex;
             public float slopeScaleBias;
+            /**
+             * Incorrect self-shadowing happens because a shadow caster depth texel covers more than one fragment, 
+             * which causes the caster's volume to poke out of its surface. 
+             * 
+             * So if we shrink the caster enough this should no longer happen. 
+             * However, shrinking shadows caster will make shadows smaller than they should be and can introduce holes 
+             * that shouldn't exist.
+             * 
+             * We can also do the opposite: inflate the surface while sampling shadows. 
+             * Then we're sampling a bit away from the surface, just far enough to avoid incorrect self-shadowing. 
+             * This will adjust the positions of shadows a bit, potentially causing misalignment along edges and adding false shadows, 
+             * but these artifacts tend to be far less obvious than Peter-Panning.
+             * 
+             * **/
             public float normalBias;
             public bool isPoint;
         }
@@ -446,6 +460,15 @@ namespace CustomSR
                 shadowSettings.splitData = splitData;
 
                 if(lightIndex == 0){
+                    /*
+                     * Unity determines the region covered by each cascade by creating a culling sphere for it. 
+                     * As the shadow projections are orthographic and square they end up 
+                     * closely fitting their culling sphere but also cover some space around them. 
+                     * 
+                     * That's why some shadows can be seen outside the culling regions.
+                     * Also, the light direction doesn't matter to the sphere, 
+                     * so all directional lights end up using the same culling spheres.
+                     **/
                     //as the cascades of all lights are equivalent
                     SetCascadeData(i, splitData.cullingSphere, tileSize);
                 }
