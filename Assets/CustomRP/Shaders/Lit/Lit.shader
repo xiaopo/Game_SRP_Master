@@ -39,6 +39,8 @@
         [Toggle(_PREMULTIPLY_ALPHA)] _PremulAlpha("Premultiply Alpha",Float) = 0
         [KeywordEnum(On,Clip,Dither,Off)]_Shadows("Shadows",Float) = 0
         [Toggle(_RECEIVE_SHADOWS)] _ReceiveShadows("Receive Shadows",Float) = 1
+
+         _NoSRPBatcher("NoSRPBatcher", Float) = 1
     }
 
     SubShader
@@ -73,7 +75,7 @@
             #pragma shader_feature _MASK_MAP
             #pragma shader_feature _DETAIL_MAP
             
-
+            #pragma enable_d3d11_debug_symbols
             #pragma multi_compile _ _DIRECTIONAL_PCF3 _DIRECTIONAL_PCF5 _DIRECTIONAL_PCF7
             #pragma multi_compile _ _CASCADE_BLEND_SOFT _CASCADE_BLEND_DITHER
             #pragma multi_compile _ _SHADOW_MASK_ALWAYS _SHADOW_MASK_DISTANCE

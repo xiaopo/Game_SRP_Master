@@ -14,6 +14,19 @@ struct Varyings
     float2 uv : VAR_BASE_UV;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
+
+/*
+*Shadow Pancaking
+*Another potential problem that can cause artifacts is 
+*that Unity applies shadow pancaking. The idea is that when rendering 
+*shadow casters for a directional light the near plane is moved forward 
+*as much as possible. This increases depth precision, 
+*but it means that shadow casters that aren't in view of the 
+*camera can end up in front of the near plane, which causes them 
+*to get clipped while they shouldn't.
+*
+*This is solved by clamping the vertex positions to the near plane in ShadowCasterPassVertex
+*/
 bool _ShadowPancaking;
 Varyings ShadowCasterPassVertex(Attributes input)
 {
@@ -33,6 +46,7 @@ Varyings ShadowCasterPassVertex(Attributes input)
             output.position.z = max(output.position.z, output.position.w * UNITY_NEAR_CLIP_VALUE);
         #endif
     }
+
     output.uv = TransformBaseUV(input.uv);
     return output;
 }

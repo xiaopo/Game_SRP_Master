@@ -18,6 +18,7 @@ TEXTURE2D(_NormalMap);
 TEXTURE2D(_DetailNormalMap);
 
 //纹理和采样器是全局资源，不能放入缓冲区中
+float _NoSRPBatcher;
 
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 
@@ -114,9 +115,11 @@ float4 GetDetail(InputConfig c)
 float4 GetBase(InputConfig c)
 {
     float4 map = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, c.baseUV);
-    float4 color = INPUT_PROP(_BaseColor);
+    float4 color = INPUT_PROP(_BaseColor) * _NoSRPBatcher;
+
     if (c.useDetail)
     {
+
         float detail = GetDetail(c).r * INPUT_PROP(_DetailAlbedo);
         float mask = GetMask(c).b;
          //线性空间到gamma空间的近似转换
