@@ -289,7 +289,26 @@ namespace CustomSR
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
             float bias = light.normalBias * filterSize * 1.4142136f;
             float tileScale = 1f / split;
-            //Note:filed of view bias
+
+            /**
+             * //Note:filed of view bias
+             * There's always a discontinuity between faces of a cube map, 
+             * because the orientation of the texture plane suddenly changes 90°.
+             * Regular cubemap sampling can hide this somewhat because it can interpolate between faces, 
+             * but we're sampling from a single tile per fragment. 
+             * We get the same issues that exist at the edge of spot shadow tiles, 
+             * but now they aren't hidden because there's no spot attenuation.
+             * 
+             * We can reduce these artifacts by increasing the field of view—FOV for short—a little 
+             * when rendering the shadows, so we never sample beyond the edge of a tile. That's what 
+             * the bias argument of ComputePointShadowMatricesAndCullingPrimitives is for. 
+             * 
+             * We do that by making our tile size a bit larger than 2 at distance 1 from the light. 
+             * Specifically, we add the normal bias plus the filter size on each side. 
+             * 
+             * The tangent of the half corresponding FOV angle is then equal to 1 plus the bias and filter size. 
+             * Double that, convert it to degrees, subtract 90°, and use it for the FOV bias in RenderPointShadows.
+             * **/
             float fovBias = Mathf.Atan(1f + bias + filterSize) * Mathf.Rad2Deg * 2f - 90f;
             for (int i = 0; i < 6; i++)
             {
@@ -392,8 +411,26 @@ namespace CustomSR
             //转换到对应的行
             int tileOffset = lightIndex * cascadeCount;
             Vector3 ratios = settings.directional.CascadeRatios;
+
+            /**
+             * One downside of using cascaded shadow maps is that we end up rendering 
+             * the same shadow casters more than once per light.
+             * It makes sense to try and cull some shadow casters from larger cascades 
+             * if it can be guaranteed that their results will always be covered by a smaller cascade. 
+             * Unity makes this possible by setting the shadowCascadeBlendCullingFactor of the split data to one.
+             * 
+             * shadowCascadeBlendCullingFactor = 1;
+             * 
+             * The value is a factor that modulates the radius of the previous cascade 
+             * used to perform the culling. Unity is fairly conservative when culling, 
+             * but we should decrease it by the cascade fade ratio and a little extra 
+             * to make sure that shadow casters in the transition region never get culled. 
+             * So let's use 0.8 minus the fade range, with a minimum of zero. 
+             * If you see holes appear in shadows around cascade transitions then it must be reduced even further.
+             * **/
             float cullingFactor = Mathf.Max(0f, 0.8f - settings.directional.cascadeFade);
             float tileScale = 1f / split;
+
             for (int i = 0;i< cascadeCount;i++)
             {
                 cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
@@ -402,8 +439,9 @@ namespace CustomSR
                     out Matrix4x4 projectionMatrix,
                     out ShadowSplitData splitData);
 
-                //cull some shadow casters from larger cascades
-                //guaranteed that their results will always be covered by a smaller cascade
+                /** cull some shadow casters from larger cascades
+                **  guaranteed that their results will always be covered by a smaller cascade
+                **/
                 splitData.shadowCascadeBlendCullingFactor = cullingFactor;
                 shadowSettings.splitData = splitData;
 
@@ -429,12 +467,24 @@ namespace CustomSR
             //dividing the diameter of the culling sphere by the tile size
             //How many meters in the world space corresponding to a texel
             float texelSize = 2f * cullingSphere.w / titleSize;
-
+            /**
+             * Increasing the filter size makes shadows smoother,
+             * but also causes acne to appear again. 
+             * We have to increase the normal bias to match the filter size. 
+             * We can do this automatically by multiplying the texel size by one plus the filter mode in SetCascadeData.
+             * **/
             float filterSize = texelSize * ((float)settings.directional.filter + 1f);
             //In the worst case we end up having to offset along the square's diagonal, so let's scale it by √2.
             float bias = filterSize * 1.4142136f;
 
-            //radius square
+            /*
+             * Besides that, increasing the sample region also means that 
+             * we can end up sampling outside of the cascade's culling sphere.
+             * We can avoid that by reducing the sphere's radius by the filter size before squaring it.
+             */
+            cullingSphere.w -= filterSize;
+
+
             cullingSphere.w *= cullingSphere.w;
             cascadeCullingSpheres[index] = cullingSphere;
             cascadeData[index] = new Vector4( 1.0f / cullingSphere.w, bias);
