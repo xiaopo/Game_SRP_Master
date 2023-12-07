@@ -50,7 +50,8 @@ namespace CustomSR
         CullingResults cullingResults;
 
         Shadows shadows = new Shadows();
-        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, ShadowSettings shadowSettings, bool useLightsPerObject, int renderingLayerMask)
+        public void Setup(ScriptableRenderContext context, CullingResults cullingResults, 
+            ShadowSettings shadowSettings, bool useLightsPerObject, int renderingLayerMask)
         {
             this.cullingResults = cullingResults;
 
@@ -119,7 +120,7 @@ namespace CustomSR
                 for (; i < indexMap.Length; i++){
                     indexMap[i] = -1;
                 }
-
+                //把剔除后的可见光设置回CullingResults.
                 if(indexMap.Length > 0)cullingResults.SetLightIndexMap(indexMap);
                 indexMap.Dispose();
                 Shader.EnableKeyword(lightsPerObjectKeyword);

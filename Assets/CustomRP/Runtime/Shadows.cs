@@ -394,10 +394,10 @@ namespace CustomSR
             for (int i = 0;i< cascadeCount;i++)
             {
                 cullingResults.ComputeDirectionalShadowMatricesAndCullingPrimitives(
-                light.visibleLightIndex, i, cascadeCount, ratios, tileSize,light.nearPlaneOffset,
-                out Matrix4x4 viewMatrix, 
-                out Matrix4x4 projectionMatrix, 
-                out ShadowSplitData splitData);
+                    light.visibleLightIndex, i, cascadeCount, ratios, tileSize, light.nearPlaneOffset,
+                    out Matrix4x4 viewMatrix,
+                    out Matrix4x4 projectionMatrix,
+                    out ShadowSplitData splitData);
 
                 //cull some shadow casters from larger cascades
                 //guaranteed that their results will always be covered by a smaller cascade
@@ -424,6 +424,7 @@ namespace CustomSR
         {
             
             //dividing the diameter of the culling sphere by the tile size
+            //How many meters in the world space corresponding to a texel
             float texelSize = 2f * cullingSphere.w / titleSize;
 
             float filterSize = texelSize * ((float)settings.directional.filter + 1f);
@@ -448,6 +449,9 @@ namespace CustomSR
                 LightBakingOutput lightBakeing = light.bakingOutput;
                 if(lightBakeing.lightmapBakeType == LightmapBakeType.Mixed && lightBakeing.mixedLightingMode == MixedLightingMode.Shadowmask) 
                 { 
+                    /*
+                     * to examine the bakeingOutput of the            
+                     */
                     useShadowMask = true;
                     maskChannel = lightBakeing.occlusionMaskChannel;
                 }
@@ -492,9 +496,11 @@ namespace CustomSR
 
             //To build a matrix that converts the value range from [-1,1] to [0,1]
             Matrix4x4 convert01 = Matrix4x4.identity;
+            // x 0.5f
             convert01.m00 = 0.5f;
             convert01.m11 = 0.5f;
             convert01.m22 = 0.5f;
+            // + 0.5f
             convert01.m03 = 0.5f;
             convert01.m13 = 0.5f;
             convert01.m23 = 0.5f;
