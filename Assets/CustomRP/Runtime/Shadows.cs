@@ -292,13 +292,13 @@ namespace CustomSR
         void RenderPointShadows(int index, int split, int tileSize)
         {
             ShadowedOtherLight light = shadowedOtherLights[index];
-            var shadowSettings = new ShadowDrawingSettings(cullingResults, light.visibleLightIndex) { useRenderingLayerMaskTest = true };
+            var shadowSettings = new ShadowDrawingSettings(cullingResults, 
+                light.visibleLightIndex) { useRenderingLayerMaskTest = true };
 
 
             //The field of view for cubemap faces is always 90°, thus the world-space tile size at distance 1 is always 2
             // a = tan(fov/2) * distance;
-            // a = tan(90° / 2) * 1;
-            // worldsize = a * 2 = 2;
+            // worldsize = tan(90° / 2) * 1 * 2;
             float texelSize = 2f / tileSize;
             float filterSize = texelSize * ((float)settings.other.filter + 1f);
             float bias = light.normalBias * filterSize * 1.4142136f;
@@ -310,6 +310,7 @@ namespace CustomSR
              * because the orientation of the texture plane suddenly changes 90°.
              * Regular cubemap sampling can hide this somewhat because it can interpolate between faces, 
              * but we're sampling from a single tile per fragment. 
+             * 
              * We get the same issues that exist at the edge of spot shadow tiles, 
              * but now they aren't hidden because there's no spot attenuation.
              * 
@@ -332,6 +333,24 @@ namespace CustomSR
                 out ShadowSplitData splitData
                 );
 
+                /*
+                 * We can now see realtime shadows for point lights. They don't appear to suffer from shadow acne, 
+                 * even with zero bias. Unfortunately, light now leaks through objects to surfaces very close to them on the opposite side. 
+                 * Increasing the shadow bias makes this worse and also appears to cut holes in the shadows of objects close to other surfaces.
+                 * 
+                 * This happens because of the way Unity renders shadows for point lights. 
+                 * It draws them upside down, which reverses the winding order of triangles. 
+                 * Normally the front faces—from the point of view of the light—are drawn, 
+                 * but now the back faces get rendered. 
+                 * This prevents most acne but introduces light leaking. 
+                 * 
+                 * 
+                 * We cannot stop the flipping,but we can undo it by negating a row of the view matrix 
+                 * that we get from ComputePointShadowMatricesAndCullingPrimitives. 
+                 * Let's negate its second row. This flips everything upside down in the atlas at second time, 
+                 * which turns everything back to normal. 
+                 * Because the first component of that row is always zero we can suffice with only negating the other three components.
+                 * */
                 viewMatrix.m11 = -viewMatrix.m11;
                 viewMatrix.m12 = -viewMatrix.m12;
                 viewMatrix.m13 = -viewMatrix.m13;
