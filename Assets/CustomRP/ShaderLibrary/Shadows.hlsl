@@ -316,8 +316,10 @@ float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS
 {
     float tileIndex = other.tileIndex;
     float3 lightPlane = other.spotDirectionWS;
+
     if (other.isPoint)
     {
+        //CubeMapFaceID function to find the face offset
         float faceOffset = CubeMapFaceID(-other.lightDirectionWS);
         tileIndex += faceOffset;
         lightPlane = pointShadowPlanes[faceOffset];
@@ -325,13 +327,17 @@ float GetOtherShadow(OtherShadowData other, ShadowData global, Surface surfaceWS
     
     float4 tileData = _OtherShadowTiles[tileIndex];
     float3 surfaceToLight = other.lightPositionWS - surfaceWS.position;
+
+    //distance 投影到 Plane 上.
     float distanceToLightPlane = dot(surfaceToLight, lightPlane);
+
     float3 normalBias = surfaceWS.interpolatedNormal * (distanceToLightPlane * tileData.w);
     float4 positionSTS = mul(_OtherShadowMatrices[tileIndex],float4(surfaceWS.position + normalBias, 1.0));
     
     //it's a perspective projection,so have to divide the XYZ by its W 
     return FilterOtherShadow(positionSTS.xyz / positionSTS.w, tileData.xyz);
 }
+
 
 float GetOtherShadowAttenuation(OtherShadowData other, ShadowData global, Surface surfaceWS)
 {
