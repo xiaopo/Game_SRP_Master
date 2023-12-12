@@ -52,6 +52,7 @@ DirectionalShadowData GetDirectionalShadowData(int lightIndex, ShadowData shadow
     return data;
 }
 
+
 OtherShadowData GetOtherShadowData(int lightIndex)
 {
     OtherShadowData data;

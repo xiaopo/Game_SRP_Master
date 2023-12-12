@@ -4,12 +4,13 @@
 //计算入射光照
 float3 IncomingLight(Surface surface,Light light)
 {
-    //兰伯特光照
+
     return saturate(dot(surface.normal, light.direction) * light.attenuation) * light.color;
 }
 
 float3 GetLighting(Surface surface,BRDF brdf,Light light)
 {
+    //Li * Fbrdf 
     return IncomingLight(surface, light) * DirectBRDF(surface,brdf,light);
 }
 

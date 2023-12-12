@@ -34,19 +34,27 @@ float SpecularStrength(Surface surface,BRDF brdf,Light light)
 
 }
 
+
 float3 DirectBRDF(Surface surface,BRDF brdf,Light light)
 {
     return SpecularStrength(surface, brdf, light) * brdf.specular + brdf.diffuse;
 }
 
-float3 IndirectBRDF(Surface surface, BRDF brdf, float3 diffuse_gi, float3 specular_gi)
+/**
+ *let's add an IndirectBRDF function to BRDF, with surface and BRDF parameters, 
+ * plus diffuse and specular colors obtained from global illumination. 
+ * Initially have it return the reflected diffuse light only.
+ * */
+float3 IndirectBRDF (Surface surface, BRDF brdf, float3 diffuse, float3 specular) 
 {
     // Fschlick(v,n) =  F0 + (1-F0)Pow4(1 - V*N)
     float fresnelStrength = surface.fresnelStrength * Pow4(1.0 - saturate(dot(surface.normal, surface.viewDirection)));
 
-    float3 reflection = specular_gi * lerp(brdf.specular, brdf.fresnel, fresnelStrength);
+    float3 reflection = specular * lerp(brdf.specular, brdf.fresnel, fresnelStrength);
 
-    return (diffuse_gi * brdf.diffuse + reflection) * surface.occlusion;
+    reflection /= brdf.roughness * brdf.roughness + 1.0;
+    
+    return (diffuse * brdf.diffuse + reflection) * surface.occlusion;
 }
 
 //获取给定表面的BRDF数据

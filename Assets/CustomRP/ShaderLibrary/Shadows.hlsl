@@ -122,21 +122,20 @@ ShadowData GetShadowData(Surface surfaceWS)
         }
     }
     
-    if (i == _CascadeCount && _CascadeCount > 0 )
-    {
+    if (i == _CascadeCount && _CascadeCount > 0 ){
         data.strength = 0.0;
     }
-#if defined(_CASCADE_BLEND_DITHER)
+    #if defined(_CASCADE_BLEND_DITHER)
 	else if (data.cascadeBlend < surfaceWS.dither) {
 		i += 1;
 	}
-    
-#endif   
-#if !defined(_CASCADE_BLEND_SOFT)
-        data.cascadeBlend = 1.0;
-#endif
-        data.cascadeIndex = i;
-        return data;
+    #endif   
+
+    #if !defined(_CASCADE_BLEND_SOFT)
+    data.cascadeBlend = 1.0;
+    #endif
+    data.cascadeIndex = i;
+    return data;
 }
 
 float SampleDirectionalShadowAtlas(float3 positionSTS)
@@ -145,43 +144,59 @@ float SampleDirectionalShadowAtlas(float3 positionSTS)
 }
 
 // percentage close-filtering
-float FilterDirectionalShadow(float3 positionSTS)
+float FilterDirectionalShadow (float3 positionSTS) 
 {
-#if defined(DIRECTIONAL_FILTER_SETUP)
-    float weights[DIRECTIONAL_FILTER_SAMPLES];
-    float2 positions[DIRECTIONAL_FILTER_SAMPLES];
-    float4 size = _ShadowAtlasSize.yyxx;
-    DIRECTIONAL_FILTER_SETUP(size, positionSTS.xy, weights, positions);
-    float shadow = 0;
-    [unroll]
-    for (int i = 0; i < DIRECTIONAL_FILTER_SAMPLES; i++) {
-	    shadow += weights[i] * SampleDirectionalShadowAtlas(float3(positions[i].xy, positionSTS.z) );
-    }
-    return shadow;
-#else
-    return SampleDirectionalShadowAtlas(positionSTS);
-#endif
+    #if defined(DIRECTIONAL_FILTER_SETUP)
+
+        real weights[DIRECTIONAL_FILTER_SAMPLES];
+        real2 positions[DIRECTIONAL_FILTER_SAMPLES];
+        float4 size = _ShadowAtlasSize.yyxx;
+       
+        DIRECTIONAL_FILTER_SETUP(size, positionSTS.xy, weights, positions);
+        float shadow = 0;
+        for (int i = 0; i < DIRECTIONAL_FILTER_SAMPLES; i++) {
+            shadow += weights[i] * SampleDirectionalShadowAtlas(
+                float3(positions[i].xy, positionSTS.z)
+            );
+        }
+
+        return shadow;
+    #else
+        return SampleDirectionalShadowAtlas(positionSTS);
+    #endif
 }
 
-float GetCascadedShadow(DirectionalShadowData directional, ShadowData global, Surface surfaceWS)
+float GetCascadedShadow (DirectionalShadowData directional, ShadowData global, Surface surfaceWS) 
 {
-     //第一个采样
-    float3 normalBias = surfaceWS.interpolatedNormal * (directional.normalBias * _CascadeData[global.cascadeIndex].y);
-    float3 positionSTS = mul(_DirectionalShadowMatrices[directional.tileIndex], float4(surfaceWS.position + normalBias, 1.0)).xyz;
+    //Blending Cascades
+
+    float3 normalBias = surfaceWS.interpolatedNormal * 
+    (directional.normalBias * _CascadeData[global.cascadeIndex].y);
+
+    float3 positionSTS = mul(
+                                _DirectionalShadowMatrices[directional.tileIndex],
+                                float4(surfaceWS.position + normalBias, 1.0) 
+                            ).xyz;
+
     float shadow = FilterDirectionalShadow(positionSTS);
-    
-    if (global.cascadeBlend < 1.0)
+
+    if (global.cascadeBlend < 1.0) 
     {
-        //在第二个级联采样
-        normalBias = surfaceWS.interpolatedNormal * (directional.normalBias * _CascadeData[global.cascadeIndex + 1].y);
-        positionSTS = mul(_DirectionalShadowMatrices[directional.tileIndex + 1], float4(surfaceWS.position + normalBias, 1.0)).xyz;
-        
-        //混合
-        shadow = lerp(FilterDirectionalShadow(positionSTS), shadow, global.cascadeBlend);
+        //采样下一个级联进行混合
+        normalBias = surfaceWS.interpolatedNormal *
+            (directional.normalBias * _CascadeData[global.cascadeIndex + 1].y);
+
+        positionSTS = mul(
+            _DirectionalShadowMatrices[directional.tileIndex + 1],
+            float4(surfaceWS.position + normalBias, 1.0)
+        ).xyz;
+
+        shadow = lerp(FilterDirectionalShadow(positionSTS), shadow, global.cascadeBlend );
     }
-    
+
     return shadow;
 }
+
 
 float SampleOtherShadowAtlas(float3 positionSTS, float3 bounds)
 {
@@ -262,6 +277,8 @@ float MixBakedAndRealtimeShadows(ShadowData global, float shadow, int shadowMask
     
     return lerp(1.0, shadow, strength * global.strength);
 }
+
+
 
 //directional(strength, tileIndex, normalBias, shadowMaskChannel)
 float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowData global,Surface surfaceWS)
