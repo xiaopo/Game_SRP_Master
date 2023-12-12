@@ -79,6 +79,13 @@ void ClipLOD(Fragment fragment,float fade)
 {
 #if defined(LOD_FADE_CROSSFADE)
 	//float dither = (fragment.positionCS.y % 32) / 32;
+    /**
+     * InterleavedGradientNoise function from the Core RP Library, 
+     * which generates a rotated tiled dither pattern given a screen-space XY position. 
+     * In the fragment function that's equal to the clip-space XY position. 
+     * It also requires a second argument which is used to animate it, 
+     * which we don't need and can leave at zero.
+     * **/
     float dither = InterleavedGradientNoise(fragment.positionSS, 0);
     clip(fade + (fade < 0.0 ? dither : -dither));
 #endif

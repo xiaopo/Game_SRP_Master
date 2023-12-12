@@ -4,6 +4,22 @@ using UnityEngine.Rendering;
 
 namespace CustomSR
 {
+    /**
+     * Normal Bias
+     * Incorrect self-shadowing happens because a shadow caster depth texel covers more than one fragment, 
+     * which causes the caster's volume to poke out of its surface. 
+     * 
+     * So if we shrink the caster enough this should no longer happen. 
+     * However, shrinking shadows caster will make shadows smaller than they should be and can introduce holes 
+     * that shouldn't exist.
+     * 
+     * We can also do the opposite: inflate the surface while sampling shadows. 
+     * Then we're sampling a bit away from the surface, just far enough to avoid incorrect self-shadowing. 
+     * This will adjust the positions of shadows a bit, potentially causing misalignment along edges and adding false shadows, 
+     * but these artifacts tend to be far less obvious than Peter-Panning.
+     * 
+     * **/
+
     public class Shadows
     {
         //定义最大支持的shadow的light数量
@@ -75,20 +91,7 @@ namespace CustomSR
         {
             public int visibleLightIndex;
             public float slopeScaleBias;
-            /**
-             * Incorrect self-shadowing happens because a shadow caster depth texel covers more than one fragment, 
-             * which causes the caster's volume to poke out of its surface. 
-             * 
-             * So if we shrink the caster enough this should no longer happen. 
-             * However, shrinking shadows caster will make shadows smaller than they should be and can introduce holes 
-             * that shouldn't exist.
-             * 
-             * We can also do the opposite: inflate the surface while sampling shadows. 
-             * Then we're sampling a bit away from the surface, just far enough to avoid incorrect self-shadowing. 
-             * This will adjust the positions of shadows a bit, potentially causing misalignment along edges and adding false shadows, 
-             * but these artifacts tend to be far less obvious than Peter-Panning.
-             * 
-             * **/
+
             public float normalBias;
             public bool isPoint;
         }

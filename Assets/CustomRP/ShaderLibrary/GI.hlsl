@@ -67,6 +67,18 @@ float4 SampleBakedShadows(float2 lightMapUV, Surface surfaceWS)
     }
     else
     {
+        /**
+         * Occlusion Probes
+        * We can see that the shadow mask gets applied to lightmapped objects correctly. 
+        * We also see that dynamic objects have no shadow mask data, as expected. 
+        * They use light probes instead of light maps. 
+        * However, Unity also bakes shadow mask data into light probes, 
+        * referring to it as occlusion probes. 
+        * 
+        * We can access this data by adding a unity_ProbesOcclusion vector to the 
+        * UnityPerDraw buffer in UnityInput. 
+        * Place it in between the world transform parameters and light map UV transformation vector.
+        * **/
         return unity_ProbesOcclusion;
     }
     
@@ -80,6 +92,11 @@ float3 SampleLightProbe(Surface surfaceWS)
         return 0.0;
     #else
         //dynamic gameobjects
+        /**
+         * unity_ProbeVolumeParams, defined in UnityShaderVariables. 
+         * If it is set to 1, then we have an LPPV, 
+         * otherwise we should use regular spherical harmonics
+         * **/
         if (unity_ProbeVolumeParams.x)
         {
            //LPPVs
