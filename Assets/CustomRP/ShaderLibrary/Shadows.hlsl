@@ -279,7 +279,6 @@ float MixBakedAndRealtimeShadows(ShadowData global, float shadow, int shadowMask
 }
 
 
-
 //directional(strength, tileIndex, normalBias, shadowMaskChannel)
 float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowData global,Surface surfaceWS)
 {

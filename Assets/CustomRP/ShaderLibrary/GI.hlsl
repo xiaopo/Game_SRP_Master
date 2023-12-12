@@ -12,6 +12,18 @@ TEXTURE3D_FLOAT(unity_ProbeVolumeSH);
 SAMPLER(samplerunity_ProbeVolumeSH);
 
 //bake mixlight shadows
+/**
+ * At runtime, Unity uses the shadow mask to determine whether a pixel
+ * is in shadow or not. The shadow mask Texture contains occlusion information about baked lights
+ * It shares the same UV layout and resolution with its corresponding lightmap. 
+ * It contains occlusion information for up to four lights per texel, stored in RGBA format.
+ * 
+ * If more than four lights overlap, any additional lights fall back to Baked Lighting. 
+ * The baking system determines which lights fall back to Baked Lighting, 
+ * and this stays consistent across bakes,
+ *  unless you modify one of the overlapping lights. 
+ * Light Probes also receive the same information for up to four lights.
+ * **/
 TEXTURE2D(unity_ShadowMask);
 SAMPLER(samplerunity_ShadowMask);
 
@@ -152,6 +164,11 @@ GI GetGI(float2 lightMapUV, Surface surfaceWS, BRDF brdf)
     gi.shadowMask.shadows = 1.0;
 
 #if defined(_SHADOW_MASK_ALWAYS)
+    /**
+     * There is another shadow mask mode, which is simply known as Shadowmask. 
+     * It works exactly the same as the distance mode, except that Unity will omit static shadow casters for lights 
+     * that use the shadow mask
+     * **/
     gi.shadowMask.always = true;
     gi.shadowMask.shadows = SampleBakedShadows(lightMapUV,surfaceWS);
 #elif defined(_SHADOW_MASK_DISTANCE)
