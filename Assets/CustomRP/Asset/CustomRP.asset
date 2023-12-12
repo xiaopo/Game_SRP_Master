@@ -31,8 +31,8 @@ MonoBehaviour:
   useSRPBatcher: 1
   useLightsPerObject: 1
   shadows:
-    maxDistance: 80
-    distanceFade: 0.508
+    maxDistance: 38.2
+    distanceFade: 0.511
     directional:
       atlasSize: 2048
       filter: 1
