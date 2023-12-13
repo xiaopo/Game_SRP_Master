@@ -19,6 +19,13 @@ struct Varyings
     float2 uv : VAR_BASE_UV;
 };
 
+/**
+ * Because indirect diffuse light bounces off surfaces it should be affected
+ * by the diffuse reflectivity of those surfaces. 
+ * This currently doesn't happen. Unity treats our surfaces as uniformly white. 
+ * 
+ * Unity uses a special meta pass to determine the reflected light while baking
+ * **/
 
 bool4 unity_MetaFragmentControl;
 float unity_OneOverOutputBoost;
@@ -78,3 +85,28 @@ float4 MetaPassFragment(Varyings input) : SV_TARGET
 }
 
 #endif
+
+
+/**
+ * Baked Transparency
+ * Hard-Coded Properties
+ * Unfortunately Unity's lightmapper has a hard-coded approach for transparency. 
+ * It looks at the material's queue to determine whether it's opaque, clipped, or transparent.
+ * It then determines transparency by multiplying the alpha components of a _MainTex and _Color property, 
+ * using the _Cutoff property for alpha clipping. Our shaders have the third but lack first two. 
+ * The only way to currently make this work is by adding the expected properties to our shaders, 
+ * giving them the HideInInspector attribute so they don't show up in the inspector. 
+ * Unity's SRP shaders have to deal with the same problem.
+ * 
+ * [HideInInspector] _MainTex("Texture for Lightmap", 2D) = "white" {}
+ * [HideInInspector] _Color("Color for Lightmap", Color) = (0.5, 0.5, 0.5, 1.0)
+ * **/
+
+/**
+ * Copying Properties
+ * We have to make sure that the _MainTex property points to the same texture as _BaseMap and 
+ * uses the same UV transformation. Both color properties must also be identical. 
+ * We can do this in a new CopyLightMappingProperties method that we invoke at the end of CustomShaderGUI.OnGUI 
+ * if a change has been made. If the relevant properties exist copy their values.
+ * **/
+        
