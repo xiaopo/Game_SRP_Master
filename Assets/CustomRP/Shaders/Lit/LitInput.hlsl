@@ -19,7 +19,7 @@ TEXTURE2D(_DetailNormalMap);
 
 //纹理和采样器是全局资源，不能放入缓冲区中
 float _NoSRPBatcher;
-
+//All Material properties must be declared in a single CBUFFER named “UnityPerMaterial”.
 UNITY_INSTANCING_BUFFER_START(UnityPerMaterial)
 
 UNITY_DEFINE_INSTANCED_PROP(float4,_BaseColor)
