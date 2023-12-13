@@ -35,8 +35,25 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
     
     //point light and spot light
     #if defined(_LIGHTS_PER_OBJECT)
+    /**
+     * Using the Indices
+     * 
+     *  real4 unity_LightData; //which contains the amount of lights in its Y component.  
+     * 
+     *  real4 unity_LightIndices[2];
+     * 
+     * unity_LightIndices ,which is an array of length two.
+     * Each channel of the two vectors contains a light index,
+     * so up to eight are supported per object.
+     * 
+     * **/
         for (int j = 0; j < min(unity_LightData.y, 8); j++)
         {
+            /**
+             * In this case the amount of lights is found via unity_LightData.y 
+             * and the light index has to be retrieved from the appropriate element and component of unity_LightIndices. 
+             * We can get the correct vector by dividing the iterator by 4 and the correct component via modulo 4.
+             * **/
             int lightIndex = unity_LightIndices[(uint)j / 4][(uint) j % 4];
             
 			Light light = GetOtherLight(lightIndex, surface, shadowData);
@@ -44,6 +61,12 @@ float3 GetLighting(Surface surface,BRDF brdf,GI gi)
                 color += GetLighting(surface, brdf, light);
             }
 		}
+
+    /**
+     * Note that with lights-per-object enabled GPU instancing is less efficient, 
+     * because only objects whose light counts and index lists match are grouped. 
+     * The SRP batcher isn't affected, because each object still gets its own optimized draw call.
+     * **/
 	#else
         for (int j = 0; j < GetOtherLightCount(); j++)
         {
