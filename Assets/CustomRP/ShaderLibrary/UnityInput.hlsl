@@ -1,6 +1,9 @@
 ﻿#ifndef CUSTOM_UNITY_INPUT_INCLUDED
 #define CUSTOM_UNITY_INPUT_INCLUDED
-
+/**
+ * All built-in engine properties must be declared in a single CBUFFER named “UnityPerDraw”. 
+ * For example, unity_ObjectToWorld, or unity_SHAr.
+ * **/
 CBUFFER_START(UnityPerDraw)
     float4x4 unity_ObjectToWorld;
     float4x4 unity_WorldToObject;
