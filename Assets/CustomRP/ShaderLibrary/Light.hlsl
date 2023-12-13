@@ -67,6 +67,19 @@ OtherShadowData GetOtherShadowData(int lightIndex)
     return data;
 }
 
+/**The shadows of point and spot lights can also be baked into the shadow mask, 
+ * by setting their Mode to Mixed. 
+ * Each lights gets a channel,  just like directional lights. 
+ * 
+ * But because their range is limited it is possible  for multiple lights to use the same channel, 
+ * as long as they don't overlap. Thus the shadow mask can support an arbitrary amount of lights, 
+ * but only up to four per texel. 
+ * 
+ * If multiple lights end up overlapping while trying to claim the same channel then 
+ * the least important lights will be forced to Baked mode until there is no longer a conflict.
+ * **/
+
+
 //获取指定索引的方向的数据
 Light GetDirectionLight(int index, Surface surfaceWS, ShadowData shadowData)
 {
