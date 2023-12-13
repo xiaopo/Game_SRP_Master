@@ -67,7 +67,31 @@ namespace CustomSR
             context.ExecuteCommandBuffer(buffer);
             buffer.Clear();
         }
-
+        /**
+         * Currently all visible lights are evaluated for every fragment that gets rendered. 
+         * This is fine for directional lights, 
+         * but it's unnecessary work for other lights that are out of range of a fragment.
+         * 
+         * Usually each point or spot light only affects a small portion of all fragments, 
+         * so there's a lot of work done for nothing, which can affect performance significantly. 
+         * In order to support many lights with good performance we have to somehow reduce the 
+         * amount of lights are evaluated per fragment. There are multiple approaches for this, 
+         * of which the simplest is to use Unity's per-object light indices.
+         * 
+         * Unity's per-object light indices
+         * The idea is that Unity determines which lights affect each object and 
+         * sends this information to the GPU. Then we can evaluate only the relevant lights 
+         * when rendering each object, ignoring the rest. Thus the lights are determined 
+         * on a per-object basis, not per fragment. 
+         * 
+         * This usually works fine for small objects but isn't ideal for large ones,
+         * because if a light only affects a small portion of an object it will 
+         * get evaluated for its entire surface. Also, there is a limit to how many lights can affect each object, 
+         * so large objects are more prone to lack some lighting.
+         * 
+         * Because per-object light indices aren't ideal and can miss some lighting we'll make it optional. 
+         * That way it's also possible to easily compare both visuals and performance.
+         * **/
         void SetupLights(bool useLightsPerObject, int renderingLayerMask)
         {
             //Unity 会在剔除阶段计算哪些光源会影响相机的可见性
