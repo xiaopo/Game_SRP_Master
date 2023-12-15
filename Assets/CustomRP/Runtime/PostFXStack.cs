@@ -170,14 +170,34 @@ namespace CustomSR
             buffer.SetViewport(camera.pixelRect);
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass, MeshTopology.Triangles, 3);
         }
-
+        /**
+         * To make HDR colors visible, they have to be mapped to LDR, which is known as tonemapping. 
+         * This boils down to nonlinearly darkening the image, so it becomes possible to distinguish 
+         * between originally HDR colors. This is somewhat analogous to how our eyes adapt to deal with bright scenes, 
+         * although tonemapping is constant. 
+         * There's also the auto-exposure technique, which adjust the image brightness dynamically. Both can be used together. 
+         * But our eyes aren't always able to do adapt sufficiently. 
+         * Some scenes are simply too bright, which makes it harder for us to see. How could we show this effect, 
+         * while limited to LDR displays?
+         * 
+         * 
+         * Bloom is an effect which messes up an image by making a pixels' color bleed into adjacent pixels. 
+         * It's like blurring an image, but based on brightness. This way, we could communicate overbright colors via blurring. 
+         * It's somewhat similar to how light can diffuse inside our eyes, which can become noticeable in case of high brightness, 
+         * but it's mostly a nonrealistic effect.
+         * 
+         * Many people dislike bloom because it messes up otherwise crisp images and makes things appear to glow unrealistically. 
+         * This isn't an inherent fault of bloom, it's simply how it happens to be used a lot. If you're aiming for realism, 
+         * use bloom in moderation, when it makes sense. Bloom can also be used artistically for nonrealistic effects. 
+         * Examples are dream sequences, to indicate wooziness, or for creative scene transitions.
+         * **/
         bool DoBloom(int sourceId)
         {
             //buffer.BeginSample("Bloom");
 
             PostFXSettings.BloomSettings bloom = settings.Bloom;
             buffer.SetGlobalFloat(bloomBucibicUpsamplingId, bloom.bicubicUpsampling ? 1f : 0f);
-
+            
             int width, height;
             if (bloom.ignoreRenderScale)
             {

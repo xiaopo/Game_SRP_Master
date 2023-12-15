@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using LightType = UnityEngine.LightType;
 
-
 namespace CustomSR
 {
     public partial class CustomRenderPipeline
@@ -16,7 +15,10 @@ namespace CustomSR
         {
             Lightmapping.SetDelegate(lightsDelegate);
         }
-
+        /**
+         * We can tell Unity to use a different falloff, 
+         * by providing a delegate to a method that should get invoked before Unity performs lightmapping in the editor. 
+         **/
         // lambda expression
         static Lightmapping.RequestLightsDelegate lightsDelegate = (Light[] lights, NativeArray<LightDataGI> output) =>
         //static void lightsDelegateFuns(Light[] lights, NativeArray<LightDataGI> output)
