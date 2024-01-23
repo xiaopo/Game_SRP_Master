@@ -156,16 +156,21 @@ namespace CustomSR
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass,MeshTopology.Triangles, 3);
 
         }
-
+        static Rect fullViewRect = new Rect(0f, 0f, 1f, 1f);
         void DrawFinal(RenderTargetIdentifier from, Pass pass)
         {
             buffer.SetGlobalFloat(finalSrcBlendId, (float)finalBlendMode.source);
             buffer.SetGlobalFloat(finalDstBlendId, (float)finalBlendMode.destination);
 
             buffer.SetGlobalTexture(fxSourceId, from);
+
             buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,
-                finalBlendMode.destination == BlendMode.Zero ?RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load, 
-                RenderBufferStoreAction.Store );
+                camera.rect == fullViewRect ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load,
+                RenderBufferStoreAction.Store);
+
+            //buffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,
+            //    RenderBufferLoadAction.DontCare,
+            //   RenderBufferStoreAction.DontCare);
 
             buffer.SetViewport(camera.pixelRect);
             buffer.DrawProcedural(Matrix4x4.identity, settings.Material, (int)pass, MeshTopology.Triangles, 3);
