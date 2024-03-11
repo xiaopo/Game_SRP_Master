@@ -301,6 +301,7 @@ float GetDirectionalShadowAttenuation(DirectionalShadowData directional,ShadowDa
 
     return shadow;
 }
+
 //+X, −X, +Y, −Y, +Z, −Z
 static const float3 pointShadowPlanes[6] =
 {

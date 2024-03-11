@@ -1,4 +1,4 @@
-﻿#ifndef CUSTOM_GI_INCLUDED
+#ifndef CUSTOM_GI_INCLUDED
 #define CUSTOM_GI_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/EntityLighting.hlsl"
@@ -20,8 +20,7 @@ SAMPLER(samplerunity_ProbeVolumeSH);
  * 
  * If more than four lights overlap, any additional lights fall back to Baked Lighting. 
  * The baking system determines which lights fall back to Baked Lighting, 
- * and this stays consistent across bakes,
- *  unless you modify one of the overlapping lights. 
+ * and this stays consistent across bakes,unless you modify one of the overlapping lights. 
  * Light Probes also receive the same information for up to four lights.
  * **/
 TEXTURE2D(unity_ShadowMask);
