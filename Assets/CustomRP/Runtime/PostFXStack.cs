@@ -215,7 +215,9 @@ namespace CustomSR
                 height = bufferSize.y >> 1;
             }
 
-            if (bloom.maxIterations == 0 || bloom.intensity <= 0 || height < bloom.downscaleLimit * 2 || width < bloom.downscaleLimit * 2)
+            if (bloom.maxIterations == 0 || bloom.intensity <= 0 || 
+                height < bloom.downscaleLimit * 2 || 
+                width < bloom.downscaleLimit * 2)
             {
                 //Draw(sourceId, BuiltinRenderTextureType.CameraTarget, Pass.Copy);
                // buffer.EndSample("Bloom");
